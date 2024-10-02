@@ -52,8 +52,7 @@ fun ImageItemView(item: ImageItem, modifier: Modifier) {
         AsyncImage(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(height = LocalConfiguration.current.screenHeightDp.dp)
-            ,
+                .height(height = LocalConfiguration.current.screenHeightDp.dp),
             model = item.imageUrl,
             contentScale = ContentScale.FillBounds,
             contentDescription = null,
@@ -63,7 +62,7 @@ fun ImageItemView(item: ImageItem, modifier: Modifier) {
                 .align(Alignment.TopCenter)
                 .padding(top = 98.dp),
             painter = painterResource(id = R.drawable.ic_bloom_main),
-            tint = Color.Black,
+            tint = if (!item.isWhite) Color.Black else Color.White,
             contentDescription = null
         )
         if (item.index == 0) {
@@ -73,7 +72,7 @@ fun ImageItemView(item: ImageItem, modifier: Modifier) {
                     .fillMaxWidth()
                     .padding(horizontal = 21.dp)
                     .padding(bottom = 30.dp)
-                    .border(BorderStroke(width = 1.dp, color = Color.Black))
+                    .border(BorderStroke(width = 1.dp, color = if (!item.isWhite) Color.Black else Color.White))
                 //.clickable {  }
             ) {
                 Text(
