@@ -84,4 +84,7 @@ dependencies {
     implementation(libs.mvikotlin.main)
     implementation(libs.mvikotlin.logging)
     implementation(libs.mvikotlin.extensions.coroutines)
+
+    // Compose
+    implementation("androidx.compose.foundation:foundation:1.7.2")
 }
