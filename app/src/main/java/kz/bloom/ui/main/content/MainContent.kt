@@ -1,8 +1,10 @@
 package kz.bloom.ui.main.content
 
 import android.util.Log
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -24,16 +27,23 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -42,6 +52,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import kotlinx.coroutines.delay
 import kz.bloom.R
 import kz.bloom.ui.main.VM.ImageListViewModel
 import kz.bloom.ui.main.data.entity.ImageListState
@@ -50,24 +61,90 @@ import kz.bloom.ui.main.data.entity.ImageItem
 @Composable
 fun MainContent(vm: ImageListViewModel) {
     val listState: LazyListState = rememberLazyListState()
-    val snapFlingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
     val state = vm.state.observeAsState(ImageListState())
-    Column {
+    var isLogoWhite by remember { mutableStateOf(false) }
+
+    var isScrollingUp by remember { mutableStateOf(true) }
+    var isScrolling by remember { mutableStateOf(false) }
+    var isBottomBarVisible by remember { mutableStateOf(true) }
+    var previousScrollOffset by remember { mutableStateOf(0) }
+
+    val navBarOffset by animateDpAsState(
+        targetValue = if (isScrollingUp) 0.dp else 100.dp, // Смещение панели вниз
+        animationSpec = tween(durationMillis = 300) // Время анимации
+    )
+
+    val boxAlpha by animateFloatAsState(
+        targetValue = if (isScrollingUp) 1f else 0f, // Прозрачность кнопки
+        animationSpec = tween(durationMillis = 300) // Время анимации
+    )
+
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (listState.isScrollInProgress) {
+            isScrolling = true
+            isBottomBarVisible = false // Скрываем, когда идет скролл
+        } else {
+            // Добавляем задержку, чтобы показать панель после остановки скролла
+            delay(300)
+            isScrolling = false
+            isBottomBarVisible = true // Показываем, когда скролл остановлен
+        }
+    }
+
+    LaunchedEffect(listState.firstVisibleItemScrollOffset) {
+        val currentOffset = listState.firstVisibleItemScrollOffset
+        isScrollingUp = currentOffset <= previousScrollOffset
+        previousScrollOffset = currentOffset
+    }
+
+    LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
+        val firstVisibleItemIndex = listState.firstVisibleItemIndex
+        val currentItem = state.value.images.getOrNull(firstVisibleItemIndex)
+
+        val thresholdOffset = listState.layoutInfo.viewportEndOffset / 1.2
+        val isScrolledPastHalfway = listState.firstVisibleItemScrollOffset > thresholdOffset
+
+        isLogoWhite = if (isScrolledPastHalfway) {
+            state.value.images.getOrNull(firstVisibleItemIndex + 1)?.isWhite ?: false
+        } else {
+            currentItem?.isWhite ?: false
+        }
+    }
+
+
+    Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = listState,
-            flingBehavior = snapFlingBehavior
         ) {
             items(state.value.images) { item ->
-                ImageItemView(item, modifier = Modifier)
+                ImageItemView(item, modifier = Modifier, boxAlpha = boxAlpha)
             }
         }
+
+        Icon(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 98.dp),
+            painter = painterResource(id = R.drawable.ic_bloom_main),
+            tint = if (!isLogoWhite) Color.Black else Color.White,
+            contentDescription = null
+        )
+
+        BottomNavBar(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .offset(y = navBarOffset)
+        )
     }
 }
 
 @Composable
-fun ImageItemView(item: ImageItem, modifier: Modifier) {
-    Log.d("behold", item.imageUrl)
+fun ImageItemView(
+    item: ImageItem,
+    modifier: Modifier,
+    boxAlpha: Float
+) {
     Box(modifier = modifier.fillMaxSize()) {
         AsyncImage(
             modifier = Modifier
@@ -80,21 +157,14 @@ fun ImageItemView(item: ImageItem, modifier: Modifier) {
             contentScale = ContentScale.FillBounds,
             contentDescription = null,
         )
-        Icon(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 98.dp),
-            painter = painterResource(id = R.drawable.ic_bloom_main),
-            tint = if (!item.isWhite) Color.Black else Color.White,
-            contentDescription = null
-        )
         if (item.index != 4) {
             Column(modifier = Modifier.align(Alignment.BottomCenter)) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 21.dp)
-                        .padding(bottom = 30.dp)
+                        .padding(bottom = 117.dp)
+                        .alpha(boxAlpha)
                         .border(
                             BorderStroke(
                                 width = 1.dp,
@@ -110,9 +180,6 @@ fun ImageItemView(item: ImageItem, modifier: Modifier) {
                         text = "ПОИСК",
                         color = if (!item.isWhite) Color.Black else Color.White
                     )
-                }
-                if (item.index == 0) {
-                    BottomNavBar(modifier = Modifier)
                 }
             }
         } else {
@@ -201,24 +268,6 @@ fun BottomNavBar(modifier: Modifier = Modifier) {
                 contentDescription = null
             )
         }
-    }
-}
-
-@Composable
-fun LastImageItemView(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(color = Color.White)
-    ) {
-        Icon(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 98.dp),
-            painter = painterResource(id = R.drawable.ic_bloom_main),
-            tint = Color.Black,
-            contentDescription = null
-        )
     }
 }
 

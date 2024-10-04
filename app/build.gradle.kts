@@ -85,6 +85,10 @@ dependencies {
     implementation(libs.mvikotlin.logging)
     implementation(libs.mvikotlin.extensions.coroutines)
 
-    // Compose
-    implementation("androidx.compose.foundation:foundation:1.7.2")
+    // Compose foundation
+    implementation(libs.androidx.foundation)
+
+    implementation(libs.lottie.compose)
+
+    implementation (libs.androidx.core.splashscreen)
 }
