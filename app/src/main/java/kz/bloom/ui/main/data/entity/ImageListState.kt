@@ -1,6 +1,6 @@
 package kz.bloom.ui.main.data.entity
 
 data class ImageListState(
-    val images: List<ImageItem> = emptyList()
+    val pages: List<PageItem> = emptyList()
 )
 

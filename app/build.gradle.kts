@@ -91,4 +91,7 @@ dependencies {
     implementation(libs.lottie.compose)
 
     implementation (libs.androidx.core.splashscreen)
+
+    // Accompanist
+    implementation (libs.accompanist.pager)
 }
