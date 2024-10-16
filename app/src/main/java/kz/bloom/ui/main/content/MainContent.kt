@@ -120,8 +120,6 @@ fun MainContent(vm: ImageListViewModel) {
             }
     }
 
-
-
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemScrollOffset }
             .collect { scrollOffset ->
@@ -164,6 +162,7 @@ fun MainContent(vm: ImageListViewModel) {
         Icon(
             modifier = Modifier
                 .align(Alignment.TopCenter)
+                .padding(horizontal = 41.dp)
                 .padding(top = 98.dp),
             painter = painterResource(id = R.drawable.ic_bloom_main),
             tint = if (!isLogoWhite) Color.Black else Color.White,

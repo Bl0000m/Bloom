@@ -15,7 +15,7 @@ class SplashActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SplashContent(
-                onAnimationFinish = {
+                onLogoShown = {
                     startActivity(Intent(this@SplashActivity, MainActivity::class.java))
                     overridePendingTransition(0,0)
                     finish()
