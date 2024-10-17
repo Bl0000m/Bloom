@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import kz.bloom.ui.main.data.MainRepository
 import kz.bloom.ui.main.data.entity.ImageListState
 
-class ImageListViewModel(private val repository: MainRepository) : ViewModel() {
+class PageListViewModel(private val repository: MainRepository) : ViewModel() {
     private val _state = MutableLiveData<ImageListState>()
     val state: LiveData<ImageListState> = _state
 
@@ -16,5 +16,9 @@ class ImageListViewModel(private val repository: MainRepository) : ViewModel() {
 
     private fun loadMockData() {
         _state.value = repository.getMockedState()
+    }
+
+    private fun initAuthorization() {
+
     }
 }

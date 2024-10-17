@@ -94,4 +94,10 @@ dependencies {
 
     // Accompanist
     implementation (libs.accompanist.pager)
+
+    // Decompose
+    implementation(libs.bundles.decompose)
+
+    // Koin
+    implementation(libs.bundles.koin)
 }

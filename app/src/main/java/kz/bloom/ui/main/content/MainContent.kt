@@ -31,6 +31,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -59,12 +60,17 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import kz.bloom.R
-import kz.bloom.ui.main.VM.ImageListViewModel
+import kz.bloom.ui.main.VM.PageListViewModel
+import kz.bloom.ui.main.component.MainComponent
 import kz.bloom.ui.main.data.entity.ImageListState
 import kz.bloom.ui.main.data.entity.PageItem
 
 @Composable
-fun MainContent(vm: ImageListViewModel) {
+fun MainContent(
+    component: MainComponent,
+    vm: PageListViewModel
+) {
+
     val listState: LazyListState = rememberLazyListState()
     val state = vm.state.observeAsState(ImageListState())
     var isLogoWhite by remember { mutableStateOf(false) }
@@ -171,7 +177,7 @@ fun MainContent(vm: ImageListViewModel) {
 
         BottomNavBar(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
+                .align(Alignment.BottomCenter),
         )
     }
 }
