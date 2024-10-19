@@ -47,7 +47,7 @@ ComponentContext by componentContext
 
     private fun Value<MainStore.State>.toModels(): Value<Model> = map { state ->
         Model(
-            pagesList = state.pagesList
+            pages = state.pagesList
         )
     }
 }
