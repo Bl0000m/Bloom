@@ -13,11 +13,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.defaultComponentContext
-import kz.bloom.ui.main.VM.PageListViewModel
 import kz.bloom.ui.main.component.MainComponentImpl
 import kz.bloom.ui.main.content.MainContent
 import kz.bloom.ui.main.content.SplashMainContentAnimation
-import kz.bloom.ui.main.data.MainRepository
 import kz.bloom.ui.theme.BloomTheme
 import kz.bloom.ui.ui_components.AUTH
 
@@ -35,7 +33,7 @@ class MainActivity : ComponentActivity() {
                         onNavigateAuth = { onNavigateAuth() }
                     )
                     if (isAnimationFinished) {
-                        MainContent(vm = PageListViewModel(repository = MainRepository()), component = component)
+                        MainContent(component = component)
                     }
                 }
             }

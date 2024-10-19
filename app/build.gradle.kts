@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 android {
@@ -84,6 +85,7 @@ dependencies {
     implementation(libs.mvikotlin.main)
     implementation(libs.mvikotlin.logging)
     implementation(libs.mvikotlin.extensions.coroutines)
+    implementation(libs.mvikotlin.rx)
 
     // Compose foundation
     implementation(libs.androidx.foundation)

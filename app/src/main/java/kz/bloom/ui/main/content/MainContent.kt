@@ -60,19 +60,15 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import kz.bloom.R
-import kz.bloom.ui.main.VM.PageListViewModel
 import kz.bloom.ui.main.component.MainComponent
-import kz.bloom.ui.main.data.entity.ImageListState
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.ui.main.data.entity.PageItem
 
 @Composable
-fun MainContent(
-    component: MainComponent,
-    vm: PageListViewModel
-) {
+fun MainContent(component: MainComponent) {
 
+    val model by component.model.subscribeAsState()
     val listState: LazyListState = rememberLazyListState()
-    val state = vm.state.observeAsState(ImageListState())
     var isLogoWhite by remember { mutableStateOf(false) }
     var isAutoScrollEnabled by remember { mutableStateOf(true) }
     var currentItemIndex by remember { mutableStateOf(0) }
@@ -134,16 +130,16 @@ fun MainContent(
                 val isScrolledPastHalfway = scrollOffset >= itemSize / 1.1
 
                 isLogoWhite = if (isScrolledPastHalfway) {
-                    state.value.pages.getOrNull(firstVisibleItemIndex + 1)?.isWhite ?: false
+                    model.pages.getOrNull(firstVisibleItemIndex + 1)?.isWhite ?: false
                 } else {
-                    state.value.pages.getOrNull(firstVisibleItemIndex)?.isWhite ?: false
+                    model.pages.getOrNull(firstVisibleItemIndex)?.isWhite ?: false
                 }
             }
     }
-    val pageCount = state.value.pages.size - 2
-    val categoryNames = state.value.pages.map { it.categoryName.orEmpty().trim() }
+    val pageCount = model.pages.size - 2
+    val categoryNames = model.pages.map { it.categoryName.orEmpty().trim() }
         .filterIndexed { index, name ->
-            index != 0 && index != state.value.pages.size - 1 && name.isNotEmpty()
+            index != 0 && index != model.pages.size - 1 && name.isNotEmpty()
         }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -152,7 +148,7 @@ fun MainContent(
             state = listState,
             flingBehavior = snapFlingBehavior
         ) {
-            items(state.value.pages) { item ->
+            items(model.pages) { item ->
                 PageItemView(
                     item = item,
                     modifier = Modifier,

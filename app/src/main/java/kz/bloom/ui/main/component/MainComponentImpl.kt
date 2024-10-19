@@ -1,10 +1,11 @@
 package kz.bloom.ui.main.component
 
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.decompose.value.operator.map
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import kz.bloom.libraries.states
 
 import kz.bloom.ui.main.component.MainComponent.Model
 import kz.bloom.ui.main.data.MainApi
@@ -26,25 +27,27 @@ ComponentContext by componentContext
 {
     private val mainApi by inject<MainApi>()
     private val mainContext by inject<CoroutineContext>(qualifier = named(name = "Main"))
+    private val ioContext by inject<CoroutineContext>(qualifier = named(name = "IO"))
     private val storeFactory by inject<StoreFactory>()
 
     private val store: MainStore = instanceKeeper.getStore {
         MainStore(
             mainApi = mainApi,
             mainContext = mainContext,
+            ioContext = ioContext,
             storeFactory = storeFactory)
     }
 
 
-    private val _model: MutableValue<Model> = MutableValue(
-        initialValue = Model(
-            pagesList = emptyList()
-        )
-    )
-
-    override val model: Value<Model> = _model
+    override val model: Value<Model> = store.states.toModels()
 
     override fun navigateToAuthorization() {
         onNavigateAuth()
+    }
+
+    private fun Value<MainStore.State>.toModels(): Value<Model> = map { state ->
+        Model(
+            pagesList = state.pagesList
+        )
     }
 }
