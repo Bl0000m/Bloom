@@ -9,6 +9,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kz.bloom.ui.main.data.MainApi
+import kz.bloom.ui.main.data.MainRepository
 import kz.bloom.ui.main.data.entity.PageItem
 import kz.bloom.ui.main.store.MainStore.Intent
 import kz.bloom.ui.main.store.MainStore.State
@@ -28,7 +29,7 @@ private sealed interface Message : JvmSerializable {
 }
 
 internal fun MainStore(
-    mainApi: MainApi,
+    mainApi: MainRepository,
     mainContext: CoroutineContext,
     ioContext: CoroutineContext,
     storeFactory: StoreFactory
@@ -68,7 +69,7 @@ internal fun MainStore(
 private class ExecutorImpl(
     mainContext: CoroutineContext,
     private val ioContext: CoroutineContext,
-    private val mainApi: MainApi
+    private val mainApi: MainRepository
 ) : CoroutineExecutor<Intent, Action, State, Message, Nothing> (mainContext = mainContext)
 {
     override fun executeAction(action: Action, getState: () -> State) {

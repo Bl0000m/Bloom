@@ -23,15 +23,21 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val componentContext = defaultComponentContext()
         setContent {
             BloomTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
                     var isAnimationFinished by remember { mutableStateOf(false) }
-                    SplashMainContentAnimation(modifier = Modifier.fillMaxSize(), onAnimationFinish = { isAnimationFinished = true} )
-                    val component = MainComponentImpl(
-                        componentContext = defaultComponentContext(),
-                        onNavigateAuth = { onNavigateAuth() }
-                    )
+                    SplashMainContentAnimation(
+                        modifier = Modifier.fillMaxSize(),
+                        onAnimationFinish = { isAnimationFinished = true })
+                    val component = remember {
+                        MainComponentImpl(
+                            componentContext = componentContext,
+                            onNavigateAuth = { onNavigateAuth() }
+                        )
+                    }
                     if (isAnimationFinished) {
                         MainContent(component = component)
                     }
