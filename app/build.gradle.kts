@@ -87,12 +87,10 @@ dependencies {
     implementation(libs.mvikotlin.extensions.coroutines)
     implementation(libs.mvikotlin.rx)
 
-    // Compose foundation
+    // Compose
     implementation(libs.androidx.foundation)
 
     implementation(libs.lottie.compose)
-
-    implementation (libs.androidx.core.splashscreen)
 
     // Accompanist
     implementation (libs.accompanist.pager)
@@ -102,4 +100,10 @@ dependencies {
 
     // Koin
     implementation(libs.bundles.koin)
+
+    // Material3
+    implementation(libs.bundles.material)
+
+    // Else
+    implementation (libs.androidx.core.splashscreen)
 }

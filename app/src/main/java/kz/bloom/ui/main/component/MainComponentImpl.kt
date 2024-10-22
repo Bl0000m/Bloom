@@ -42,8 +42,10 @@ ComponentContext by componentContext
 
     override val model: Value<Model> = store.states.toModels()
 
-    override fun navigateToAuthorization() {
+    override fun profileClicked() {
+        //if (!isAuth)
         onNavigateAuth()
+        //else
     }
 
     private fun Value<MainStore.State>.toModels(): Value<Model> = map { state ->

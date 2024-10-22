@@ -10,5 +10,5 @@ interface MainComponent {
 
     public val model: Value<Model>
 
-    public fun navigateToAuthorization()
+    public fun profileClicked()
 }
