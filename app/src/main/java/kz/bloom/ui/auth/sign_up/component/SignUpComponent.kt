@@ -1,8 +1,8 @@
-package kz.bloom.ui.auth.component
+package kz.bloom.ui.auth.sign_up.component
 
 import com.arkivanov.decompose.value.Value
 
-interface AuthComponent {
+interface SignUpComponent {
 
     val model: Value<Model>
 

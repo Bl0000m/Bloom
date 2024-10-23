@@ -4,20 +4,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.arkivanov.decompose.defaultComponentContext
-import kz.bloom.ui.auth.component.AuthComponentImpl
-import kz.bloom.ui.auth.content.AuthContent
+import kz.bloom.ui.auth.sign_up.component.SignUpComponentImpl
+import kz.bloom.ui.auth.sign_up.content.SignUpContent
 import kz.bloom.ui.theme.BloomTheme
 
 class AuthActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val component = AuthComponentImpl(
+        val component = SignUpComponentImpl(
             componentContext = defaultComponentContext()
         )
         setContent {
             BloomTheme {
-                AuthContent(component = component)
+                SignUpContent(component = component)
             }
         }
     }

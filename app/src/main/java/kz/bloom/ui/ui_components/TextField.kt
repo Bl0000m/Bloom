@@ -107,8 +107,7 @@ cursorColor: Color = MaterialTheme.colorScheme.onPrimary,
                         isError = isError,
                         colors = colors,
                         contentPadding = PaddingValues(
-                            vertical = 12.dp,
-                            horizontal = 16.dp
+                            vertical = 4.dp
                         ),
                         interactionSource = remember { MutableInteractionSource() },
                         visualTransformation = visualTransformation
