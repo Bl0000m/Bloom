@@ -26,13 +26,13 @@ import kz.bloom.ui.ui_components.LabeledTextField
 import kz.bloom.ui.ui_components.PrimaryButton
 
 @Composable
-fun SignUpContent(component: SignUpComponent) {
+fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
 
     val model by component.model.subscribeAsState()
     val focusManager = LocalFocusManager.current
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 21.dp),
         verticalArrangement = Arrangement.spacedBy(44.dp)
@@ -127,7 +127,7 @@ fun SignUpContent(component: SignUpComponent) {
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            PrimaryButton(text = "СОЗДАТЬ АККАУНТ", textStyle = MaterialTheme.typography.bodySmall)
+            PrimaryButton(text = "СОЗДАТЬ АККАУНТ", textStyle = MaterialTheme.typography.bodySmall, onClick = { component.createAccount() } )
         }
     }
 }
