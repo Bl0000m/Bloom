@@ -1,5 +1,6 @@
 package kz.bloom.ui.auth.sign_up.content
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +35,7 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
     Column(
         modifier = modifier
             .fillMaxSize()
+            .padding(top = 51.dp)
             .padding(horizontal = 21.dp),
         verticalArrangement = Arrangement.spacedBy(44.dp)
     ) {
@@ -44,6 +46,7 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
             verticalArrangement = Arrangement.spacedBy(33.dp)
         ) {
             Icon(
+                modifier = Modifier.clickable { component.navigateBack() },
                 painter = painterResource(id = R.drawable.ic_arrow_back_black),
                 contentDescription = null
             )

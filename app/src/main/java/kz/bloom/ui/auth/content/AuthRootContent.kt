@@ -9,6 +9,7 @@ import com.arkivanov.decompose.extensions.compose.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import kz.bloom.ui.auth.component.AuthRootComponent
 import kz.bloom.ui.auth.component.AuthRootComponent.Child
+import kz.bloom.ui.auth.confirm_email.component.VerificationGenericComponent
 import kz.bloom.ui.auth.sign_in.content.SignInContent
 import kz.bloom.ui.auth.sign_up.content.SignUpContent
 
@@ -29,6 +30,10 @@ fun AuthRootContent(component: AuthRootComponent) {
                         component = childInstance.component
                     )
                     is Child.SignUp -> SignUpContent(
+                        modifier = contentPaddingModifier,
+                        component = childInstance.component
+                    )
+                    is Child.ConfirmEmail -> GenericVerificationContent(
                         modifier = contentPaddingModifier,
                         component = childInstance.component
                     )

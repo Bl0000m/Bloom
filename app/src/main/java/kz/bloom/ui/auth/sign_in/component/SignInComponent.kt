@@ -18,4 +18,6 @@ public interface SignInComponent {
     public fun enterAccount()
 
     public fun createAccount()
+
+    public fun navigateBack()
 }

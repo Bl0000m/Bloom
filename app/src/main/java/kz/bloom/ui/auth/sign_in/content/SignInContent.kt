@@ -1,5 +1,6 @@
 package kz.bloom.ui.auth.sign_in.content
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,7 @@ fun SignInContent(modifier: Modifier, component: SignInComponent) {
     Column(
         modifier = modifier
             .fillMaxSize()
+            .padding(top = 51.dp)
             .padding(horizontal = 21.dp),
         verticalArrangement = Arrangement.spacedBy(44.dp)
     ) {
@@ -41,6 +43,7 @@ fun SignInContent(modifier: Modifier, component: SignInComponent) {
             verticalArrangement = Arrangement.spacedBy(33.dp)
         ) {
             Icon(
+                modifier = Modifier.clickable { component.navigateBack() },
                 painter = painterResource(id = R.drawable.ic_arrow_back_black),
                 contentDescription = null
             )

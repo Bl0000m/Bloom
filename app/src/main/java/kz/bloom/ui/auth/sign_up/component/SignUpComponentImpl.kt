@@ -9,7 +9,8 @@ import org.koin.core.component.KoinComponent
 
 class SignUpComponentImpl(
     componentContext: ComponentContext,
-    private val onLoginPage:() -> Unit,
+    private val onCreateAccount:() -> Unit,
+    private val onNavigateBack:() -> Unit,
 ) : SignUpComponent,
     KoinComponent,
     ComponentContext by componentContext
@@ -52,6 +53,10 @@ class SignUpComponentImpl(
     }
 
     override fun createAccount() {
-        onLoginPage()
+        onCreateAccount()
+    }
+
+    override fun navigateBack() {
+        onNavigateBack()
     }
 }

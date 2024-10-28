@@ -29,4 +29,5 @@ interface SignUpComponent {
 
     fun createAccount()
 
+    fun navigateBack()
 }
