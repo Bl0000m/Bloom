@@ -13,15 +13,19 @@ import kz.bloom.ui.auth.sign_in.component.SignInComponent
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent
 import kz.bloom.ui.auth.component.AuthRootComponent.Model
 import kz.bloom.ui.auth.component.AuthRootComponent.Child
-import kz.bloom.ui.auth.confirm_email.component.VerificationGenericComponent
-import kz.bloom.ui.auth.confirm_email.component.VerificationGenericComponent.VerificationKind
-import kz.bloom.ui.auth.confirm_email.component.VerificationGenericComponentImpl
+import kz.bloom.ui.auth.confirm.component.VerificationGenericComponent
+import kz.bloom.ui.auth.confirm.component.VerificationGenericComponent.VerificationKind
+import kz.bloom.ui.auth.confirm.component.VerificationGenericComponentImpl
+import kz.bloom.ui.auth.outcome.component.OutcomeComponent
+import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
+import kz.bloom.ui.auth.outcome.component.OutcomeComponentImpl
 import kz.bloom.ui.auth.sign_in.component.SignInComponentImpl
 import kz.bloom.ui.auth.sign_up.component.SignUpComponentImpl
 import org.koin.core.component.KoinComponent
 
 internal class AuthRootComponentImpl(
-    componentContext: ComponentContext
+    componentContext: ComponentContext,
+    private val onNavigateBack:() -> Unit
 ) : AuthRootComponent,
     KoinComponent,
     ComponentContext by componentContext {
@@ -31,6 +35,8 @@ internal class AuthRootComponentImpl(
             smth = true
         )
     )
+
+    private val isSuccess = MutableValue(true)
 
     private val navigation = StackNavigation<Configuration>()
 
@@ -67,8 +73,15 @@ internal class AuthRootComponentImpl(
             )
         )
 
-        is Configuration.ConfirmEmail -> Child.ConfirmEmail(
-            component = confirmEmailComponent(
+        is Configuration.GenericConfirm -> Child.ConfirmEmail(
+            component = genericConfirmComponent(
+                componentContext = componentContext,
+                kind = configuration.confirmKind
+            )
+        )
+
+        is Configuration.Outcome -> Child.OutcomePage(
+            component = outcomeComponent(
                 componentContext = componentContext
             )
         )
@@ -79,8 +92,11 @@ internal class AuthRootComponentImpl(
     ): SignInComponent = SignInComponentImpl(
         componentContext = componentContext,
         onCreateAccount = { navigation.pushNew(configuration = Configuration.SignUp) },
-        onNavigateBack = {
-            // requireActivityFinish
+        onNavigateBack = onNavigateBack,
+        onForgotPassword = {
+            navigation.pushNew(
+                configuration = Configuration.GenericConfirm(VerificationKind.ForgotPassFillEmail)
+            )
         }
     )
 
@@ -88,29 +104,56 @@ internal class AuthRootComponentImpl(
         componentContext: ComponentContext
     ) : SignUpComponent = SignUpComponentImpl(
         componentContext = componentContext,
-        onCreateAccount = { navigation.pushNew(configuration = Configuration.ConfirmEmail) },
+        onCreateAccount = {
+            navigation.pushNew(
+                configuration =
+                Configuration.GenericConfirm(VerificationKind.ConfirmEmail)
+            )
+        },
         onNavigateBack = { navigation.pop() }
     )
 
-    private fun confirmEmailComponent(
-        componentContext: ComponentContext
+    private fun genericConfirmComponent(
+        componentContext: ComponentContext,
+        kind: VerificationKind,
     ) : VerificationGenericComponent = VerificationGenericComponentImpl(
         componentContext = componentContext,
-        kind = VerificationKind.ConfirmEmail,
+        kind = kind,
         onBack = { navigation.pop() },
         openOutcomePage = {
-            // navigation.pushNew(configuration = Configuration.OutcomePage)
+            navigation.pushNew(
+                configuration = Configuration.Outcome(
+                    outcomeKind = if (isSuccess.value) {
+                        OutcomeKind.Welcome
+                    } else OutcomeKind.Error
+                )
+            )
         }
+    )
+
+    private fun outcomeComponent(
+        componentContext: ComponentContext
+    ) : OutcomeComponent = OutcomeComponentImpl(
+        componentContext = componentContext,
+        outcomeKind = OutcomeKind.Welcome,
+        onNavigateBack = { },
+        onContinue = { }
     )
 
     @Serializable
     private sealed interface Configuration {
         @Serializable
-        object SignIn : Configuration
+        data object SignIn : Configuration
         @Serializable
-        object SignUp : Configuration
+        data object SignUp : Configuration
         @Serializable
-        object ConfirmEmail : Configuration
+        data class GenericConfirm(
+            val confirmKind: VerificationKind
+        ) : Configuration
+        @Serializable
+        data class Outcome(
+            val outcomeKind: OutcomeKind
+        ) : Configuration
     }
 
 }

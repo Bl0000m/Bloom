@@ -1,4 +1,4 @@
-package kz.bloom.ui.auth.confirm_email.component
+package kz.bloom.ui.auth.confirm.component
 
 import com.arkivanov.decompose.value.Value
 
@@ -20,13 +20,13 @@ interface VerificationGenericComponent {
 
     public fun fillEditText(value: String)
 
-    public fun confirmEmail(code: String)
+    public fun confirmEmail()
 
-    public fun fillInEmailToRestorePass(email: String)
+    public fun fillInEmailToRestorePass()
 
-    public fun fillInCodeToRestorePass(codeForRestore: String)
+    public fun fillInCodeToRestorePass()
 
-    public fun createNewPass(newPass: String)
+    public fun createNewPass()
 
     public fun onNavigateBack()
 }

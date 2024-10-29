@@ -13,7 +13,8 @@ class AuthActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val component = AuthRootComponentImpl(
-            componentContext = defaultComponentContext()
+            componentContext = defaultComponentContext(),
+            onNavigateBack = { finish() }
         )
         setContent {
             BloomTheme {

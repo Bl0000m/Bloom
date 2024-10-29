@@ -11,6 +11,7 @@ class SignInComponentImpl(
     componentContext: ComponentContext,
     private val onCreateAccount:() -> Unit,
     private val onNavigateBack:() -> Unit,
+    private val onForgotPassword:() -> Unit
 ): SignInComponent,
    KoinComponent,
    ComponentContext by componentContext
@@ -42,5 +43,9 @@ class SignInComponentImpl(
 
     override fun navigateBack() {
         onNavigateBack()
+    }
+
+    override fun forgotPassword() {
+        onForgotPassword()
     }
 }

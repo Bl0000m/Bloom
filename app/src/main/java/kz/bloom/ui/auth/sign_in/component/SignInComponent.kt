@@ -20,4 +20,6 @@ public interface SignInComponent {
     public fun createAccount()
 
     public fun navigateBack()
+
+    public fun forgotPassword()
 }

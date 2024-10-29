@@ -1,4 +1,4 @@
-package kz.bloom.ui.auth.confirm_email.component
+package kz.bloom.ui.auth.confirm.component
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
@@ -6,8 +6,8 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import org.koin.core.component.KoinComponent
 
-import kz.bloom.ui.auth.confirm_email.component.VerificationGenericComponent.Model
-import kz.bloom.ui.auth.confirm_email.component.VerificationGenericComponent.VerificationKind
+import kz.bloom.ui.auth.confirm.component.VerificationGenericComponent.Model
+import kz.bloom.ui.auth.confirm.component.VerificationGenericComponent.VerificationKind
 
 class VerificationGenericComponentImpl(
     componentContext: ComponentContext,
@@ -30,20 +30,20 @@ class VerificationGenericComponentImpl(
         _model.update { it.copy(editTextValue = value) }
     }
 
-    override fun confirmEmail(code: String) {
-        TODO("Not yet implemented")
+    override fun confirmEmail() {
+        openOutcomePage()
     }
 
-    override fun fillInEmailToRestorePass(email: String) {
-        TODO("Not yet implemented")
+    override fun fillInEmailToRestorePass() {
+        _model.update { it.copy(kind = VerificationKind.ForgotPassFillCode) }
     }
 
-    override fun fillInCodeToRestorePass(codeForRestore: String) {
-        TODO("Not yet implemented")
+    override fun fillInCodeToRestorePass() {
+        _model.update { it.copy(kind = VerificationKind.CreateNewPass) }
     }
 
-    override fun createNewPass(newPass: String) {
-        TODO("Not yet implemented")
+    override fun createNewPass() {
+        openOutcomePage()
     }
 
     override fun onNavigateBack() {

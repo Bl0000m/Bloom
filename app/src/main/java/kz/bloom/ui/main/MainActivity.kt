@@ -51,6 +51,5 @@ class MainActivity : ComponentActivity() {
             setClassName(this@MainActivity, AUTH)
             startActivity(this)
         }
-        finish()
     }
 }

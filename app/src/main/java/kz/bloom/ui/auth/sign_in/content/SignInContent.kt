@@ -7,14 +7,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.R
@@ -28,6 +33,9 @@ fun SignInContent(modifier: Modifier, component: SignInComponent) {
     val model by component.model.subscribeAsState()
 
     val focusManager = LocalFocusManager.current
+
+    val emailFocusRequest = remember { FocusRequester() }
+    val passwordFocusRequest = remember { FocusRequester() }
 
     Column(
         modifier = modifier
@@ -59,33 +67,40 @@ fun SignInContent(modifier: Modifier, component: SignInComponent) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             LabeledTextField(
+                modifier = Modifier.focusRequester(emailFocusRequest),
                 label = "ЭЛЕКТРОННАЯ ПОЧТА",
                 placeholder = "",
                 singleLine = true,
                 labelStyle = MaterialTheme.typography.labelSmall,
                 onValueChange = { component.fillEmail(email = it) },
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
-                    onDone = { focusManager.clearFocus() }
+                    onNext = { passwordFocusRequest.requestFocus() }
                 ),
                 value = model.email
             )
             LabeledTextField(
+                modifier = Modifier.focusRequester(passwordFocusRequest),
                 label = "ПАРОЛЬ",
                 singleLine = true,
                 placeholder = "",
                 labelStyle = MaterialTheme.typography.labelSmall,
                 onValueChange = {component.fillPassword(password = it) },
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
                     onDone = { focusManager.clearFocus() }
                 ),
-                value = model.password
+                value = model.password,
             )
             Column(
                 modifier = Modifier.padding(top = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 PrimaryButton(text = "ВОЙТИ В АККАУНТ", onClick = { component.enterAccount() } )
-                Text(text = "Забыли пароль?", style = MaterialTheme.typography.labelSmall)
+                Text(
+                    modifier = Modifier.clickable { component.forgotPassword() },
+                    text = "Забыли пароль?", style = MaterialTheme.typography.labelSmall
+                )
             }
         }
 
