@@ -1,6 +1,7 @@
 package kz.bloom.ui.main.component
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.operator.map
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
@@ -8,7 +9,7 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kz.bloom.libraries.states
 
 import kz.bloom.ui.main.component.MainComponent.Model
-import kz.bloom.ui.main.data.MainApi
+import kz.bloom.ui.main.content.NavBarItem
 import kz.bloom.ui.main.data.MainRepository
 import kz.bloom.ui.main.store.MainStore
 
@@ -48,9 +49,14 @@ ComponentContext by componentContext
         //else
     }
 
+    override fun categorySelected(navBarItem: NavBarItem) {
+        store.accept(MainStore.Intent.SelectNavBarItem(navBarItem))
+    }
+
     private fun Value<MainStore.State>.toModels(): Value<Model> = map { state ->
         Model(
-            pages = state.pagesList
+            pages = state.pagesList,
+            navBarSelectedItem = state.navBarSelectedItem
         )
     }
 }

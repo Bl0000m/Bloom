@@ -1,5 +1,7 @@
 package kz.bloom.ui.auth.component
 
+import android.util.Log
+import androidx.compose.ui.platform.LocalGraphicsContext
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
@@ -76,13 +78,14 @@ internal class AuthRootComponentImpl(
         is Configuration.GenericConfirm -> Child.ConfirmEmail(
             component = genericConfirmComponent(
                 componentContext = componentContext,
-                kind = configuration.confirmKind
+                confirmKind = configuration.confirmKind
             )
         )
 
         is Configuration.Outcome -> Child.OutcomePage(
             component = outcomeComponent(
-                componentContext = componentContext
+                componentContext = componentContext,
+                outcomeKind = configuration.outcomeKind
             )
         )
     }
@@ -104,10 +107,17 @@ internal class AuthRootComponentImpl(
         componentContext: ComponentContext
     ) : SignUpComponent = SignUpComponentImpl(
         componentContext = componentContext,
-        onCreateAccount = {
+        onCreateAccount = { confirmEmailVerify ->
             navigation.pushNew(
                 configuration =
-                Configuration.GenericConfirm(VerificationKind.ConfirmEmail)
+                Configuration.GenericConfirm(confirmEmailVerify)
+            )
+        },
+        onError = { errorOutcome ->
+            Log.d("behold", "error")
+            navigation.pushNew(
+                configuration =
+                Configuration.Outcome(errorOutcome)
             )
         },
         onNavigateBack = { navigation.pop() }
@@ -115,16 +125,16 @@ internal class AuthRootComponentImpl(
 
     private fun genericConfirmComponent(
         componentContext: ComponentContext,
-        kind: VerificationKind,
+        confirmKind: VerificationKind,
     ) : VerificationGenericComponent = VerificationGenericComponentImpl(
         componentContext = componentContext,
-        kind = kind,
+        kind = confirmKind,
         onBack = { navigation.pop() },
-        openOutcomePage = {
+        openOutcomePage = {  outcomeKind ->
             navigation.pushNew(
                 configuration = Configuration.Outcome(
                     outcomeKind = if (isSuccess.value) {
-                        OutcomeKind.Welcome
+                        outcomeKind
                     } else OutcomeKind.Error
                 )
             )
@@ -132,10 +142,11 @@ internal class AuthRootComponentImpl(
     )
 
     private fun outcomeComponent(
-        componentContext: ComponentContext
+        componentContext: ComponentContext,
+        outcomeKind: OutcomeKind,
     ) : OutcomeComponent = OutcomeComponentImpl(
         componentContext = componentContext,
-        outcomeKind = OutcomeKind.Welcome,
+        outcomeKind = outcomeKind,
         onNavigateBack = { },
         onContinue = { }
     )

@@ -8,6 +8,7 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kz.bloom.ui.main.content.NavBarItem
 import kz.bloom.ui.main.data.MainApi
 import kz.bloom.ui.main.data.MainRepository
 import kz.bloom.ui.main.data.entity.PageItem
@@ -24,6 +25,8 @@ private sealed interface Message : JvmSerializable {
     data class PagesLoaded(val pages : List<PageItem>) : Message
 
     data class LoadingPagesList(val isLoading: Boolean) : Message
+
+    data class NavBarItemSelected(val selectedItem: NavBarItem) : Message
 
     object ErrorOccurred : Message
 }
@@ -53,6 +56,9 @@ internal fun MainStore(
                         )
                         is Message.PagesLoaded -> copy(
                             pagesList = message.pages
+                        )
+                        is Message.NavBarItemSelected -> copy(
+                            navBarSelectedItem = message.selectedItem
                         )
                     }
                 },
@@ -98,5 +104,16 @@ private class ExecutorImpl(
 
     override fun executeIntent(intent: Intent, getState: () -> State) {
         super.executeIntent(intent, getState)
+        when (intent) {
+            is Intent.SelectNavBarItem -> {
+                scope.launch {
+                    try {
+                        dispatch(message = Message.NavBarItemSelected(selectedItem = intent.navBarItem))
+                    } catch (exception : Exception) {
+                        dispatch(message = Message.ErrorOccurred)
+                    }
+                }
+            }
+        }
     }
 }

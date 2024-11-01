@@ -1,5 +1,7 @@
 package kz.bloom.ui.main.content
 
+import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -50,6 +52,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -63,10 +66,15 @@ import kz.bloom.ui.main.component.MainComponent
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.ui.main.data.entity.PageItem
 
+enum class NavBarItem {
+    HOME, SEARCH, MENU
+}
+
 @Composable
 fun MainContent(component: MainComponent) {
 
     val model by component.model.subscribeAsState()
+
     val listState: LazyListState = rememberLazyListState()
     var isLogoWhite by remember { mutableStateOf(false) }
     var isAutoScrollEnabled by remember { mutableStateOf(true) }
@@ -173,7 +181,9 @@ fun MainContent(component: MainComponent) {
         BottomNavBar(
             modifier = Modifier
                 .align(Alignment.BottomCenter),
-            userProfileClicked = { component.profileClicked() }
+            userProfileClicked = { component.profileClicked() },
+            onItemSelected = { component.categorySelected(it) },
+            selectedItem = model.navBarSelectedItem
         )
     }
 }
@@ -217,9 +227,11 @@ private fun PageItemView(
 }
 
 @Composable
-private fun BottomNavBar(
+fun BottomNavBar(
     modifier: Modifier = Modifier,
-    userProfileClicked:() -> Unit
+    selectedItem: NavBarItem,
+    onItemSelected: (NavBarItem) -> Unit,
+    userProfileClicked: () -> Unit
 ) {
     Surface(
         modifier = modifier
@@ -238,39 +250,69 @@ private fun BottomNavBar(
             horizontalArrangement = Arrangement.spacedBy(45.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                modifier = Modifier.size(size = 24.dp),
-                painter = painterResource(id = R.drawable.ic_home),
-                tint = Color.Black,
-                contentDescription = null
+            NavBarItem(
+                icon = R.drawable.ic_home,
+                isSelected = selectedItem == NavBarItem.HOME,
+                onClick = { onItemSelected(NavBarItem.HOME) }
+            )
+            NavBarItem(
+                icon = R.drawable.ic_search,
+                isSelected = selectedItem == NavBarItem.SEARCH,
+                onClick = { onItemSelected(NavBarItem.SEARCH) }
+            )
+            NavBarItem(
+                icon = R.drawable.ic_menu,
+                isSelected = selectedItem == NavBarItem.MENU,
+                onClick = { onItemSelected(NavBarItem.MENU) },
+                isMenuIcon = true
             )
             Icon(
-                modifier = Modifier.size(size = 24.dp),
-                painter = painterResource(id = R.drawable.ic_search),
-                tint = Color.Black,
-                contentDescription = null
-            )
-            Text(
-                modifier = Modifier.width(width = 50.dp),
-                text = "МЕНЮ",
-                color = Color.Black,
-                style = MaterialTheme.typography.bodySmall
-            )
-            Icon(
-                modifier = Modifier.size(size = 24.dp),
+                modifier = Modifier.size(24.dp),
                 painter = painterResource(id = R.drawable.ic_bag),
                 tint = Color.Black,
                 contentDescription = null
             )
             Icon(
                 modifier = Modifier
-                    .size(size = 24.dp)
+                    .size(24.dp)
                     .clickable { userProfileClicked() },
                 painter = painterResource(id = R.drawable.ic_user),
                 tint = Color.Black,
                 contentDescription = null
             )
         }
+    }
+}
+
+
+@Composable
+fun NavBarItem(
+    @DrawableRes icon: Int,
+    isSelected: Boolean = false,
+    isMenuIcon: Boolean = false,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .height(height = if (isMenuIcon) 15.dp else 24.dp)
+            .width(width = if (isMenuIcon) 50.dp else 24.dp)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = null,
+            tint = Color.Black
+        )
+        AnimatedVisibility(
+            visible = isSelected,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(top = 1.dp)
+                .height(1.dp)
+                .width(6.dp)
+                .background(Color.Black)
+        ) {}
     }
 }
 

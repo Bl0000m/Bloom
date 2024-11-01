@@ -8,11 +8,13 @@ import org.koin.core.component.KoinComponent
 
 import kz.bloom.ui.auth.confirm.component.VerificationGenericComponent.Model
 import kz.bloom.ui.auth.confirm.component.VerificationGenericComponent.VerificationKind
+import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
+
 
 class VerificationGenericComponentImpl(
     componentContext: ComponentContext,
     kind: VerificationKind,
-    private val openOutcomePage:() -> Unit,
+    private val openOutcomePage:(kind: OutcomeKind) -> Unit,
     private val onBack:() -> Unit
 ) : VerificationGenericComponent,
     KoinComponent,
@@ -31,7 +33,7 @@ class VerificationGenericComponentImpl(
     }
 
     override fun confirmEmail() {
-        openOutcomePage()
+        openOutcomePage(OutcomeKind.Welcome)
     }
 
     override fun fillInEmailToRestorePass() {
@@ -43,7 +45,7 @@ class VerificationGenericComponentImpl(
     }
 
     override fun createNewPass() {
-        openOutcomePage()
+        openOutcomePage(OutcomeKind.RestoreSuccess)
     }
 
     override fun onNavigateBack() {

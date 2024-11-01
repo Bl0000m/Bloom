@@ -36,8 +36,8 @@ fun OutcomePageContent(modifier: Modifier = Modifier, component: OutcomeComponen
             style = MaterialTheme.typography.labelLarge,
             text = when (outcomeKind) {
                 is OutcomeKind.Welcome -> "ДОБРО ПОЖАЛОВАТЬ"
-                is OutcomeKind.Error -> "ПОЗДРАВЛЯЕМ"
-                is OutcomeKind.RestoreSuccess -> "ОШИБКА"
+                is OutcomeKind.Error -> "ОШИБКА"
+                is OutcomeKind.RestoreSuccess -> "ПОЗДРАВЛЯЕМ"
             }
         )
         Text(
@@ -45,9 +45,8 @@ fun OutcomePageContent(modifier: Modifier = Modifier, component: OutcomeComponen
             color = MaterialTheme.colorScheme.secondary,
             text = when (outcomeKind) {
                 is OutcomeKind.Welcome -> "Вы успешно прошли аутентификацию"
-                is OutcomeKind.Error -> "Ваш пароль был изменён. Нажмите \"Продолжить\", чтобы войти в систему"
-                is OutcomeKind.RestoreSuccess -> "К сожалению, произошла ошибка. Попробуйте снова или обратитесь в службу поддержки, если проблема сохраняется."
-
+                is OutcomeKind.Error -> "К сожалению, произошла ошибка. Попробуйте снова или обратитесь в службу поддержки, если проблема сохраняется."
+                is OutcomeKind.RestoreSuccess -> "Ваш пароль был изменён. Нажмите \"Продолжить\", чтобы войти в систему"
             }
         )
         Image(

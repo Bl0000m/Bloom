@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -19,8 +20,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent
@@ -33,6 +36,11 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
 
     val model by component.model.subscribeAsState()
     val focusManager = LocalFocusManager.current
+    val emailFocusRequest = remember { FocusRequester() }
+    val nameFocusRequest = remember { FocusRequester () }
+    val phoneNumberFocusRequest = remember { FocusRequester() }
+    val passwordFocusRequest = remember { FocusRequester () }
+    val rePasswordFocusRequest = remember { FocusRequester () }
 
     Column(
         modifier = modifier
@@ -64,47 +72,69 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             LabeledTextField(
+                modifier = Modifier.focusRequester(nameFocusRequest),
                 label = "ИМЯ",
                 placeholder = "",
                 singleLine = true,
                 labelStyle = MaterialTheme.typography.labelSmall,
                 onValueChange = { component.fillName(name = it) },
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
-                    onDone = { focusManager.clearFocus() }
+                    onNext = { emailFocusRequest.requestFocus() }
                 ),
                 value = model.name
             )
             LabeledTextField(
+                modifier = Modifier.focusRequester(emailFocusRequest),
                 label = "ЭЛЕКТРОННАЯ ПОЧТА",
                 singleLine = true,
                 placeholder = "",
                 labelStyle = MaterialTheme.typography.labelSmall,
                 onValueChange = {component.fillMail(email = it) },
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
-                    onDone = { focusManager.clearFocus() }
+                    onNext = { phoneNumberFocusRequest.requestFocus() }
                 ),
                 value = model.email
             )
 
+            LabeledTextField(
+                modifier = Modifier.focusRequester(phoneNumberFocusRequest),
+                label = "НОМЕР ТЕЛЕФОНА",
+                singleLine = true,
+                placeholder = "",
+                labelStyle = MaterialTheme.typography.labelSmall,
+                onValueChange = { component.fillPhone(phoneNumber = it) },
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onNext = { passwordFocusRequest.requestFocus() }
+                ),
+                value = model.phoneNumber
+            )
+
 
             LabeledTextField(
+                modifier = Modifier.focusRequester(passwordFocusRequest),
                 label = "ПАРОЛЬ",
                 singleLine = true,
                 placeholder = "",
                 labelStyle = MaterialTheme.typography.labelSmall,
                 onValueChange = { component.fillPassword(password = it) },
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
-                    onDone = { focusManager.clearFocus() }
+                    onDone = { rePasswordFocusRequest.requestFocus() }
                 ),
                 value = model.password
             )
 
             LabeledTextField(
+                modifier = Modifier.focusRequester(rePasswordFocusRequest),
                 label = "ПОВТОРИТЕ ПАРОЛЬ",
                 singleLine = true,
                 placeholder = "",
                 labelStyle = MaterialTheme.typography.labelSmall,
                 onValueChange = { component.fillPasswordConfirm(rePassword = it) },
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
                     onDone = { focusManager.clearFocus() }
                 ),

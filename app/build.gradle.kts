@@ -74,9 +74,6 @@ dependencies {
     // Retrofit
     implementation(libs.retrofit)
 
-    // OkHttp
-    implementation(libs.logging.interceptor)
-
     // Coil
     implementation(libs.coil.compose)
 
@@ -106,4 +103,12 @@ dependencies {
 
     // Else
     implementation (libs.androidx.core.splashscreen)
+
+    // Ktor
+    implementation (libs.ktor.client.core)
+    implementation (libs.ktor.client.okhttp)
+
+    // okHttp
+    implementation (libs.okhttp.main)
+    implementation (libs.okhttp.logging)
 }
