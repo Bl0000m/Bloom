@@ -18,6 +18,7 @@ private sealed interface Message : JvmSerializable {
     data class LoadingChanged(val isLoading: Boolean) : Message
     data object ErrorOccurred : Message
     data object AccountCreated : Message
+    data object AccountEntered : Message
 }
 
 internal fun AuthStore(
@@ -31,14 +32,16 @@ internal fun AuthStore(
         name = "AuthStore",
         initialState = State(
             isError = false,
-            isSuccess = false,
+            accountCreated = false,
+            accountEntered = false,
             isLoading = false
         ),
         reducer = { message ->
             when(message) {
-                is Message.ErrorOccurred -> copy(isError = true, isSuccess = false, isLoading = false)
-                is Message.AccountCreated -> copy(isSuccess = true, isError = false, isLoading = false)
+                is Message.ErrorOccurred -> copy(isError = true, isLoading = false)
                 is Message.LoadingChanged -> copy(isLoading = message.isLoading)
+                is Message.AccountCreated -> copy(accountCreated = true, isError = false, isLoading = false)
+                is Message.AccountEntered -> copy(accountEntered = true, isLoading = false)
             }
         },
         bootstrapper = SimpleBootstrapper(),
@@ -73,11 +76,31 @@ private class ExecutorImpl(
                             authApi.createAccount(model = intent.model)
                         }
                         if (createAccount.status.value == 200) {
-                            Log.d("behold11","Account Created")
                             dispatch(message = Message.AccountCreated)
                         }
 
                     } catch (exception: Exception) {
+                        dispatch(message = Message.ErrorOccurred)
+                    }
+                }
+            }
+
+            is Intent.EnterAccount -> {
+                scope.launch {
+                    try {
+                        dispatch(
+                            message = Message.LoadingChanged(
+                                isLoading = true
+                            )
+                        )
+                        val enterAccount = withContext(context = ioContext) {
+                            authApi.enterAccount(model = intent.model)
+                        }
+
+
+
+                    } catch (exception: Exception) {
+                        Log.d("beholdError", exception.toString())
                         dispatch(message = Message.ErrorOccurred)
                     }
                 }

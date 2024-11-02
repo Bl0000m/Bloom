@@ -102,13 +102,19 @@ dependencies {
     implementation(libs.bundles.material)
 
     // Else
-    implementation (libs.androidx.core.splashscreen)
+    implementation(libs.androidx.core.splashscreen)
 
     // Ktor
-    implementation (libs.ktor.client.core)
-    implementation (libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation)
+
+    implementation(libs.ktor.serialization.kotlinx.json)
 
     // okHttp
-    implementation (libs.okhttp.main)
-    implementation (libs.okhttp.logging)
+    implementation(libs.okhttp.main)
+    implementation(libs.okhttp.logging)
+
+    // kotlinx Serialization
+    implementation(libs.kotlinx.serialization.json)
 }

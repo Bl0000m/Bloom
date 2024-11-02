@@ -4,8 +4,16 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
+import com.arkivanov.mvikotlin.core.instancekeeper.getStore
+import com.arkivanov.mvikotlin.core.store.StoreFactory
+import kz.bloom.ui.auth.api.AuthApi
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.auth.sign_in.component.SignInComponent.Model
+import kz.bloom.ui.auth.sign_up.store.AuthStore
+import kz.bloom.ui.ui_components.coroutineScope
+import org.koin.core.component.inject
+import org.koin.core.qualifier.named
+import kotlin.coroutines.CoroutineContext
 
 class SignInComponentImpl(
     componentContext: ComponentContext,
@@ -16,12 +24,28 @@ class SignInComponentImpl(
    KoinComponent,
    ComponentContext by componentContext
 {
+    private val authApi by inject<AuthApi>()
+    private val mainContext by inject<CoroutineContext>(qualifier = named(name = "Main"))
+    private val ioContext by inject<CoroutineContext>(qualifier = named(name = "IO"))
+    private val storeFactory by inject<StoreFactory>()
+
     private val _model = MutableValue(
         initialValue = Model(
             email = "",
             password = ""
         )
     )
+
+    private val store = instanceKeeper.getStore {
+        AuthStore(
+            authApi = authApi,
+            mainContext = mainContext,
+            ioContext = ioContext,
+            storeFactory = storeFactory
+        )
+    }
+
+    private val scope = coroutineScope()
 
     override val model: Value<Model> = _model
 
@@ -34,6 +58,7 @@ class SignInComponentImpl(
     }
 
     override fun enterAccount() {
+        store.accept(intent = AuthStore.Intent.EnterAccount(model = _model.value))
 
     }
 

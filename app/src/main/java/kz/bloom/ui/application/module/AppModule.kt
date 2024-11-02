@@ -6,6 +6,10 @@ import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.defaultRequest
+import io.ktor.serialization.kotlinx.json.json
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+
+import kotlinx.serialization.json.Json
 
 
 import kz.bloom.ui.auth.api.AuthApi
@@ -19,6 +23,16 @@ import org.koin.dsl.module
 
 import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
+
+private val json = Json {
+    isLenient = true
+    prettyPrint = false
+    encodeDefaults = true
+    ignoreUnknownKeys = true
+    useArrayPolymorphism = false
+    allowStructuredMapKeys = true
+    allowSpecialFloatingPointValues = true
+}
 
 val appModule = module {
     single { MainRepository() }
@@ -35,6 +49,9 @@ val appModule = module {
                 requestTimeoutMillis = 15000
                 connectTimeoutMillis = 15000
                 socketTimeoutMillis = 15000
+            }
+            install(plugin = ContentNegotiation.Plugin) {
+                json(json = json)
             }
             engine {
                 val loggingInterceptor = HttpLoggingInterceptor().apply {

@@ -88,11 +88,11 @@ class SignUpComponentImpl(
         Log.d("behold", "123")
         store.accept(intent = AuthStore.Intent.CreateAccount(model = _model.value))
         scope.launch {
-            delay(timeMillis = 1000L)
+            delay(timeMillis = 500L)
             store.states.subscribe { state ->
-                if (state.isSuccess && !state.isLoading) {
+                if (state.accountCreated && !state.isLoading) {
                     onCreateAccount(VerificationKind.ConfirmEmail)
-                } else if (!state.isSuccess && !state.isLoading) {
+                } else if (!state.accountCreated && !state.isLoading) {
                     onError(OutcomeKind.Error)
                 }
             }
