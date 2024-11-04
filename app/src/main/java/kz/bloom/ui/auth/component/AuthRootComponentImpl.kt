@@ -1,7 +1,10 @@
 package kz.bloom.ui.auth.component
 
+import android.content.Context
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalGraphicsContext
+import androidx.core.content.ContentProviderCompat.requireContext
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
@@ -23,11 +26,17 @@ import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
 import kz.bloom.ui.auth.outcome.component.OutcomeComponentImpl
 import kz.bloom.ui.auth.sign_in.component.SignInComponentImpl
 import kz.bloom.ui.auth.sign_up.component.SignUpComponentImpl
+import kz.bloom.ui.country_chooser.AssetsProvider
+import kz.bloom.ui.country_chooser.component.ChooseCountryComponent
+import kz.bloom.ui.country_chooser.component.ChooseCountryComponentImpl
+import kz.bloom.ui.country_chooser.component.CountryModel
+import kz.bloom.ui.ui_components.parseAssetsFileContents
 import org.koin.core.component.KoinComponent
 
 internal class AuthRootComponentImpl(
     componentContext: ComponentContext,
-    private val onNavigateBack:() -> Unit
+    private val onNavigateBack:() -> Unit,
+    private val context: Context
 ) : AuthRootComponent,
     KoinComponent,
     ComponentContext by componentContext {
@@ -39,6 +48,13 @@ internal class AuthRootComponentImpl(
     )
 
     private val isSuccess = MutableValue(true)
+    private val startingCountryModel = CountryModel(
+        code = "KZ",
+        name = "Казахстан",
+        dialCode = "+7",
+        flagEmoji = "\uD83C\uDDF0\uD83C\uDDFF",
+        phoneNumberLength = 10
+    )
 
     private val navigation = StackNavigation<Configuration>()
 
@@ -71,7 +87,8 @@ internal class AuthRootComponentImpl(
 
         is Configuration.SignUp -> Child.SignUp(
             component = signUpComponent(
-                componentContext = componentContext
+                componentContext = componentContext,
+                selectedCountry = configuration.selectedCountry ?: startingCountryModel
             )
         )
 
@@ -88,13 +105,18 @@ internal class AuthRootComponentImpl(
                 outcomeKind = configuration.outcomeKind
             )
         )
+        is Configuration.ChooseCountry -> Child.CountryChoose(
+            component = chooseCountryComponent(
+                componentContext = componentContext
+            )
+        )
     }
 
     private fun signInComponent(
         componentContext: ComponentContext
     ): SignInComponent = SignInComponentImpl(
         componentContext = componentContext,
-        onCreateAccount = { navigation.pushNew(configuration = Configuration.SignUp) },
+        onCreateAccount = { navigation.pushNew(configuration = Configuration.SignUp(startingCountryModel)) },
         onNavigateBack = onNavigateBack,
         onForgotPassword = {
             navigation.pushNew(
@@ -104,9 +126,11 @@ internal class AuthRootComponentImpl(
     )
 
     private fun signUpComponent(
-        componentContext: ComponentContext
+        componentContext: ComponentContext,
+        selectedCountry: CountryModel
     ) : SignUpComponent = SignUpComponentImpl(
         componentContext = componentContext,
+        selectedCountry = selectedCountry,
         onCreateAccount = { confirmEmailVerify ->
             navigation.pushNew(
                 configuration =
@@ -114,13 +138,17 @@ internal class AuthRootComponentImpl(
             )
         },
         onError = { errorOutcome ->
-            Log.d("behold", "error")
             navigation.pushNew(
                 configuration =
                 Configuration.Outcome(errorOutcome)
             )
         },
-        onNavigateBack = { navigation.pop() }
+        onNavigateBack = { navigation.pop() },
+        onOpenCountryChooser = { selectedCountry ->
+            navigation.pushNew(
+                configuration = Configuration.ChooseCountry(selectedCountry)
+            )
+        }
     )
 
     private fun genericConfirmComponent(
@@ -151,12 +179,25 @@ internal class AuthRootComponentImpl(
         onContinue = { }
     )
 
+    private fun chooseCountryComponent(
+        componentContext: ComponentContext
+    ) : ChooseCountryComponent = ChooseCountryComponentImpl(
+        componentContext = componentContext,
+        onCountrySelected = { selectedCountry ->
+            navigation.pushNew(configuration = Configuration.SignUp(selectedCountry))
+        },
+        onNavigateBack = { navigation.pop() },
+        context = context
+    )
+
     @Serializable
     private sealed interface Configuration {
         @Serializable
         data object SignIn : Configuration
         @Serializable
-        data object SignUp : Configuration
+        data class SignUp(
+            val selectedCountry: CountryModel?
+        ) : Configuration
         @Serializable
         data class GenericConfirm(
             val confirmKind: VerificationKind
@@ -164,6 +205,10 @@ internal class AuthRootComponentImpl(
         @Serializable
         data class Outcome(
             val outcomeKind: OutcomeKind
+        ) : Configuration
+        @Serializable
+        data class ChooseCountry(
+            val selectedCountry: CountryModel
         ) : Configuration
     }
 

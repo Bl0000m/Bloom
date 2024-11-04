@@ -16,6 +16,7 @@ import kz.bloom.ui.auth.confirm.component.VerificationGenericComponent.Verificat
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent.Model
 import kz.bloom.ui.auth.sign_up.store.AuthStore
+import kz.bloom.ui.country_chooser.component.CountryModel
 import kz.bloom.ui.ui_components.coroutineScope
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -24,9 +25,11 @@ import kotlin.coroutines.CoroutineContext
 
 class SignUpComponentImpl(
     componentContext: ComponentContext,
+    selectedCountry: CountryModel,
     private val onCreateAccount:(VerificationKind) -> Unit,
     private val onError:(OutcomeKind) -> Unit,
     private val onNavigateBack:() -> Unit,
+    private val onOpenCountryChooser:(selectedCountry: CountryModel) -> Unit
 ) : SignUpComponent,
     KoinComponent,
     ComponentContext by componentContext
@@ -54,7 +57,8 @@ class SignUpComponentImpl(
             phoneNumber = "",
             password = "",
             passwordConfirm = "",
-            userAgreesToReceiveInfo = false
+            userAgreesToReceiveInfo = false,
+            selectedCountry = selectedCountry
         )
     )
 
@@ -101,5 +105,13 @@ class SignUpComponentImpl(
 
     override fun navigateBack() {
         onNavigateBack()
+    }
+
+    override fun openCountryChooser() {
+        onOpenCountryChooser(_model.value.selectedCountry)
+    }
+
+    override fun selectCountry(selectedCountry: CountryModel) {
+        _model.update { it.copy(selectedCountry = selectedCountry) }
     }
 }

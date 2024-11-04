@@ -13,6 +13,7 @@ import kz.bloom.ui.auth.confirm.content.GenericVerificationContent
 import kz.bloom.ui.auth.outcome.content.OutcomePageContent
 import kz.bloom.ui.auth.sign_in.content.SignInContent
 import kz.bloom.ui.auth.sign_up.content.SignUpContent
+import kz.bloom.ui.country_chooser.ChooseCountryContent
 
 
 @Composable
@@ -41,6 +42,10 @@ fun AuthRootContent(component: AuthRootComponent) {
                     is Child.OutcomePage -> OutcomePageContent(
                         modifier = contentPaddingModifier,
                         component = childInstance.component
+                    )
+                    is Child.CountryChoose -> ChooseCountryContent(
+                        component = childInstance.component,
+                        modifier = contentPaddingModifier
                     )
                 }
             }

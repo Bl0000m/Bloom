@@ -31,35 +31,35 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomTextField(
-modifier: Modifier = Modifier,
-value: String,
-onValueChange: (String) -> Unit,
-placeholder: String?,
-textStyle: TextStyle = LocalTextStyle.current,
-maxLines: Int = Int.MAX_VALUE,
-enabled: Boolean = true,
-isError: Boolean = false,
-readOnly: Boolean = false,
-singleLine: Boolean = true,
-leadingContent: @Composable (() -> Unit)? = null,
-trailingContent: @Composable (() -> Unit)? = null,
-additionalContent: @Composable (() -> Unit)? = null,
-additionalContentColor: Color = if (isError) {
-    MaterialTheme.colorScheme.error
-} else {
-    Color(0xFF757575)
-},
-textColor: Color = if (isError) {
-    MaterialTheme.colorScheme.error
-} else {
-    MaterialTheme.colorScheme.onSurface
-},
-backgroundColor: Color = Color.Transparent,
-placeholderColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-keyboardActions: KeyboardActions = KeyboardActions.Default,
-keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-visualTransformation: VisualTransformation = VisualTransformation.None,
-cursorColor: Color = MaterialTheme.colorScheme.onPrimary,
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String?,
+    textStyle: TextStyle = LocalTextStyle.current,
+    maxLines: Int = Int.MAX_VALUE,
+    enabled: Boolean = true,
+    isError: Boolean = false,
+    readOnly: Boolean = false,
+    singleLine: Boolean = true,
+    leadingContent: @Composable (() -> Unit)? = null,
+    trailingContent: @Composable (() -> Unit)? = null,
+    additionalContent: @Composable (() -> Unit)? = null,
+    additionalContentColor: Color = if (isError) {
+        MaterialTheme.colorScheme.error
+    } else {
+        Color(0xFF757575)
+    },
+    textColor: Color = if (isError) {
+        MaterialTheme.colorScheme.error
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    },
+    backgroundColor: Color = Color.Transparent,
+    placeholderColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    cursorColor: Color = MaterialTheme.colorScheme.onPrimary,
 ) {
     Column {
         Box {
@@ -121,13 +121,13 @@ cursorColor: Color = MaterialTheme.colorScheme.onPrimary,
             )
         }
 
-        // Дополнительный контент, если необходим
         additionalContent?.let {
             CompositionLocalProvider(LocalContentColor provides additionalContentColor) {
                 it()
             }
         }
     }
+
     HorizontalDivider(
         modifier = Modifier.fillMaxWidth(),
         thickness = 1.dp,

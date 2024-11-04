@@ -14,7 +14,8 @@ class AuthActivity : ComponentActivity() {
 
         val component = AuthRootComponentImpl(
             componentContext = defaultComponentContext(),
-            onNavigateBack = { finish() }
+            onNavigateBack = { finish() },
+            context = this
         )
         setContent {
             BloomTheme {

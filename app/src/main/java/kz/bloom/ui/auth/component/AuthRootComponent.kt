@@ -6,6 +6,7 @@ import kz.bloom.ui.auth.confirm.component.VerificationGenericComponent
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent
 import kz.bloom.ui.auth.sign_in.component.SignInComponent
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent
+import kz.bloom.ui.country_chooser.component.ChooseCountryComponent
 
 public interface AuthRootComponent {
     public data class Model(
@@ -24,6 +25,9 @@ public interface AuthRootComponent {
         ) : Child
         public data class OutcomePage(
             public val component: OutcomeComponent
+        ) : Child
+        public data class CountryChoose(
+            public val component: ChooseCountryComponent
         ) : Child
     }
 

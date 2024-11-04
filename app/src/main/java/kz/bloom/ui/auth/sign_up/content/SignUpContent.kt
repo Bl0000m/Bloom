@@ -1,5 +1,7 @@
 package kz.bloom.ui.auth.sign_up.content
 
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,27 +10,40 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent
 import kz.bloom.R
+import kz.bloom.ui.country_chooser.component.isRussiaOrKazakhstan
 import kz.bloom.ui.ui_components.LabeledTextField
+import kz.bloom.ui.ui_components.PhoneNumberMaskVisualTransformation
 import kz.bloom.ui.ui_components.PrimaryButton
 
 @Composable
@@ -101,14 +116,36 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
             LabeledTextField(
                 modifier = Modifier.focusRequester(phoneNumberFocusRequest),
                 label = "НОМЕР ТЕЛЕФОНА",
+                leadingContent = {
+                    Row(
+                        modifier = Modifier
+                            .clickable { component.openCountryChooser() },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
+                        Text(
+                            text = model.selectedCountry.dialCode,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        Icon(painter = painterResource(id = R.drawable.ic_expand_left_light), contentDescription = null)
+                    }
+                },
                 singleLine = true,
-                placeholder = "",
+                placeholder = if (model.selectedCountry.isRussiaOrKazakhstan) {
+                    "_ _ _  _ _ _  _ _  _ _"
+                } else {
+                    null
+                },
                 labelStyle = MaterialTheme.typography.labelSmall,
                 onValueChange = { component.fillPhone(phoneNumber = it) },
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
                     onNext = { passwordFocusRequest.requestFocus() }
                 ),
+                visualTransformation = if (model.selectedCountry.isRussiaOrKazakhstan) {
+                  PhoneNumberMaskVisualTransformation(length = 10)
+                } else VisualTransformation.None,
                 value = model.phoneNumber
             )
 

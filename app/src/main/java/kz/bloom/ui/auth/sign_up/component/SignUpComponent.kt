@@ -1,6 +1,7 @@
 package kz.bloom.ui.auth.sign_up.component
 
 import com.arkivanov.decompose.value.Value
+import kz.bloom.ui.country_chooser.component.CountryModel
 
 interface SignUpComponent {
 
@@ -12,7 +13,8 @@ interface SignUpComponent {
         val phoneNumber: String,
         val password: String,
         val passwordConfirm: String,
-        val userAgreesToReceiveInfo: Boolean
+        val userAgreesToReceiveInfo: Boolean,
+        val selectedCountry: CountryModel
     )
 
     fun fillName(name: String)
@@ -30,4 +32,8 @@ interface SignUpComponent {
     fun createAccount()
 
     fun navigateBack()
+
+    fun openCountryChooser()
+
+    fun selectCountry(selectedCountry: CountryModel)
 }
