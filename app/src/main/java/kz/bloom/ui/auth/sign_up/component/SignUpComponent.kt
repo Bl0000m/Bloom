@@ -35,5 +35,5 @@ interface SignUpComponent {
 
     fun openCountryChooser()
 
-    fun selectCountry(selectedCountry: CountryModel)
+    fun updateSelectedCountry(country: CountryModel)
 }

@@ -25,11 +25,11 @@ import kotlin.coroutines.CoroutineContext
 
 class SignUpComponentImpl(
     componentContext: ComponentContext,
-    selectedCountry: CountryModel,
+    selectedCountry: CountryModel? = null,
     private val onCreateAccount:(VerificationKind) -> Unit,
     private val onError:(OutcomeKind) -> Unit,
     private val onNavigateBack:() -> Unit,
-    private val onOpenCountryChooser:(selectedCountry: CountryModel) -> Unit
+    private val onOpenCountryChooser:() -> Unit
 ) : SignUpComponent,
     KoinComponent,
     ComponentContext by componentContext
@@ -50,6 +50,14 @@ class SignUpComponentImpl(
         )
     }
 
+    private val startingCountryModel = CountryModel(
+        code = "KZ",
+        name = "Казахстан",
+        dialCode = "+7",
+        flagEmoji = "\uD83C\uDDF0\uD83C\uDDFF",
+        phoneNumberLength = 10
+    )
+
     private val _model: MutableValue<Model> = MutableValue(
         initialValue = Model(
             name = "",
@@ -58,7 +66,7 @@ class SignUpComponentImpl(
             password = "",
             passwordConfirm = "",
             userAgreesToReceiveInfo = false,
-            selectedCountry = selectedCountry
+            selectedCountry = selectedCountry ?: startingCountryModel
         )
     )
 
@@ -89,8 +97,13 @@ class SignUpComponentImpl(
     }
 
     override fun createAccount() {
-        Log.d("behold", "123")
-        store.accept(intent = AuthStore.Intent.CreateAccount(model = _model.value))
+        store.accept(
+            intent = AuthStore.Intent.CreateAccount(
+                model = _model.value.copy(
+                    phoneNumber = _model.value.selectedCountry.dialCode + _model.value.phoneNumber
+                )
+            )
+        )
         scope.launch {
             delay(timeMillis = 500L)
             store.states.subscribe { state ->
@@ -108,10 +121,10 @@ class SignUpComponentImpl(
     }
 
     override fun openCountryChooser() {
-        onOpenCountryChooser(_model.value.selectedCountry)
+        onOpenCountryChooser()
     }
 
-    override fun selectCountry(selectedCountry: CountryModel) {
-        _model.update { it.copy(selectedCountry = selectedCountry) }
+    override fun updateSelectedCountry(country: CountryModel) {
+        _model.update { it.copy(selectedCountry = country) }
     }
 }

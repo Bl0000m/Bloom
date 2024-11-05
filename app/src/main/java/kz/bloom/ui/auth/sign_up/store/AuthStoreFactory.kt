@@ -65,6 +65,7 @@ private class ExecutorImpl(
         super.executeIntent(intent, getState)
         when(intent) {
             is Intent.CreateAccount -> {
+                Log.d("behold123", intent.model.phoneNumber)
                 scope.launch {
                     try {
                         dispatch(
