@@ -11,6 +11,7 @@ import kz.bloom.ui.auth.component.AuthRootComponent
 import kz.bloom.ui.auth.component.AuthRootComponent.Child
 import kz.bloom.ui.auth.confirm.content.GenericVerificationContent
 import kz.bloom.ui.auth.outcome.content.OutcomePageContent
+import kz.bloom.ui.auth.pass_code.content.PassContent
 import kz.bloom.ui.auth.sign_in.content.SignInContent
 import kz.bloom.ui.auth.sign_up.content.SignUpContent
 import kz.bloom.ui.country_chooser.ChooseCountryContent
@@ -44,6 +45,10 @@ fun AuthRootContent(component: AuthRootComponent) {
                         component = childInstance.component
                     )
                     is Child.CountryChoose -> ChooseCountryContent(
+                        component = childInstance.component,
+                        modifier = contentPaddingModifier
+                    )
+                    is Child.PassCode -> PassContent(
                         component = childInstance.component,
                         modifier = contentPaddingModifier
                     )

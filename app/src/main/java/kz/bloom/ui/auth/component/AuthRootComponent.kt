@@ -4,6 +4,7 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import kz.bloom.ui.auth.confirm.component.VerificationGenericComponent
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent
+import kz.bloom.ui.auth.pass_code.component.PassCodeComponent
 import kz.bloom.ui.auth.sign_in.component.SignInComponent
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent
 import kz.bloom.ui.country_chooser.component.ChooseCountryComponent
@@ -28,6 +29,9 @@ public interface AuthRootComponent {
         ) : Child
         public data class CountryChoose(
             public val component: ChooseCountryComponent
+        ) : Child
+        public data class PassCode(
+            public val component: PassCodeComponent
         ) : Child
     }
 

@@ -163,7 +163,7 @@ private fun CountryItem(
 
                     Text(
                         modifier = Modifier,
-                        text = country.name
+                        text = country.name.uppercase(),
                     )
                 }
                 HorizontalDivider(modifier = Modifier.fillMaxWidth())

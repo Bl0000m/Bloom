@@ -1,10 +1,6 @@
 package kz.bloom.ui.auth.component
 
 import android.content.Context
-import android.util.Log
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalGraphicsContext
-import androidx.core.content.ContentProviderCompat.requireContext
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
@@ -24,13 +20,14 @@ import kz.bloom.ui.auth.confirm.component.VerificationGenericComponentImpl
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
 import kz.bloom.ui.auth.outcome.component.OutcomeComponentImpl
+import kz.bloom.ui.auth.pass_code.component.PassComponentImpl
+import kz.bloom.ui.auth.pass_code.component.PassCodeComponent
 import kz.bloom.ui.auth.sign_in.component.SignInComponentImpl
 import kz.bloom.ui.auth.sign_up.component.SignUpComponentImpl
 import kz.bloom.ui.country_chooser.AssetsProvider
 import kz.bloom.ui.country_chooser.component.ChooseCountryComponent
 import kz.bloom.ui.country_chooser.component.ChooseCountryComponentImpl
 import kz.bloom.ui.country_chooser.component.CountryModel
-import kz.bloom.ui.ui_components.parseAssetsFileContents
 import org.koin.core.component.KoinComponent
 
 internal class AuthRootComponentImpl(
@@ -110,11 +107,16 @@ internal class AuthRootComponentImpl(
                 }
             )
         )
+        is Configuration.PassCode -> Child.PassCode(
+            component = passCodeComponent(
+                componentContext = componentContext
+            )
+        )
     }
 
     private fun signInComponent(
         componentContext: ComponentContext,
-    ): SignInComponent = SignInComponentImpl(
+    ) : SignInComponent = SignInComponentImpl(
         componentContext = componentContext,
         onCreateAccount = { navigation.pushNew(configuration = Configuration.SignUp(null)) },
         onNavigateBack = onNavigateBack,
@@ -191,6 +193,13 @@ internal class AuthRootComponentImpl(
         context = context
     )
 
+    private fun passCodeComponent(
+        componentContext: ComponentContext
+    ) : PassCodeComponent = PassComponentImpl(
+        componentContext = componentContext,
+        onNavigateBack = { navigation.pop() }
+    )
+
     @Serializable
     private sealed interface Configuration {
         @Serializable
@@ -209,5 +218,7 @@ internal class AuthRootComponentImpl(
         ) : Configuration
         @Serializable
         data object ChooseCountry : Configuration
+        @Serializable
+        data object PassCode : Configuration
     }
 }

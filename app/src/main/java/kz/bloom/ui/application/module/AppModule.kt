@@ -22,6 +22,9 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 import kotlinx.coroutines.Dispatchers
+import kz.bloom.ui.ui_components.preference.SecurityPreference
+import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
+import org.koin.android.ext.koin.androidContext
 import kotlin.coroutines.CoroutineContext
 
 private val json = Json {
@@ -64,6 +67,9 @@ val appModule = module {
             }
         }
     }
+
+    single { SharedPreferencesSetting(androidContext()) }
+    single { SecurityPreference(androidContext()) }
 
     single<AuthApi> { AuthApiClient(client = get()) }
 }
