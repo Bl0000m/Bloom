@@ -1,12 +1,14 @@
 package kz.bloom.ui.ui_components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -32,6 +34,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CustomTextField(
     modifier: Modifier = Modifier,
+    dividerCutRange: Int = 0,
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String?,
@@ -107,7 +110,8 @@ fun CustomTextField(
                         isError = isError,
                         colors = colors,
                         contentPadding = PaddingValues(
-                            vertical = 4.dp
+                            vertical = 4.dp,
+                            horizontal = dividerCutRange.dp
                         ),
                         interactionSource = remember { MutableInteractionSource() },
                         visualTransformation = visualTransformation
@@ -128,9 +132,24 @@ fun CustomTextField(
         }
     }
 
-    HorizontalDivider(
-        modifier = Modifier.fillMaxWidth(),
-        thickness = 1.dp,
-        color = MaterialTheme.colorScheme.secondary
-    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        HorizontalDivider(
+            modifier = Modifier
+                .width(50.dp),
+            thickness = 1.dp,
+            color = Color.Gray
+        )
+
+        Spacer(modifier = Modifier.width(dividerCutRange.dp))
+
+        HorizontalDivider(
+            modifier = Modifier
+                .weight(1f),
+            thickness = 1.dp,
+            color = Color.Gray
+        )
+    }
 }

@@ -84,7 +84,7 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
 
         Column(
             modifier = Modifier.padding(top = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             LabeledTextField(
                 modifier = Modifier.focusRequester(nameFocusRequest),
@@ -131,12 +131,9 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                         Icon(painter = painterResource(id = R.drawable.ic_expand_left_light), contentDescription = null)
                     }
                 },
+                dividerCutRange = 10,
                 singleLine = true,
-                placeholder = if (model.selectedCountry.isRussiaOrKazakhstan) {
-                    "_ _ _  _ _ _  _ _  _ _"
-                } else {
-                    null
-                },
+                placeholder = null,
                 labelStyle = MaterialTheme.typography.labelSmall,
                 onValueChange = { component.fillPhone(phoneNumber = it) },
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
