@@ -64,7 +64,7 @@ fun OutcomePageContent(modifier: Modifier = Modifier, component: OutcomeComponen
             text = if (outcomeKind == OutcomeKind.Error) {
                 "ПОПРОБОВАТЬ СНОВА"
             } else "ПРОДОЛЖИТЬ",
-            onClick = { component.continuePressed() }
+            onClick = { component.continuePressed(model.outcomeKind) }
         )
     }
 }

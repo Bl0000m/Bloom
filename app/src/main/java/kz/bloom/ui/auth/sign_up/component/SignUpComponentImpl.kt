@@ -97,23 +97,24 @@ class SignUpComponentImpl(
     }
 
     override fun createAccount() {
-        store.accept(
-            intent = AuthStore.Intent.CreateAccount(
-                model = _model.value.copy(
-                    phoneNumber = _model.value.selectedCountry.dialCode + _model.value.phoneNumber
-                )
-            )
-        )
-        scope.launch {
-            delay(timeMillis = 500L)
-            store.states.subscribe { state ->
-                if (state.accountCreated && !state.isLoading) {
-                    onCreateAccount(VerificationKind.ConfirmEmail)
-                } else if (!state.accountCreated && !state.isLoading) {
-                    onError(OutcomeKind.Error)
-                }
-            }
-        }
+        onCreateAccount(VerificationKind.ConfirmEmail)
+//        store.accept(
+//            intent = AuthStore.Intent.CreateAccount(
+//                model = _model.value.copy(
+//                    phoneNumber = _model.value.selectedCountry.dialCode + _model.value.phoneNumber
+//                )
+//            )
+//        )
+//        scope.launch {
+//            delay(timeMillis = 500L)
+//            store.states.subscribe { state ->
+//                if (state.accountCreated && !state.isLoading) {
+//                    onCreateAccount(VerificationKind.ConfirmEmail)
+//                } else if (!state.accountCreated && !state.isLoading) {
+//                    onError(OutcomeKind.Error)
+//                }
+//            }
+//        }
     }
 
     override fun navigateBack() {

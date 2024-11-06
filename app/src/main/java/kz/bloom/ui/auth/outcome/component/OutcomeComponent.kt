@@ -15,7 +15,7 @@ interface OutcomeComponent {
 
     public val model: Value<Model>
 
-    public fun continuePressed()
+    public fun continuePressed(outcomeKind: OutcomeKind)
 
     public fun navigateBack()
 }

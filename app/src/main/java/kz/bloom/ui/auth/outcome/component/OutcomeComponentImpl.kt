@@ -11,7 +11,7 @@ class OutcomeComponentImpl(
     componentContext: ComponentContext,
     outcomeKind: OutcomeKind,
     private val onNavigateBack:() -> Unit,
-    private val onContinue:() -> Unit
+    private val onContinue:(outcomeKind: OutcomeKind) -> Unit
 ): OutcomeComponent, KoinComponent, ComponentContext by componentContext
 {
     private val _model = MutableValue(
@@ -22,8 +22,8 @@ class OutcomeComponentImpl(
 
     override val model: Value<Model> = _model
 
-    override fun continuePressed() {
-        onContinue()
+    override fun continuePressed(outcomeKind: OutcomeKind) {
+        onContinue(outcomeKind)
     }
 
     override fun navigateBack() {

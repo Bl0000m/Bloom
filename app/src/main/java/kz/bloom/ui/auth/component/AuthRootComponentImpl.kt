@@ -109,7 +109,8 @@ internal class AuthRootComponentImpl(
         )
         is Configuration.PassCode -> Child.PassCode(
             component = passCodeComponent(
-                componentContext = componentContext
+                componentContext = componentContext,
+                userHasPinCode = configuration.userHasPinCode
             )
         )
     }
@@ -178,7 +179,21 @@ internal class AuthRootComponentImpl(
         componentContext = componentContext,
         outcomeKind = outcomeKind,
         onNavigateBack = { },
-        onContinue = { }
+        onContinue = { callBackOutcome->
+            when (callBackOutcome) {
+                is OutcomeKind.Welcome -> {
+                    navigation.pushNew(configuration = Configuration.PassCode(userHasPinCode = false))
+                }
+
+                is OutcomeKind.RestoreSuccess -> {
+
+                }
+
+                is OutcomeKind.Error -> {
+
+                }
+            }
+        }
     )
 
     private fun chooseCountryComponent(
@@ -194,9 +209,11 @@ internal class AuthRootComponentImpl(
     )
 
     private fun passCodeComponent(
-        componentContext: ComponentContext
+        componentContext: ComponentContext,
+        userHasPinCode: Boolean
     ) : PassCodeComponent = PassComponentImpl(
         componentContext = componentContext,
+        userHasPinCode = userHasPinCode,
         onNavigateBack = { navigation.pop() }
     )
 
@@ -219,6 +236,8 @@ internal class AuthRootComponentImpl(
         @Serializable
         data object ChooseCountry : Configuration
         @Serializable
-        data object PassCode : Configuration
+        data class PassCode(
+            val userHasPinCode: Boolean
+        ) : Configuration
     }
 }
