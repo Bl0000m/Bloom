@@ -214,7 +214,7 @@ internal class AuthRootComponentImpl(
     ) : PassCodeComponent = PassComponentImpl(
         componentContext = componentContext,
         userHasPinCode = userHasPinCode,
-        onNavigateBack = { navigation.pop() }
+        onNavigateBack = { onNavigateBack() }
     )
 
     @Serializable

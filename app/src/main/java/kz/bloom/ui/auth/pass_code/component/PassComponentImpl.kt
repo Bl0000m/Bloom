@@ -24,7 +24,7 @@ public class PassComponentImpl(
     private val _model = MutableValue(
         initialValue = Model(
             pinCode = "",
-            pinLength = 4,
+            pinLength = 0,
             userHasPinCode = userHasPinCode
         )
     )
@@ -37,7 +37,7 @@ public class PassComponentImpl(
 
     override fun updatePinCode(pinCode: String) {
         sharedPreferences.pincode = pinCode
-        Log.d("behold123", sharedPreferences.pincode.toString())
+        onCloseClick()
     }
 
     override fun onBackClick() {
@@ -51,11 +51,11 @@ public class PassComponentImpl(
 
     override fun onNumberClick(number: Int) {
         val currentPin = _model.value.pinCode
-        val maxLength = _model.value.pinLength
+        val maxLength = 4
 
         if (currentPin.length < maxLength) {
             val newPin = currentPin + number
-            _model.update { it.copy(pinCode = newPin) }
+            _model.update { it.copy(pinCode = newPin, pinLength = newPin.length) }
 
             if (newPin.length == maxLength) {
                 saveOrVerifyPin(newPin)
@@ -67,7 +67,7 @@ public class PassComponentImpl(
         val currentPin = _model.value.pinCode
         if (currentPin.isNotEmpty()) {
             val updatedPin = currentPin.dropLast(1)
-            _model.update { it.copy(pinCode = updatedPin) }
+            _model.update { it.copy(pinCode = updatedPin, pinLength = updatedPin.length) }
         }
     }
 
