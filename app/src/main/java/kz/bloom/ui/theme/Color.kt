@@ -7,5 +7,6 @@ import androidx.compose.ui.graphics.Color
 val LightColors = lightColorScheme(
     primary = Color.White,
     onPrimary = Color.Black,
-    secondary = Color(0xFF555555)
+    secondary = Color(0xFF555555),
+    error = Color(color = 0xFFDC3545)
 )

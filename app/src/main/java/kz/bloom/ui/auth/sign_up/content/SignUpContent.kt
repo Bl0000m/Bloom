@@ -1,43 +1,38 @@
 package kz.bloom.ui.auth.sign_up.content
 
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.FragmentActivity
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent
 import kz.bloom.R
@@ -84,13 +79,18 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
 
         Column(
             modifier = Modifier.padding(top = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp)
+            verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             LabeledTextField(
-                modifier = Modifier.focusRequester(nameFocusRequest),
+                modifier = Modifier
+                    .focusRequester(nameFocusRequest)
+                    .onFocusChanged { focusState ->
+                        if (!focusState.isFocused) component.onNameFocusLost()
+                    },
                 label = "ИМЯ",
                 placeholder = "",
                 singleLine = true,
+                isError = model.nameErrorOccurred.errorOccurred,
                 labelStyle = MaterialTheme.typography.labelSmall,
                 onValueChange = { component.fillName(name = it) },
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
@@ -99,13 +99,19 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                 ),
                 value = model.name
             )
+            Text(
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                text = model.nameErrorOccurred.errorText,
+                color = MaterialTheme.colorScheme.error
+            )
             LabeledTextField(
                 modifier = Modifier.focusRequester(emailFocusRequest),
                 label = "ЭЛЕКТРОННАЯ ПОЧТА",
                 singleLine = true,
                 placeholder = "",
+                isError = model.emailErrorOccurred.errorOccurred,
                 labelStyle = MaterialTheme.typography.labelSmall,
-                onValueChange = {component.fillMail(email = it) },
+                onValueChange = { component.fillMail(email = it) },
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
                     onNext = { phoneNumberFocusRequest.requestFocus() }
@@ -113,44 +119,47 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                 value = model.email
             )
 
-            LabeledTextField(
-                modifier = Modifier.focusRequester(phoneNumberFocusRequest),
-                label = "НОМЕР ТЕЛЕФОНА",
-                leadingContent = {
-                    Row(
-                        modifier = Modifier
-                            .clickable { component.openCountryChooser() },
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(20.dp)
-                    ) {
-                        Text(
-                            text = model.selectedCountry.dialCode,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        Icon(painter = painterResource(id = R.drawable.ic_expand_left_light), contentDescription = null)
-                    }
-                },
-                dividerCutRange = 10,
-                singleLine = true,
-                placeholder = null,
-                labelStyle = MaterialTheme.typography.labelSmall,
-                onValueChange = { component.fillPhone(phoneNumber = it) },
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions(
-                    onNext = { passwordFocusRequest.requestFocus() }
-                ),
-                visualTransformation = if (model.selectedCountry.isRussiaOrKazakhstan) {
-                  PhoneNumberMaskVisualTransformation(length = 10)
-                } else VisualTransformation.None,
-                value = model.phoneNumber
-            )
+            Row(
+                modifier = Modifier.clickable { component.openCountryChooser() },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = model.selectedCountry.dialCode,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Icon(
+                    modifier = Modifier.padding(start = 10.dp),
+                    painter = painterResource(id = R.drawable.ic_expand_left_light),
+                    contentDescription = null)
 
-
+                LabeledTextField(
+                    modifier = Modifier
+                        .focusRequester(phoneNumberFocusRequest),
+                    label = "НОМЕР ТЕЛЕФОНА",
+                    hasTrailingContent = true,
+                    isError = model.phoneNumberErrorOccurred.errorOccurred,
+                    dividerCutRange = 10,
+                    singleLine = true,
+                    placeholder = null,
+                    labelStyle = MaterialTheme.typography.labelSmall,
+                    onValueChange = { component.fillPhone(phoneNumber = it) },
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(
+                        onNext = { passwordFocusRequest.requestFocus() }
+                    ),
+                    visualTransformation = if (model.selectedCountry.isRussiaOrKazakhstan) {
+                        PhoneNumberMaskVisualTransformation(length = 10)
+                    } else VisualTransformation.None,
+                    value = model.phoneNumber
+                )
+            }
             LabeledTextField(
                 modifier = Modifier.focusRequester(passwordFocusRequest),
                 label = "ПАРОЛЬ",
                 singleLine = true,
+                isError = model.passwordErrorOccurred.errorOccurred,
                 placeholder = "",
                 labelStyle = MaterialTheme.typography.labelSmall,
                 onValueChange = { component.fillPassword(password = it) },
@@ -164,6 +173,7 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
             LabeledTextField(
                 modifier = Modifier.focusRequester(rePasswordFocusRequest),
                 label = "ПОВТОРИТЕ ПАРОЛЬ",
+                isError = model.confirmPasswordErrorOccurred.errorOccurred,
                 singleLine = true,
                 placeholder = "",
                 labelStyle = MaterialTheme.typography.labelSmall,

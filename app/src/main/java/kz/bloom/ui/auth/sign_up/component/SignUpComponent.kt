@@ -14,7 +14,12 @@ interface SignUpComponent {
         val password: String,
         val passwordConfirm: String,
         val userAgreesToReceiveInfo: Boolean,
-        val selectedCountry: CountryModel
+        val selectedCountry: CountryModel,
+        val nameErrorOccurred: ErrorBody,
+        val emailErrorOccurred: ErrorBody,
+        val phoneNumberErrorOccurred: ErrorBody,
+        val passwordErrorOccurred: ErrorBody,
+        val confirmPasswordErrorOccurred: ErrorBody
     )
 
     fun fillName(name: String)
@@ -36,4 +41,20 @@ interface SignUpComponent {
     fun openCountryChooser()
 
     fun updateSelectedCountry(country: CountryModel)
+
+    fun onNameFocusLost()
+
+    fun onEmailFocusLost()
+
+    fun onPhoneFocusLost()
+
+    fun onPasswordFocusLost()
+
+    fun onConfirmPasswordFocusLost()
+
+    data class ErrorBody(
+        val errorOccurred: Boolean,
+        val errorText: String,
+        val wasFocusedBefore: Boolean
+    )
 }

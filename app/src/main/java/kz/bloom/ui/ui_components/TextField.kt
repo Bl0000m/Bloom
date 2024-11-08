@@ -2,12 +2,14 @@ package kz.bloom.ui.ui_components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -47,16 +49,8 @@ fun CustomTextField(
     leadingContent: @Composable (() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null,
     additionalContent: @Composable (() -> Unit)? = null,
-    additionalContentColor: Color = if (isError) {
-        MaterialTheme.colorScheme.error
-    } else {
-        Color(0xFF757575)
-    },
-    textColor: Color = if (isError) {
-        MaterialTheme.colorScheme.error
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    },
+    additionalContentColor: Color = Color(0xFF757575),
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
     backgroundColor: Color = Color.Transparent,
     placeholderColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
@@ -84,7 +78,7 @@ fun CustomTextField(
                 modifier = modifier
                     .background(
                         color = backgroundColor,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(2.dp)
                     )
                     .fillMaxWidth(),
                 value = value,
@@ -107,7 +101,6 @@ fun CustomTextField(
                         trailingIcon = trailingContent,
                         singleLine = singleLine,
                         enabled = enabled,
-                        isError = isError,
                         colors = colors,
                         contentPadding = PaddingValues(
                             vertical = 4.dp,
@@ -130,26 +123,27 @@ fun CustomTextField(
                 it()
             }
         }
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        HorizontalDivider(
+        Row(
             modifier = Modifier
-                .width(50.dp),
-            thickness = 1.dp,
-            color = Color.Gray
-        )
+                .fillMaxWidth()
+                .height(1.dp)
+        ) {
+            HorizontalDivider(
+                modifier = Modifier
+                    .width(50.dp),
+                thickness = 1.dp,
+                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+            )
 
-        Spacer(modifier = Modifier.width(dividerCutRange.dp))
+            Spacer(modifier = Modifier.width(dividerCutRange.dp))
 
-        HorizontalDivider(
-            modifier = Modifier
-                .weight(1f),
-            thickness = 1.dp,
-            color = Color.Gray
-        )
+            HorizontalDivider(
+                modifier = Modifier
+                    .weight(1f),
+                thickness = 1.dp,
+                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+            )
+        }
+
     }
 }

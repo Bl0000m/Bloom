@@ -1,5 +1,6 @@
 package kz.bloom.ui.ui_components
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +41,7 @@ fun LabeledTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
+    hasTrailingContent: Boolean = false,
     shape: Shape = RoundedCornerShape(12.dp),
     labelStyle: TextStyle = LocalTextStyle.current.copy(color = Color(0xFF555555)),
     textFieldStyle: TextStyle = labelStyle,
@@ -53,16 +55,8 @@ fun LabeledTextField(
     leadingContent: @Composable (() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null,
     additionalContent: @Composable (() -> Unit)? = null,
-    additionalContentColor: Color = if (isError) {
-        MaterialTheme.colorScheme.error
-    } else {
-        Color(0xFF757575)
-    },
-    textColor: Color = if (isError) {
-        MaterialTheme.colorScheme.onError
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    },
+    additionalContentColor: Color = Color(0xFF757575),
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
     backgroundColor: Color = Color.Transparent,
     placeholderColor: Color = MaterialTheme.colorScheme.secondary,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
@@ -71,8 +65,13 @@ fun LabeledTextField(
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
-    val labelSize by animateFloatAsState(
+    val labelFontSize by animateFloatAsState(
         targetValue = if (isFocused || value.isNotEmpty()) 8f else 12f,
+        animationSpec = tween(durationMillis = 300)
+    )
+
+    val labelPaddingTop by animateDpAsState(
+        targetValue = if (isFocused || value.isNotEmpty()) 2.dp else 16.dp,
         animationSpec = tween(durationMillis = 300)
     )
 
@@ -80,13 +79,22 @@ fun LabeledTextField(
         modifier = modifier.height(46.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Text(
-            text = label,
-            style = labelStyle.copy(fontSize = labelSize.sp),
-            color = labelColor,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        if (hasTrailingContent) {
+            Text(
+                modifier = Modifier.padding(start = 60.dp, top = labelPaddingTop),
+                text = label,
+                style = labelStyle.copy(fontSize = labelFontSize.sp),
+                color = labelColor
+            )
+        } else
+            Text(
+                modifier = Modifier.padding(top = labelPaddingTop),
+                text = label,
+                style = labelStyle.copy(fontSize = labelFontSize.sp),
+                color = labelColor,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         CustomTextField(
             modifier = Modifier
                 .clip(shape = shape)
