@@ -1,6 +1,5 @@
 package kz.bloom.ui.auth.pass_code.component
 
-import android.util.Log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value

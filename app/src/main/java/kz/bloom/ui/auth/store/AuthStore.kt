@@ -1,12 +1,12 @@
-package kz.bloom.ui.auth.sign_up.store
+package kz.bloom.ui.auth.store
 
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.utils.JvmSerializable
 import kz.bloom.ui.auth.sign_in.component.SignInComponent
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent
 
-import kz.bloom.ui.auth.sign_up.store.AuthStore.State
-import kz.bloom.ui.auth.sign_up.store.AuthStore.Intent
+import kz.bloom.ui.auth.store.AuthStore.State
+import kz.bloom.ui.auth.store.AuthStore.Intent
 
 interface AuthStore : Store<Intent, State, Nothing> {
 
@@ -17,7 +17,8 @@ interface AuthStore : Store<Intent, State, Nothing> {
         val accountEntered: Boolean,
         val confirmCodeReceived: Boolean,
         val confirmCodeSent: Boolean,
-        val newPassCreated: Boolean
+        val newPassCreated: Boolean,
+        val serverIsNotResponding: Boolean
     ) : JvmSerializable
 
     sealed interface Intent : JvmSerializable {

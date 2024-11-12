@@ -6,16 +6,20 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kz.bloom.libraries.states
 import kz.bloom.ui.auth.api.AuthApi
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
-import kz.bloom.ui.auth.sign_up.store.AuthStore
-import kz.bloom.ui.auth.sign_up.store.AuthStore.Intent
+import kz.bloom.ui.auth.store.AuthStore
+import kz.bloom.ui.auth.store.AuthStore.Intent
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 import kotlin.coroutines.CoroutineContext
 import kz.bloom.ui.auth.confirm.forgot_password.creating_new_password.component.CreateNewPasswordComponent.Model
+import kz.bloom.ui.ui_components.coroutineScope
 
 class CreateNewPasswordComponentImpl(
     componentContext: ComponentContext,
@@ -25,7 +29,6 @@ class CreateNewPasswordComponentImpl(
 ) : CreateNewPasswordComponent,
     KoinComponent,
     ComponentContext by componentContext {
-
     private val _model = MutableValue(
         initialValue = Model(
             password = "",
@@ -48,6 +51,8 @@ class CreateNewPasswordComponentImpl(
         )
     }
 
+    private val scope = coroutineScope()
+
     override fun fillPassword(password: String) {
         _model.update { it.copy(password = password) }
     }
@@ -57,9 +62,16 @@ class CreateNewPasswordComponentImpl(
     }
 
     override fun createNewPass() {
-        store.accept(intent = Intent.CreateNewPass(email = email, password = _model.value.password, confirmPassword = _model.value.confirmPassword))
-        if (store.states.value.newPassCreated) {
-            openOutcomePage(OutcomeKind.RestoreSuccess)
+        scope.launch {
+            store.accept(intent = Intent.CreateNewPass(
+                email = email,
+                password = _model.value.password,
+                confirmPassword = _model.value.confirmPassword)
+            )
+            delay(500)
+            if (store.states.value.newPassCreated) {
+                openOutcomePage(OutcomeKind.RestoreSuccess)
+            }
         }
     }
 

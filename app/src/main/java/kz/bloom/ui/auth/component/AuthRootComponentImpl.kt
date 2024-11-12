@@ -6,6 +6,7 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.pop
+import com.arkivanov.decompose.router.stack.popToFirst
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -33,7 +34,6 @@ import kz.bloom.ui.country_chooser.component.ChooseCountryComponent
 import kz.bloom.ui.country_chooser.component.ChooseCountryComponentImpl
 import kz.bloom.ui.country_chooser.component.CountryModel
 import org.koin.core.component.KoinComponent
-import org.koin.core.parameter.emptyParametersHolder
 
 internal class AuthRootComponentImpl(
     componentContext: ComponentContext,
@@ -48,8 +48,6 @@ internal class AuthRootComponentImpl(
             smth = true
         )
     )
-
-    private val isSuccess = MutableValue(true)
 
     private var currentSignUpComponent: SignUpComponent? = null
 
@@ -166,7 +164,8 @@ internal class AuthRootComponentImpl(
     ) : FillEmailComponent = FillEmailComponentImpl(
         componentContext = componentContext,
         onContinue = { navigation.pushNew(configuration = Configuration.FPCheckEmailFillCode(email = it))},
-        navigateBack = { navigation.pop() }
+        navigateBack = { navigation.pop() },
+        openErrorScreen = { errorKind -> navigation.pushNew(configuration = Configuration.Outcome(errorKind))}
     )
 
     private fun confirmEmailComponent(
@@ -218,29 +217,18 @@ internal class AuthRootComponentImpl(
         }
     )
 
-
     private fun outcomeComponent(
         componentContext: ComponentContext,
         outcomeKind: OutcomeKind,
     ) : OutcomeComponent = OutcomeComponentImpl(
         componentContext = componentContext,
         outcomeKind = outcomeKind,
-        onNavigateBack = { },
-        onContinue = { callBackOutcome->
-            when (callBackOutcome) {
-                is OutcomeKind.Welcome -> {
-                    navigation.pushNew(configuration = Configuration.PassCode(userHasPinCode = false))
-                }
-
-                is OutcomeKind.RestoreSuccess -> {
-
-                }
-
-                is OutcomeKind.Error -> {
-
-                }
-            }
-        }
+        onOpenPass = {
+            navigation.pushNew(configuration =
+            Configuration.PassCode(userHasPinCode = false)
+            )
+        },
+        onOpenSignIn = { navigation.popToFirst() }
     )
 
     private fun chooseCountryComponent(

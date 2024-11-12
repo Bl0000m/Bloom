@@ -1,4 +1,4 @@
-package kz.bloom.ui.auth.sign_up.store
+package kz.bloom.ui.auth.store
 
 import android.util.Log
 import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
@@ -10,15 +10,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kz.bloom.ui.auth.api.AuthApi
-import kz.bloom.ui.auth.sign_up.store.AuthStore.Intent
-import kz.bloom.ui.auth.sign_up.store.AuthStore.State
-import org.koin.androidx.compose.get
+import kz.bloom.ui.auth.store.AuthStore.Intent
+import kz.bloom.ui.auth.store.AuthStore.State
 import kotlin.coroutines.CoroutineContext
 
 
 private sealed interface Message : JvmSerializable {
     data class LoadingChanged(val isLoading: Boolean) : Message
     data object ErrorOccurred : Message
+    data object ServerIsNotResponding : Message
     data object AccountCreated : Message
     data object AccountEntered : Message
     data object ConfirmCodeSent : Message
@@ -46,7 +46,8 @@ internal fun AuthStore(
             isLoading = false,
             confirmCodeReceived = false,
             confirmCodeSent = false,
-            newPassCreated = false
+            newPassCreated = false,
+            serverIsNotResponding = false
         ),
         reducer = { message ->
             when(message) {
@@ -57,6 +58,7 @@ internal fun AuthStore(
                 is Message.ConfirmCodeReceived -> copy(confirmCodeReceived = true)
                 is Message.ConfirmCodeSent -> copy(confirmCodeSent = true)
                 is Message.NewPassCreated -> copy(newPassCreated = true)
+                is Message.ServerIsNotResponding -> copy(serverIsNotResponding = true)
             }
         },
         bootstrapper = SimpleBootstrapper(),
@@ -145,6 +147,8 @@ private class ExecutorImpl(
                         delay(timeMillis = 500)
                         if (getConfirmCode.status.value == 200) {
                             dispatch(message = Message.ConfirmCodeReceived)
+                        } else if (getConfirmCode.status.value == 500 && getConfirmCode.status.value == 502) {
+                            dispatch(message = Message.ServerIsNotResponding)
                         }
                     } catch (exception: Exception) {
                         Log.d("beholdError", exception.toString())

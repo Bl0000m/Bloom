@@ -6,10 +6,12 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import kz.bloom.libraries.states
 import kz.bloom.ui.auth.api.AuthApi
 import kz.bloom.ui.auth.confirm.forgot_password.fill_email.component.FillEmailComponent.Model
-import kz.bloom.ui.auth.sign_up.store.AuthStore.Intent
-import kz.bloom.ui.auth.sign_up.store.AuthStore
+import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
+import kz.bloom.ui.auth.store.AuthStore.Intent
+import kz.bloom.ui.auth.store.AuthStore
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
@@ -18,7 +20,8 @@ import kotlin.coroutines.CoroutineContext
 class FillEmailComponentImpl(
     componentContext: ComponentContext,
     private val navigateBack: () -> Unit,
-    private val onContinue:(email: String) -> Unit
+    private val onContinue:(email: String) -> Unit,
+    private val openErrorScreen:(outcomeKind: OutcomeKind) -> Unit
 ) : FillEmailComponent,
     KoinComponent,
     ComponentContext by componentContext {
@@ -46,6 +49,9 @@ class FillEmailComponentImpl(
 
     override fun continueAndGetCode() {
         store.accept(intent = Intent.ReceiveConfirmCode(email = _model.value.email))
+        if (store.states.value.serverIsNotResponding) {
+            openErrorScreen(OutcomeKind.Error)
+        }
         onContinue(_model.value.email)
     }
 

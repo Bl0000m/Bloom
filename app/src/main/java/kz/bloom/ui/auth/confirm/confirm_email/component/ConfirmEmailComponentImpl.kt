@@ -11,8 +11,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kz.bloom.ui.auth.api.AuthApi
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
-import kz.bloom.ui.auth.sign_up.store.AuthStore
-import kz.bloom.ui.auth.sign_up.store.AuthStore.Intent
+import kz.bloom.ui.auth.store.AuthStore
+import kz.bloom.ui.auth.store.AuthStore.Intent
 import kz.bloom.ui.auth.confirm.confirm_email.component.ConfirmEmailComponent.Model
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

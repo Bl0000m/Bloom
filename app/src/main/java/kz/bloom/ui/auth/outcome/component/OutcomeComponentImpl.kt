@@ -10,9 +10,11 @@ import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
 class OutcomeComponentImpl(
     componentContext: ComponentContext,
     outcomeKind: OutcomeKind,
-    private val onNavigateBack:() -> Unit,
-    private val onContinue:(outcomeKind: OutcomeKind) -> Unit
-): OutcomeComponent, KoinComponent, ComponentContext by componentContext
+    private val onOpenPass:() -> Unit,
+    private val onOpenSignIn:() -> Unit
+) : OutcomeComponent,
+    KoinComponent,
+    ComponentContext by componentContext
 {
     private val _model = MutableValue(
         initialValue = Model(
@@ -23,11 +25,10 @@ class OutcomeComponentImpl(
     override val model: Value<Model> = _model
 
     override fun continuePressed(outcomeKind: OutcomeKind) {
-        onContinue(outcomeKind)
+        when(outcomeKind) {
+            is OutcomeKind.Welcome -> { onOpenPass() }
+            is OutcomeKind.RestoreSuccess -> { onOpenSignIn() }
+            is OutcomeKind.Error -> { onOpenSignIn() }
+        }
     }
-
-    override fun navigateBack() {
-        onNavigateBack()
-    }
-
 }

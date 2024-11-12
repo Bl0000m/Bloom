@@ -13,7 +13,7 @@ import kz.bloom.ui.auth.api.AuthApi
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent.ErrorBody
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent.Model
-import kz.bloom.ui.auth.sign_up.store.AuthStore
+import kz.bloom.ui.auth.store.AuthStore
 import kz.bloom.ui.country_chooser.component.CountryModel
 import kz.bloom.ui.ui_components.coroutineScope
 import org.koin.core.component.KoinComponent

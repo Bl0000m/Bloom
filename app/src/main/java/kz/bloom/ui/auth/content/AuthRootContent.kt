@@ -9,7 +9,10 @@ import com.arkivanov.decompose.extensions.compose.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import kz.bloom.ui.auth.component.AuthRootComponent
 import kz.bloom.ui.auth.component.AuthRootComponent.Child
-import kz.bloom.ui.auth.confirm.content.GenericVerificationContent
+import kz.bloom.ui.auth.confirm.confirm_email.content.CheckForEmailContent
+import kz.bloom.ui.auth.confirm.forgot_password.check_email_fill_code.content.CheckEmailFillCodeContent
+import kz.bloom.ui.auth.confirm.forgot_password.creating_new_password.content.CreateNewPassContent
+import kz.bloom.ui.auth.confirm.forgot_password.fill_email.content.FillEmailContent
 import kz.bloom.ui.auth.outcome.content.OutcomePageContent
 import kz.bloom.ui.auth.pass_code.content.PassContent
 import kz.bloom.ui.auth.sign_in.content.SignInContent
@@ -36,7 +39,19 @@ fun AuthRootContent(component: AuthRootComponent) {
                         modifier = contentPaddingModifier,
                         component = childInstance.component
                     )
-                    is Child.ConfirmEmail -> GenericVerificationContent(
+                    is Child.ConfirmEmail -> CheckForEmailContent(
+                        modifier = contentPaddingModifier,
+                        component = childInstance.component
+                    )
+                    is Child.FillEmail -> FillEmailContent(
+                        modifier = contentPaddingModifier,
+                        component = childInstance.component
+                    )
+                    is Child.CheckEmailFillCode -> CheckEmailFillCodeContent(
+                        modifier = contentPaddingModifier,
+                        component = childInstance.component
+                    )
+                    is Child.CreateNewPass -> CreateNewPassContent(
                         modifier = contentPaddingModifier,
                         component = childInstance.component
                     )
@@ -56,6 +71,4 @@ fun AuthRootContent(component: AuthRootComponent) {
             }
         }
     )
-
-
 }

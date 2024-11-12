@@ -24,7 +24,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.R
-import kz.bloom.ui.auth.confirm.forgot_password.fill_email.component.FillEmailComponent.Model
 import kz.bloom.ui.auth.confirm.forgot_password.fill_email.component.FillEmailComponent
 import kz.bloom.ui.ui_components.LabeledTextField
 import kz.bloom.ui.ui_components.PrimaryButton
@@ -71,10 +70,10 @@ fun FillEmailContent(modifier: Modifier = Modifier, component: FillEmailComponen
             onValueChange = {
                 component.fillEmail(email = it)
             },
-            label = "ВВЕДИТЕ КОД",
+            label = "ЭЛЕКТРОННАЯ ПОЧТА",
             placeholder = "",
             keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number,
+                keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Done
             ),
             value = model.email,

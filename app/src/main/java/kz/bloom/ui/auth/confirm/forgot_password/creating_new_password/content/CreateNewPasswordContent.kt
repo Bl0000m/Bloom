@@ -78,7 +78,7 @@ fun CreateNewPassContent(
             label = "ВВЕДИТЕ ПАРОЛЬ",
             placeholder = "",
             keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number,
+                keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Next
             ),
             value = model.password,
@@ -94,10 +94,10 @@ fun CreateNewPassContent(
             label = "ПОВТОРИТЕ ПАРОЛЬ",
             placeholder = "",
             keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number,
+                keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Done
             ),
-            value = model.password,
+            value = model.confirmPassword,
             keyboardActions = KeyboardActions(onDone = { confirmPasswordFR.freeFocus() } )
         )
 

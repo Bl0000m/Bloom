@@ -49,6 +49,7 @@ internal class AuthApiClient(private val client: HttpClient) : AuthApi {
             email = email
         )
         return client.post(AUTH_CONFIRM_EMAIL_GET_CODE) {
+            contentType(io.ktor.http.ContentType.Application.Json)
             setBody(requestBody)
         }
     }
@@ -59,6 +60,7 @@ internal class AuthApiClient(private val client: HttpClient) : AuthApi {
                 email = email,
                 resetCode = code
             )
+            contentType(io.ktor.http.ContentType.Application.Json)
             setBody(requestBody)
         }
     }
@@ -74,6 +76,7 @@ internal class AuthApiClient(private val client: HttpClient) : AuthApi {
                 newPassword = password,
                 confirmNewPassword = confirmPassword
             )
+            contentType(io.ktor.http.ContentType.Application.Json)
             setBody(requestBody)
         }
     }

@@ -9,7 +9,7 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kz.bloom.ui.auth.api.AuthApi
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.auth.sign_in.component.SignInComponent.Model
-import kz.bloom.ui.auth.sign_up.store.AuthStore
+import kz.bloom.ui.auth.store.AuthStore
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 import kotlin.coroutines.CoroutineContext
