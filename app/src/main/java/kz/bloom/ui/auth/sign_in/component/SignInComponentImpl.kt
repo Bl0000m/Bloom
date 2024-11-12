@@ -10,6 +10,7 @@ import kz.bloom.ui.auth.api.AuthApi
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.auth.sign_in.component.SignInComponent.Model
 import kz.bloom.ui.auth.store.AuthStore
+import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 import kotlin.coroutines.CoroutineContext
@@ -26,6 +27,7 @@ class SignInComponentImpl(
     private val authApi by inject<AuthApi>()
     private val mainContext by inject<CoroutineContext>(qualifier = named(name = "Main"))
     private val ioContext by inject<CoroutineContext>(qualifier = named(name = "IO"))
+    private val sharedPreferences by inject<SharedPreferencesSetting>()
     private val storeFactory by inject<StoreFactory>()
 
     private val _model = MutableValue(
@@ -40,7 +42,8 @@ class SignInComponentImpl(
             authApi = authApi,
             mainContext = mainContext,
             ioContext = ioContext,
-            storeFactory = storeFactory
+            storeFactory = storeFactory,
+            sharedPreferences = sharedPreferences
         )
     }
 
@@ -56,7 +59,6 @@ class SignInComponentImpl(
 
     override fun enterAccount() {
         store.accept(intent = AuthStore.Intent.EnterAccount(model = _model.value))
-
     }
 
     override fun createAccount() {

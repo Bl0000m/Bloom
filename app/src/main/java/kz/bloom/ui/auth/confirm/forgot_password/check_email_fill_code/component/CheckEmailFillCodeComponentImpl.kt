@@ -18,6 +18,7 @@ import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 import kotlin.coroutines.CoroutineContext
 import kz.bloom.ui.auth.confirm.forgot_password.check_email_fill_code.component.CheckEmailFillCodeComponent.Model
+import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 
 class CheckEmailFillCodeComponentImpl(
     componentContext: ComponentContext,
@@ -39,6 +40,7 @@ class CheckEmailFillCodeComponentImpl(
     private val authApi by inject<AuthApi>()
     private val mainContext by inject<CoroutineContext>(qualifier = named(name = "Main"))
     private val ioContext by inject<CoroutineContext>(qualifier = named(name = "IO"))
+    private val sharedPreferences by inject<SharedPreferencesSetting>()
     private val storeFactory by inject<StoreFactory>()
 
     private val store = instanceKeeper.getStore {
@@ -46,7 +48,8 @@ class CheckEmailFillCodeComponentImpl(
             authApi = authApi,
             mainContext = mainContext,
             ioContext = ioContext,
-            storeFactory = storeFactory
+            storeFactory = storeFactory,
+            sharedPreferences = sharedPreferences
         )
     }
 

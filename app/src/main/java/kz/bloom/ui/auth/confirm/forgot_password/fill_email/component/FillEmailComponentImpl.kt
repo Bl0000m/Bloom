@@ -12,6 +12,7 @@ import kz.bloom.ui.auth.confirm.forgot_password.fill_email.component.FillEmailCo
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
 import kz.bloom.ui.auth.store.AuthStore.Intent
 import kz.bloom.ui.auth.store.AuthStore
+import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
@@ -29,6 +30,7 @@ class FillEmailComponentImpl(
     private val authApi by inject<AuthApi>()
     private val mainContext by inject<CoroutineContext>(qualifier = named(name = "Main"))
     private val ioContext by inject<CoroutineContext>(qualifier = named(name = "IO"))
+    private val sharedPreferences by inject<SharedPreferencesSetting>()
     private val storeFactory by inject<StoreFactory>()
 
     private val store = instanceKeeper.getStore {
@@ -36,7 +38,8 @@ class FillEmailComponentImpl(
             authApi = authApi,
             mainContext = mainContext,
             ioContext = ioContext,
-            storeFactory = storeFactory
+            storeFactory = storeFactory,
+            sharedPreferences = sharedPreferences
         )
     }
 

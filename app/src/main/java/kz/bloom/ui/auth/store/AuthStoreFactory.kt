@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 import kz.bloom.ui.auth.api.AuthApi
 import kz.bloom.ui.auth.store.AuthStore.Intent
 import kz.bloom.ui.auth.store.AuthStore.State
+import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import kotlin.coroutines.CoroutineContext
 
 
@@ -34,7 +35,8 @@ internal fun AuthStore(
     mainContext: CoroutineContext,
     ioContext: CoroutineContext,
     authApi: AuthApi,
-    storeFactory: StoreFactory
+    storeFactory: StoreFactory,
+    sharedPreferences: SharedPreferencesSetting
 ) : AuthStore =
     object : AuthStore, Store<Intent, State, Nothing>
     by storeFactory.create<Intent, Action, Message, State, Nothing>(
@@ -66,13 +68,15 @@ internal fun AuthStore(
             ExecutorImpl(
                 mainContext = mainContext,
                 ioContext = ioContext,
-                authApi = authApi
+                authApi = authApi,
+                sharedPreferences = sharedPreferences
             )
         }
     ) {}
 
 private class ExecutorImpl(
     mainContext: CoroutineContext,
+    private val sharedPreferences: SharedPreferencesSetting,
     private val ioContext: CoroutineContext,
     private val authApi: AuthApi
 ) : CoroutineExecutor<Intent, Action, State, Message, Nothing> (
@@ -128,9 +132,13 @@ private class ExecutorImpl(
                         val enterAccount = withContext(context = ioContext) {
                             authApi.enterAccount(model = intent.model)
                         }
+                        if (enterAccount.accessToken.isNotEmpty()) {
+                            Log.d("behold", "settingTokens")
+                            sharedPreferences.accessToken = enterAccount.accessToken
+                            sharedPreferences.refreshToken = enterAccount.refreshToken
+                        }
 
                     } catch (exception: Exception) {
-                        Log.d("beholdError", exception.toString())
                         dispatch(message = Message.ErrorOccurred)
                     }
                 }
@@ -151,7 +159,7 @@ private class ExecutorImpl(
                             dispatch(message = Message.ServerIsNotResponding)
                         }
                     } catch (exception: Exception) {
-                        Log.d("beholdError", exception.toString())
+
                     }
                 }
             }
