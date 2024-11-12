@@ -25,7 +25,9 @@ public class PassComponentImpl(
         initialValue = Model(
             pinCode = "",
             pinLength = 0,
-            userHasPinCode = userHasPinCode
+            confirmPinCode = "",
+            userHasPinCode = userHasPinCode,
+            pinCodeMissMatch = false
         )
     )
 
@@ -51,7 +53,7 @@ public class PassComponentImpl(
 
     override fun onNumberClick(number: Int) {
         val currentPin = _model.value.pinCode
-        val maxLength = 4
+        val maxLength = 8
 
         if (currentPin.length < maxLength) {
             val newPin = currentPin + number
@@ -72,10 +74,22 @@ public class PassComponentImpl(
     }
 
     private fun saveOrVerifyPin(enteredPin: String) {
-        if (userHasPinCode) {
+        if (enteredPin.length == 8) {
+            val firstHalf = enteredPin.substring(0, 4)
+            val secondHalf = enteredPin.substring(4, 8)
+
+            if (firstHalf == secondHalf) {
+                updatePinCode(firstHalf)
+                _model.update { it.copy(pinCode = "") }
+            } else {
+                _model.update { it.copy(pinCode = "", pinCodeMissMatch = true) }
+            }
+        } else if (userHasPinCode) {
             val storedPin = sharedPreferences.pincode
             if (enteredPin == storedPin) {
+                // PIN-коды совпадают
             } else {
+                // PIN-коды не совпадают, сбросьте ввод
                 _model.update { it.copy(pinCode = "") }
             }
         } else {

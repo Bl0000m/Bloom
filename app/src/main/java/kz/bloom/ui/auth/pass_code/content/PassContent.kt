@@ -72,15 +72,26 @@ fun PassContent(modifier: Modifier = Modifier, component: PassCodeComponent) {
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(32.dp))
+            if (model.pinLength == 4) {
+                Text(
+                    text = "Введите ПИН-код еще раз для подтверждения",
+                    style = MaterialTheme.typography.labelSmall,
+                    textAlign = TextAlign.Center
+                )
+            }
             Text(
-                text = "Создайте ПИН-код для быстрого /nдоступа к приложению",
+                text = if (model.pinCodeMissMatch) "Создайте ПИН-код для быстрого доступа к приложению" else "ПИН-коды не совпадают",
                 style = MaterialTheme.typography.labelSmall,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = if (model.pinCodeMissMatch) MaterialTheme.colorScheme.error else Color.Black
             )
         }
 
         Row(
-            modifier = Modifier.padding(top = 35.dp).fillMaxWidth().padding(horizontal = 64.dp),
+            modifier = Modifier
+                .padding(top = 35.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 64.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             repeat(4) { index ->
@@ -88,10 +99,39 @@ fun PassContent(modifier: Modifier = Modifier, component: PassCodeComponent) {
                     modifier = Modifier
                         .size(49.dp, 2.dp)
                         .background(
-                            if (index < model.pinLength) Color.Black else Color.Gray,
+                            if (index < model.pinLength.coerceAtMost(4)) {
+                                Color.Black
+                            } else if(model.pinCodeMissMatch) {
+                                    MaterialTheme.colorScheme.error
+                            } else Color.Gray,
                             shape = RoundedCornerShape(4.dp)
                         )
                 )
+            }
+        }
+
+        if (model.pinLength >= 4) {
+            Row(
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 64.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                repeat(4) { index ->
+                    Box(
+                        modifier = Modifier
+                            .size(49.dp, 2.dp)
+                            .background(
+                                if (index < (model.pinLength - 4).coerceAtLeast(0)) {
+                                    Color.Black
+                                } else if (model.pinCodeMissMatch) {
+                                    MaterialTheme.colorScheme.error
+                                } else Color.Gray,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                    )
+                }
             }
         }
 

@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CustomTextField(
     modifier: Modifier = Modifier,
-    dividerCutRange: Int = 0,
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String?,
@@ -50,7 +49,7 @@ fun CustomTextField(
     trailingContent: @Composable (() -> Unit)? = null,
     additionalContent: @Composable (() -> Unit)? = null,
     additionalContentColor: Color = Color(0xFF757575),
-    textColor: Color = MaterialTheme.colorScheme.onSurface,
+    textColor: Color = MaterialTheme.colorScheme.onPrimary,
     backgroundColor: Color = Color.Transparent,
     placeholderColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
@@ -103,8 +102,7 @@ fun CustomTextField(
                         enabled = enabled,
                         colors = colors,
                         contentPadding = PaddingValues(
-                            vertical = 4.dp,
-                            horizontal = dividerCutRange.dp
+                            vertical = 4.dp
                         ),
                         interactionSource = remember { MutableInteractionSource() },
                         visualTransformation = visualTransformation
@@ -128,15 +126,6 @@ fun CustomTextField(
                 .fillMaxWidth()
                 .height(1.dp)
         ) {
-            HorizontalDivider(
-                modifier = Modifier
-                    .width(50.dp),
-                thickness = 1.dp,
-                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
-            )
-
-            Spacer(modifier = Modifier.width(dividerCutRange.dp))
-
             HorizontalDivider(
                 modifier = Modifier
                     .weight(1f),

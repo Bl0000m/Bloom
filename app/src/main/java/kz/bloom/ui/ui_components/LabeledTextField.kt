@@ -36,12 +36,10 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun LabeledTextField(
     modifier: Modifier = Modifier,
-    dividerCutRange: Int = 0,
     textFieldModifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    hasTrailingContent: Boolean = false,
     shape: Shape = RoundedCornerShape(12.dp),
     labelStyle: TextStyle = LocalTextStyle.current.copy(color = Color(0xFF555555)),
     textFieldStyle: TextStyle = labelStyle,
@@ -79,22 +77,14 @@ fun LabeledTextField(
         modifier = modifier.height(46.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        if (hasTrailingContent) {
-            Text(
-                modifier = Modifier.padding(start = 60.dp, top = labelPaddingTop),
-                text = label,
-                style = labelStyle.copy(fontSize = labelFontSize.sp),
-                color = labelColor
-            )
-        } else
-            Text(
-                modifier = Modifier.padding(top = labelPaddingTop),
-                text = label,
-                style = labelStyle.copy(fontSize = labelFontSize.sp),
-                color = labelColor,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
+        Text(
+            modifier = Modifier.padding(top = labelPaddingTop),
+            text = label,
+            style = labelStyle.copy(fontSize = labelFontSize.sp),
+            color = labelColor,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
         CustomTextField(
             modifier = Modifier
                 .clip(shape = shape)
@@ -103,7 +93,6 @@ fun LabeledTextField(
                     isFocused = focusState.isFocused
                 },
             value = value,
-            dividerCutRange = dividerCutRange,
             textStyle = textFieldStyle,
             onValueChange = onValueChange,
             placeholder = placeholder,

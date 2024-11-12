@@ -14,9 +14,14 @@ import kz.bloom.ui.auth.sign_in.component.SignInComponent
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent
 import kz.bloom.ui.auth.component.AuthRootComponent.Model
 import kz.bloom.ui.auth.component.AuthRootComponent.Child
-import kz.bloom.ui.auth.confirm.component.VerificationGenericComponent
-import kz.bloom.ui.auth.confirm.component.VerificationGenericComponent.VerificationKind
-import kz.bloom.ui.auth.confirm.component.VerificationGenericComponentImpl
+import kz.bloom.ui.auth.confirm.confirm_email.component.ConfirmEmailComponent
+import kz.bloom.ui.auth.confirm.confirm_email.component.ConfirmEmailComponentImpl
+import kz.bloom.ui.auth.confirm.forgot_password.check_email_fill_code.component.CheckEmailFillCodeComponent
+import kz.bloom.ui.auth.confirm.forgot_password.check_email_fill_code.component.CheckEmailFillCodeComponentImpl
+import kz.bloom.ui.auth.confirm.forgot_password.creating_new_password.component.CreateNewPasswordComponent
+import kz.bloom.ui.auth.confirm.forgot_password.creating_new_password.component.CreateNewPasswordComponentImpl
+import kz.bloom.ui.auth.confirm.forgot_password.fill_email.component.FillEmailComponent
+import kz.bloom.ui.auth.confirm.forgot_password.fill_email.component.FillEmailComponentImpl
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
 import kz.bloom.ui.auth.outcome.component.OutcomeComponentImpl
@@ -24,11 +29,11 @@ import kz.bloom.ui.auth.pass_code.component.PassComponentImpl
 import kz.bloom.ui.auth.pass_code.component.PassCodeComponent
 import kz.bloom.ui.auth.sign_in.component.SignInComponentImpl
 import kz.bloom.ui.auth.sign_up.component.SignUpComponentImpl
-import kz.bloom.ui.country_chooser.AssetsProvider
 import kz.bloom.ui.country_chooser.component.ChooseCountryComponent
 import kz.bloom.ui.country_chooser.component.ChooseCountryComponentImpl
 import kz.bloom.ui.country_chooser.component.CountryModel
 import org.koin.core.component.KoinComponent
+import org.koin.core.parameter.emptyParametersHolder
 
 internal class AuthRootComponentImpl(
     componentContext: ComponentContext,
@@ -77,6 +82,13 @@ internal class AuthRootComponentImpl(
             )
         )
 
+        is Configuration.ConfirmEmail -> Child.ConfirmEmail(
+            component = confirmEmailComponent(
+                componentContext = componentContext,
+                email = configuration.email
+            )
+        )
+
         is Configuration.SignUp -> {
             currentSignUpComponent = currentSignUpComponent ?: signUpComponent(
                 componentContext = componentContext,
@@ -85,12 +97,26 @@ internal class AuthRootComponentImpl(
             Child.SignUp(component = currentSignUpComponent!!)
         }
 
-        is Configuration.GenericConfirm -> Child.ConfirmEmail(
-            component = genericConfirmComponent(
-                componentContext = componentContext,
-                confirmKind = configuration.confirmKind
+        is Configuration.FPFillEmail -> Child.FillEmail(
+            component = fillEmailComponent(
+                componentContext = componentContext
             )
         )
+
+        is Configuration.FPCheckEmailFillCode -> Child.CheckEmailFillCode(
+            component = checkEmailFillCodeComponent(
+                componentContext = componentContext,
+                email = configuration.email
+            )
+        )
+
+        is Configuration.FPCreateNewPass -> Child.CreateNewPass(
+            component = createNewPassComponent(
+                componentContext = componentContext,
+                email = configuration.email
+            )
+        )
+
 
         is Configuration.Outcome -> Child.OutcomePage(
             component = outcomeComponent(
@@ -115,6 +141,44 @@ internal class AuthRootComponentImpl(
         )
     }
 
+    private fun createNewPassComponent(
+        componentContext: ComponentContext,
+        email: String
+    ) : CreateNewPasswordComponent = CreateNewPasswordComponentImpl(
+        componentContext = componentContext,
+        email = email,
+        openOutcomePage = { kind -> navigation.pushNew(configuration = Configuration.Outcome(kind)) },
+        onBack = { navigation.pop() }
+    )
+
+    private fun checkEmailFillCodeComponent(
+        componentContext: ComponentContext,
+        email: String
+    ) : CheckEmailFillCodeComponent = CheckEmailFillCodeComponentImpl(
+        componentContext = componentContext,
+        email = email,
+        onBack = { navigation.pop() },
+        onContinue = { navigation.pushNew(configuration = Configuration.FPCreateNewPass(email))}
+    )
+
+    private fun fillEmailComponent(
+        componentContext: ComponentContext
+    ) : FillEmailComponent = FillEmailComponentImpl(
+        componentContext = componentContext,
+        onContinue = { navigation.pushNew(configuration = Configuration.FPCheckEmailFillCode(email = it))},
+        navigateBack = { navigation.pop() }
+    )
+
+    private fun confirmEmailComponent(
+        componentContext: ComponentContext,
+        email: String
+    ) : ConfirmEmailComponent = ConfirmEmailComponentImpl(
+        componentContext = componentContext,
+        email = email,
+        openOutcomePage = { kind -> navigation.pushNew(configuration = Configuration.Outcome(kind)) },
+        onBack = { navigation.pop() }
+    )
+
     private fun signInComponent(
         componentContext: ComponentContext,
     ) : SignInComponent = SignInComponentImpl(
@@ -123,7 +187,7 @@ internal class AuthRootComponentImpl(
         onNavigateBack = onNavigateBack,
         onForgotPassword = {
             navigation.pushNew(
-                configuration = Configuration.GenericConfirm(VerificationKind.ForgotPassFillEmail)
+                configuration = Configuration.FPFillEmail
             )
         }
     )
@@ -134,10 +198,10 @@ internal class AuthRootComponentImpl(
     ) : SignUpComponent = SignUpComponentImpl(
         componentContext = componentContext,
         selectedCountry = selectedCountry,
-        onCreateAccount = { confirmEmailVerify ->
+        onCreateAccount = { email ->
             navigation.pushNew(
                 configuration =
-                Configuration.GenericConfirm(confirmEmailVerify)
+                Configuration.ConfirmEmail(email = email)
             )
         },
         onError = { errorOutcome ->
@@ -154,23 +218,6 @@ internal class AuthRootComponentImpl(
         }
     )
 
-    private fun genericConfirmComponent(
-        componentContext: ComponentContext,
-        confirmKind: VerificationKind,
-    ) : VerificationGenericComponent = VerificationGenericComponentImpl(
-        componentContext = componentContext,
-        kind = confirmKind,
-        onBack = { navigation.pop() },
-        openOutcomePage = {  outcomeKind ->
-            navigation.pushNew(
-                configuration = Configuration.Outcome(
-                    outcomeKind = if (isSuccess.value) {
-                        outcomeKind
-                    } else OutcomeKind.Error
-                )
-            )
-        }
-    )
 
     private fun outcomeComponent(
         componentContext: ComponentContext,
@@ -226,9 +273,13 @@ internal class AuthRootComponentImpl(
             val selectedCountry: CountryModel?
         ) : Configuration
         @Serializable
-        data class GenericConfirm(
-            val confirmKind: VerificationKind
-        ) : Configuration
+        data class ConfirmEmail(val email: String) : Configuration
+        @Serializable
+        data class FPCheckEmailFillCode(val email: String) : Configuration
+        @Serializable
+        data object FPFillEmail : Configuration
+        @Serializable
+        data class FPCreateNewPass(val email: String) : Configuration
         @Serializable
         data class Outcome(
             val outcomeKind: OutcomeKind

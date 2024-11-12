@@ -1,5 +1,6 @@
 package kz.bloom.ui.auth.sign_up.component
 
+import androidx.compose.material3.SnackbarData
 import com.arkivanov.decompose.value.Value
 import kz.bloom.ui.country_chooser.component.CountryModel
 
@@ -19,7 +20,8 @@ interface SignUpComponent {
         val emailErrorOccurred: ErrorBody,
         val phoneNumberErrorOccurred: ErrorBody,
         val passwordErrorOccurred: ErrorBody,
-        val confirmPasswordErrorOccurred: ErrorBody
+        val confirmPasswordErrorOccurred: ErrorBody,
+        val snackBarErrorMessage: String
     )
 
     fun fillName(name: String)

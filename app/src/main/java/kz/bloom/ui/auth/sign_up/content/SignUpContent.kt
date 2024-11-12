@@ -6,14 +6,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,10 +50,10 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
     val model by component.model.subscribeAsState()
     val focusManager = LocalFocusManager.current
     val emailFocusRequest = remember { FocusRequester() }
-    val nameFocusRequest = remember { FocusRequester () }
+    val nameFocusRequest = remember { FocusRequester() }
     val phoneNumberFocusRequest = remember { FocusRequester() }
-    val passwordFocusRequest = remember { FocusRequester () }
-    val rePasswordFocusRequest = remember { FocusRequester () }
+    val passwordFocusRequest = remember { FocusRequester() }
+    val rePasswordFocusRequest = remember { FocusRequester() }
 
     Column(
         modifier = modifier
@@ -105,7 +108,11 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                 color = MaterialTheme.colorScheme.error
             )
             LabeledTextField(
-                modifier = Modifier.focusRequester(emailFocusRequest),
+                modifier = Modifier
+                    .focusRequester(emailFocusRequest)
+                    .onFocusChanged { focusState ->
+                        if (!focusState.isFocused) component.onEmailFocusLost()
+                    },
                 label = "ЭЛЕКТРОННАЯ ПОЧТА",
                 singleLine = true,
                 placeholder = "",
@@ -118,29 +125,46 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                 ),
                 value = model.email
             )
+            Text(
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                text = model.emailErrorOccurred.errorText,
+                color = MaterialTheme.colorScheme.error
+            )
 
             Row(
-                modifier = Modifier.clickable { component.openCountryChooser() },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text(
-                    text = model.selectedCountry.dialCode,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                Icon(
-                    modifier = Modifier.padding(start = 10.dp),
-                    painter = painterResource(id = R.drawable.ic_expand_left_light),
-                    contentDescription = null)
-
+                Column {
+                    Row(modifier = Modifier
+                        .padding(top = 16.dp)
+                        .clickable { component.openCountryChooser() }) {
+                        Text(
+                            text = model.selectedCountry.dialCode,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        Icon(
+                            modifier = Modifier.padding(start = 10.dp),
+                            painter = painterResource(id = R.drawable.ic_expand_left_light),
+                            contentDescription = null)
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier.width(50.dp).padding(top = 15.dp),
+                        color = if (model.phoneNumberErrorOccurred.errorOccurred)
+                            MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.secondary
+                    )
+                }
+                
                 LabeledTextField(
                     modifier = Modifier
-                        .focusRequester(phoneNumberFocusRequest),
+                        .focusRequester(phoneNumberFocusRequest)
+                        .onFocusChanged { focusState ->
+                            if (!focusState.isFocused) component.onPhoneFocusLost()
+                        },
                     label = "НОМЕР ТЕЛЕФОНА",
-                    hasTrailingContent = true,
                     isError = model.phoneNumberErrorOccurred.errorOccurred,
-                    dividerCutRange = 10,
                     singleLine = true,
                     placeholder = null,
                     labelStyle = MaterialTheme.typography.labelSmall,
@@ -155,8 +179,19 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                     value = model.phoneNumber
                 )
             }
+
+            Text(
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                text = model.phoneNumberErrorOccurred.errorText,
+                color = MaterialTheme.colorScheme.error
+            )
+
             LabeledTextField(
-                modifier = Modifier.focusRequester(passwordFocusRequest),
+                modifier = Modifier
+                    .focusRequester(passwordFocusRequest)
+                    .onFocusChanged { focusState ->
+                        if (!focusState.isFocused) component.onPasswordFocusLost()
+                    },
                 label = "ПАРОЛЬ",
                 singleLine = true,
                 isError = model.passwordErrorOccurred.errorOccurred,
@@ -170,8 +205,18 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                 value = model.password
             )
 
+            Text(
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                text = model.passwordErrorOccurred.errorText,
+                color = MaterialTheme.colorScheme.error
+            )
+
             LabeledTextField(
-                modifier = Modifier.focusRequester(rePasswordFocusRequest),
+                modifier = Modifier
+                    .focusRequester(rePasswordFocusRequest)
+                    .onFocusChanged { focusState ->
+                        if (!focusState.isFocused) component.onConfirmPasswordFocusLost()
+                    },
                 label = "ПОВТОРИТЕ ПАРОЛЬ",
                 isError = model.confirmPasswordErrorOccurred.errorOccurred,
                 singleLine = true,
@@ -183,6 +228,12 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                     onDone = { focusManager.clearFocus() }
                 ),
                 value = model.passwordConfirm
+            )
+
+            Text(
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                text = model.confirmPasswordErrorOccurred.errorText,
+                color = MaterialTheme.colorScheme.error
             )
         }
         Column(

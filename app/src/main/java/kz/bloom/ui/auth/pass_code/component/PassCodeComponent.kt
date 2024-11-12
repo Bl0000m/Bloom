@@ -7,8 +7,10 @@ public interface PassCodeComponent {
 
     public data class Model(
         val pinCode: String,
+        val confirmPinCode: String,
         val pinLength: Int,
-        val userHasPinCode: Boolean
+        val userHasPinCode: Boolean,
+        val pinCodeMissMatch: Boolean
     )
 
     public fun fillPass(pinCode: String)

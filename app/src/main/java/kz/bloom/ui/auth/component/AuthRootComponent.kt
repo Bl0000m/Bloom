@@ -2,7 +2,10 @@ package kz.bloom.ui.auth.component
 
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
-import kz.bloom.ui.auth.confirm.component.VerificationGenericComponent
+import kz.bloom.ui.auth.confirm.confirm_email.component.ConfirmEmailComponent
+import kz.bloom.ui.auth.confirm.forgot_password.check_email_fill_code.component.CheckEmailFillCodeComponent
+import kz.bloom.ui.auth.confirm.forgot_password.creating_new_password.component.CreateNewPasswordComponent
+import kz.bloom.ui.auth.confirm.forgot_password.fill_email.component.FillEmailComponent
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent
 import kz.bloom.ui.auth.pass_code.component.PassCodeComponent
 import kz.bloom.ui.auth.sign_in.component.SignInComponent
@@ -22,7 +25,16 @@ public interface AuthRootComponent {
             public val component: SignUpComponent
         ) : Child
         public data class ConfirmEmail(
-            public val component: VerificationGenericComponent
+            public val component: ConfirmEmailComponent
+        ) : Child
+        public data class FillEmail(
+            public val component: FillEmailComponent
+        ) : Child
+        public data class CheckEmailFillCode(
+            public val component: CheckEmailFillCodeComponent
+        ) : Child
+        public data class CreateNewPass(
+            public val component: CreateNewPasswordComponent
         ) : Child
         public data class OutcomePage(
             public val component: OutcomeComponent
