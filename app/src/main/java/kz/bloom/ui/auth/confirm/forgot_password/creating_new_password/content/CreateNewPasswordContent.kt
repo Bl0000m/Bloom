@@ -28,6 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.R
 import kz.bloom.ui.auth.confirm.forgot_password.creating_new_password.component.CreateNewPasswordComponent
@@ -72,7 +73,7 @@ fun CreateNewPassContent(
                 .fillMaxSize()
                 .padding(top = 42.dp)
                 .padding(horizontal = 21.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             Icon(
                 modifier = Modifier
@@ -109,6 +110,7 @@ fun CreateNewPassContent(
                     component.fillPassword(password = it)
                 },
                 label = "ВВЕДИТЕ ПАРОЛЬ",
+                isError = model.passwordErrorOccurred.errorOccurred,
                 placeholder = "",
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text,
@@ -116,6 +118,11 @@ fun CreateNewPassContent(
                 ),
                 value = model.password,
                 keyboardActions = KeyboardActions(onNext = { confirmPasswordFR.requestFocus() })
+            )
+            Text(
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                text = model.passwordErrorOccurred.errorText,
+                color = MaterialTheme.colorScheme.error
             )
             LabeledTextField(
                 modifier = Modifier
@@ -129,6 +136,7 @@ fun CreateNewPassContent(
                     component.fillConfirmPassword(confirmPassword = it)
                 },
                 label = "ПОВТОРИТЕ ПАРОЛЬ",
+                isError = model.confirmPasswordErrorOccurred.errorOccurred,
                 placeholder = "",
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text,
@@ -137,7 +145,11 @@ fun CreateNewPassContent(
                 value = model.confirmPassword,
                 keyboardActions = KeyboardActions(onDone = { confirmPasswordFR.freeFocus() })
             )
-
+            Text(
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                text = model.confirmPasswordErrorOccurred.errorText,
+                color = MaterialTheme.colorScheme.error
+            )
 
             PrimaryButton(
                 modifier = Modifier.padding(top = 39.dp),

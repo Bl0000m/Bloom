@@ -25,6 +25,10 @@ import org.koin.core.qualifier.named
 import kotlin.coroutines.CoroutineContext
 import kz.bloom.ui.auth.sign_in.component.SignInComponent.Event
 import kz.bloom.ui.auth.sign_in.store.SignInStore.Label
+import kz.bloom.ui.auth.sign_up.component.SignUpComponent.ErrorBody
+import kz.bloom.ui.auth.sign_up.component.updateFieldErrorOnSecondFocusLost
+import kz.bloom.ui.auth.sign_up.component.validateEmail
+import kz.bloom.ui.auth.sign_up.component.validatePassword
 
 class SignInComponentImpl(
     componentContext: ComponentContext,
@@ -45,7 +49,16 @@ class SignInComponentImpl(
     private val _model = MutableValue(
         initialValue = Model(
             email = "",
-            password = ""
+            password = "",
+            ErrorBody(
+                errorOccurred = false,
+                errorText = "",
+                wasFocusedBefore = false
+            ),ErrorBody(
+                errorOccurred = false,
+                errorText = "",
+                wasFocusedBefore = false
+            ),
         )
     )
     private val _events: MutableSharedFlow<Event> = MutableSharedFlow()
@@ -98,6 +111,28 @@ class SignInComponentImpl(
 
     override fun forgotPassword() {
         onForgotPassword()
+    }
+
+    override fun onEmailFocusLost() {
+        updateFieldErrorOnSecondFocusLost(
+            errorBody = _model.value.emailErrorOccurred,
+            validateField = { validateEmail(_model.value.email) },
+            didErrorOccur = { validateEmail(_model.value.email) != ""},
+            updateModel = { updatedErrorBody ->
+                _model.update { it.copy(emailErrorOccurred = updatedErrorBody) }
+            }
+        )
+    }
+
+    override fun onPasswordFocusLost() {
+        updateFieldErrorOnSecondFocusLost(
+            errorBody = _model.value.passwordErrorOccurred,
+            validateField = { validatePassword(_model.value.password) },
+            didErrorOccur = { validatePassword(_model.value.password) != ""},
+            updateModel = { updatedErrorBody ->
+                _model.update { it.copy(passwordErrorOccurred = updatedErrorBody) }
+            }
+        )
     }
 
     private fun Flow<Label>.toEvents(): Flow<Event> = map { label ->

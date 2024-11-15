@@ -108,7 +108,6 @@ public class UserHasPinCodeComponentImpl(
     }
 
     private fun checkIfPinMatch(enteredPin: String) {
-        Log.d("behold", sharedPreferences.pincode.toString())
         if (sharedPreferences.pincode == enteredPin) {
             store.accept(
                 intent =

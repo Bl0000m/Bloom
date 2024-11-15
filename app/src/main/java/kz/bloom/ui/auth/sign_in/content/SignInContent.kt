@@ -24,10 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.R
 import kz.bloom.ui.auth.sign_in.component.SignInComponent
@@ -94,13 +96,18 @@ fun SignInContent(modifier: Modifier, component: SignInComponent) {
 
             Column(
                 modifier = Modifier.padding(top = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
                 LabeledTextField(
-                    modifier = Modifier.focusRequester(emailFocusRequest),
+                    modifier = Modifier
+                        .focusRequester(emailFocusRequest)
+                        .onFocusChanged { focusState ->
+                            if (!focusState.isFocused) component.onEmailFocusLost()
+                        },
                     label = "ЭЛЕКТРОННАЯ ПОЧТА",
                     placeholder = "",
                     singleLine = true,
+                    isError = model.emailErrorOccurred.errorOccurred,
                     labelStyle = MaterialTheme.typography.labelSmall,
                     onValueChange = { component.fillEmail(email = it) },
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
@@ -109,11 +116,21 @@ fun SignInContent(modifier: Modifier, component: SignInComponent) {
                     ),
                     value = model.email
                 )
+                Text(
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                    text = model.emailErrorOccurred.errorText,
+                    color = MaterialTheme.colorScheme.error
+                )
                 LabeledTextField(
-                    modifier = Modifier.focusRequester(passwordFocusRequest),
+                    modifier = Modifier
+                        .focusRequester(passwordFocusRequest)
+                        .onFocusChanged { focusState ->
+                            if (!focusState.isFocused) component.onPasswordFocusLost()
+                        },
                     label = "ПАРОЛЬ",
                     singleLine = true,
                     placeholder = "",
+                    isError = model.passwordErrorOccurred.errorOccurred,
                     labelStyle = MaterialTheme.typography.labelSmall,
                     onValueChange = { component.fillPassword(password = it) },
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
@@ -121,6 +138,11 @@ fun SignInContent(modifier: Modifier, component: SignInComponent) {
                         onDone = { focusManager.clearFocus() }
                     ),
                     value = model.password,
+                )
+                Text(
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                    text = model.passwordErrorOccurred.errorText,
+                    color = MaterialTheme.colorScheme.error
                 )
                 Column(
                     modifier = Modifier.padding(top = 10.dp),

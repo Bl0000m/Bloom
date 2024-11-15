@@ -2,6 +2,7 @@ package kz.bloom.ui.auth.sign_in.component
 
 import com.arkivanov.decompose.value.Value
 import kotlinx.coroutines.flow.Flow
+import kz.bloom.ui.auth.sign_up.component.SignUpComponent.ErrorBody
 
 public interface SignInComponent {
 
@@ -9,7 +10,9 @@ public interface SignInComponent {
 
     public data class Model(
         val email: String,
-        val password: String
+        val password: String,
+        val passwordErrorOccurred: ErrorBody,
+        val emailErrorOccurred: ErrorBody
     )
 
     public sealed interface Event {
@@ -23,6 +26,10 @@ public interface SignInComponent {
     public fun fillEmail(email: String)
 
     public fun fillPassword(password: String)
+
+    public fun onEmailFocusLost()
+
+    public fun onPasswordFocusLost()
 
     public fun enterAccount()
 
