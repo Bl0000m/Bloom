@@ -1,4 +1,4 @@
-package kz.bloom.ui.country_chooser
+package kz.bloom.ui.auth.country_chooser
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,8 +45,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.R
-import kz.bloom.ui.country_chooser.component.ChooseCountryComponent
-import kz.bloom.ui.country_chooser.component.CountryModel
+import kz.bloom.ui.auth.country_chooser.component.ChooseCountryComponent
+import kz.bloom.ui.auth.country_chooser.component.CountryModel
 import kz.bloom.ui.ui_components.CustomTextField
 
 @Composable

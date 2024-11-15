@@ -1,4 +1,4 @@
-package kz.bloom.ui.country_chooser.component
+package kz.bloom.ui.auth.country_chooser.component
 
 import android.content.Context
 import com.arkivanov.decompose.ComponentContext
@@ -7,12 +7,12 @@ import com.arkivanov.decompose.value.operator.map
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kz.bloom.libraries.states
-import kz.bloom.ui.country_chooser.AssetsProvider
-import kz.bloom.ui.country_chooser.component.ChooseCountryComponent.Model
-import kz.bloom.ui.country_chooser.store.CountriesStore
-import kz.bloom.ui.country_chooser.store.CountriesStore.Intent
-import kz.bloom.ui.country_chooser.store.CountriesStore.State
-import kz.bloom.ui.country_chooser.store.entity.Country
+import kz.bloom.ui.auth.country_chooser.AssetsProvider
+import kz.bloom.ui.auth.country_chooser.component.ChooseCountryComponent.Model
+import kz.bloom.ui.auth.country_chooser.store.CountriesStore
+import kz.bloom.ui.auth.country_chooser.store.CountriesStore.Intent
+import kz.bloom.ui.auth.country_chooser.store.CountriesStore.State
+import kz.bloom.ui.auth.country_chooser.store.entity.Country
 import kz.bloom.ui.ui_components.parseAssetsFileContents
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

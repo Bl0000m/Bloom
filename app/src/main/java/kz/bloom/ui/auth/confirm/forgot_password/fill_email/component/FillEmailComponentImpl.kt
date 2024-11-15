@@ -6,12 +6,19 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.arkivanov.mvikotlin.extensions.coroutines.labels
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kz.bloom.libraries.states
 import kz.bloom.ui.auth.api.AuthApi
 import kz.bloom.ui.auth.confirm.forgot_password.fill_email.component.FillEmailComponent.Model
+import kz.bloom.ui.auth.confirm.forgot_password.fill_email.component.FillEmailComponent.Event
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
-import kz.bloom.ui.auth.store.AuthStore.Intent
-import kz.bloom.ui.auth.store.AuthStore
+import kz.bloom.ui.auth.confirm.forgot_password.fill_email.store.FillEmailStore
+import kz.bloom.ui.auth.confirm.forgot_password.fill_email.store.FillEmailStore.Label
+import kz.bloom.ui.auth.confirm.forgot_password.fill_email.store.FillEmailStore.Intent
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -34,7 +41,7 @@ class FillEmailComponentImpl(
     private val storeFactory by inject<StoreFactory>()
 
     private val store = instanceKeeper.getStore {
-        AuthStore(
+        FillEmailStore(
             authApi = authApi,
             mainContext = mainContext,
             ioContext = ioContext,
@@ -50,6 +57,13 @@ class FillEmailComponentImpl(
     )
     override val model: Value<Model> = _model
 
+    private val _events: MutableSharedFlow<Event> = MutableSharedFlow()
+
+    override val events: Flow<Event> = merge(
+        store.labels.toEvents(),
+        _events
+    )
+
     override fun continueAndGetCode() {
         store.accept(intent = Intent.ReceiveConfirmCode(email = _model.value.email))
         if (store.states.value.serverIsNotResponding) {
@@ -64,5 +78,13 @@ class FillEmailComponentImpl(
 
     override fun onNavigateBack() {
         navigateBack()
+    }
+}
+
+private fun Flow<Label>.toEvents(): Flow<Event> = map { label ->
+    when(label) {
+        is Label.ErrorReceived -> {
+            Event.DisplaySnackBar(errorMessage = label.message)
+        }
     }
 }

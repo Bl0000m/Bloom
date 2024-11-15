@@ -117,4 +117,7 @@ dependencies {
 
     // kotlinx Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // kotlin coroutines
+    implementation(dependencyNotation = libs.bundles.coroutines)
 }

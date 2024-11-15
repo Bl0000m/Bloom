@@ -1,4 +1,4 @@
-package kz.bloom.ui.country_chooser.store
+package kz.bloom.ui.auth.country_chooser.store
 
 import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
 import com.arkivanov.mvikotlin.core.store.Store
@@ -10,12 +10,12 @@ import java.util.Locale
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import kz.bloom.ui.country_chooser.AssetsProvider
-import kz.bloom.ui.country_chooser.store.CountriesStore.Intent
-import kz.bloom.ui.country_chooser.store.CountriesStore.Label
-import kz.bloom.ui.country_chooser.store.CountriesStore.State
-import kz.bloom.ui.country_chooser.Language
-import kz.bloom.ui.country_chooser.store.entity.Country
+import kz.bloom.ui.auth.country_chooser.AssetsProvider
+import kz.bloom.ui.auth.country_chooser.store.CountriesStore.Intent
+import kz.bloom.ui.auth.country_chooser.store.CountriesStore.Label
+import kz.bloom.ui.auth.country_chooser.store.CountriesStore.State
+import kz.bloom.ui.auth.country_chooser.Language
+import kz.bloom.ui.auth.country_chooser.store.entity.Country
 import kotlin.coroutines.CoroutineContext
 
 private const val COUNTRIES_LIST_FILE_NAME = "PhoneExtensions.json"

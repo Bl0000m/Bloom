@@ -17,7 +17,8 @@ import kz.bloom.ui.auth.outcome.content.OutcomePageContent
 import kz.bloom.ui.auth.pass_code.content.PassContent
 import kz.bloom.ui.auth.sign_in.content.SignInContent
 import kz.bloom.ui.auth.sign_up.content.SignUpContent
-import kz.bloom.ui.country_chooser.ChooseCountryContent
+import kz.bloom.ui.auth.country_chooser.ChooseCountryContent
+import kz.bloom.ui.auth.pass_code.user_has_pin_code.content.UserHasPincodeContent
 
 
 @Composable
@@ -64,6 +65,10 @@ fun AuthRootContent(component: AuthRootComponent) {
                         modifier = contentPaddingModifier
                     )
                     is Child.PassCode -> PassContent(
+                        component = childInstance.component,
+                        modifier = contentPaddingModifier
+                    )
+                    is Child.UserHasPassCode -> UserHasPincodeContent(
                         component = childInstance.component,
                         modifier = contentPaddingModifier
                     )

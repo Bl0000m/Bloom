@@ -11,4 +11,5 @@ interface AuthApi {
     suspend fun getConfirmCode(email: String) : HttpResponse
     suspend fun sendConfirmCode(email: String, code: String) : HttpResponse
     suspend fun createNewPass(email: String, password: String, confirmPassword: String) : HttpResponse
+    suspend fun refreshAccessToken(refreshToken: String) : SignInTokenResponse
 }

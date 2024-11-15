@@ -1,24 +1,36 @@
 package kz.bloom.ui.auth.sign_in.component
 
+import android.util.Log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.arkivanov.mvikotlin.extensions.coroutines.labels
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.launch
 import kz.bloom.ui.auth.api.AuthApi
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.auth.sign_in.component.SignInComponent.Model
-import kz.bloom.ui.auth.store.AuthStore
+import kz.bloom.ui.auth.sign_in.store.SignInStore
+import kz.bloom.ui.ui_components.coroutineScope
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 import kotlin.coroutines.CoroutineContext
+import kz.bloom.ui.auth.sign_in.component.SignInComponent.Event
+import kz.bloom.ui.auth.sign_in.store.SignInStore.Label
 
 class SignInComponentImpl(
     componentContext: ComponentContext,
     private val onCreateAccount:() -> Unit,
     private val onNavigateBack:() -> Unit,
+    private val onAccountEntered:() -> Unit,
     private val onForgotPassword:() -> Unit
 ): SignInComponent,
    KoinComponent,
@@ -36,9 +48,12 @@ class SignInComponentImpl(
             password = ""
         )
     )
+    private val _events: MutableSharedFlow<Event> = MutableSharedFlow()
+
+    private val scope = coroutineScope()
 
     private val store = instanceKeeper.getStore {
-        AuthStore(
+        SignInStore(
             authApi = authApi,
             mainContext = mainContext,
             ioContext = ioContext,
@@ -46,6 +61,12 @@ class SignInComponentImpl(
             sharedPreferences = sharedPreferences
         )
     }
+
+    override val events: Flow<Event> = merge(
+        store.labels.toEvents(),
+        _events
+    )
+
 
     override val model: Value<Model> = _model
 
@@ -58,7 +79,13 @@ class SignInComponentImpl(
     }
 
     override fun enterAccount() {
-        store.accept(intent = AuthStore.Intent.EnterAccount(model = _model.value))
+        store.accept(intent = SignInStore.Intent.EnterAccount(model = _model.value))
+        scope.launch {
+            delay(500)
+            if(sharedPreferences.isAuth()) {
+                onAccountEntered()
+            }
+        }
     }
 
     override fun createAccount() {
@@ -71,5 +98,13 @@ class SignInComponentImpl(
 
     override fun forgotPassword() {
         onForgotPassword()
+    }
+
+    private fun Flow<Label>.toEvents(): Flow<Event> = map { label ->
+        when(label) {
+            is Label.ReceivedError -> {
+                Event.DisplaySnackBar(errorMessage = label.message)
+            }
+        }
     }
 }

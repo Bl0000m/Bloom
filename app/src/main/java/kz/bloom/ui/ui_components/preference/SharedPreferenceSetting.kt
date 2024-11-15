@@ -16,6 +16,15 @@ class SharedPreferencesSetting(private val applicationContext: Context) : BaseSh
         Context.MODE_PRIVATE
     )
 
+    fun isAuth() = !accessToken.isNullOrBlank()
+
+    fun isGuest() = accessToken.isNullOrBlank()
+
+    fun clearAuth() {
+        //clearDataOnLogout
+        securityPreference.clearDataOnLogout()
+    }
+
     var accessToken
         get() = securityPreference.getTokenAccess()
         set(value) = securityPreference.setTokenAccess(value)

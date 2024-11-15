@@ -6,15 +6,22 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import kz.bloom.libraries.states
 import kz.bloom.ui.auth.api.AuthApi
 import kz.bloom.ui.auth.outcome.component.OutcomeComponent.OutcomeKind
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent.ErrorBody
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent.Model
-import kz.bloom.ui.auth.store.AuthStore
-import kz.bloom.ui.country_chooser.component.CountryModel
+import kz.bloom.ui.auth.country_chooser.component.CountryModel
+import kz.bloom.ui.auth.sign_up.component.SignUpComponent.Event
+import kz.bloom.ui.auth.sign_up.store.SignUpStore
+import kz.bloom.ui.auth.sign_up.store.SignUpStore.Label
 import kz.bloom.ui.ui_components.coroutineScope
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.KoinComponent
@@ -39,10 +46,8 @@ class SignUpComponentImpl(
     private val sharedPreferences by inject<SharedPreferencesSetting>()
     private val storeFactory by inject<StoreFactory>()
 
-    private val scope = coroutineScope()
-
     private val store = instanceKeeper.getStore {
-        AuthStore(
+        SignUpStore(
             authApi = authApi,
             mainContext = mainContext,
             ioContext = ioContext,
@@ -50,6 +55,14 @@ class SignUpComponentImpl(
             sharedPreferences = sharedPreferences
         )
     }
+    private val _events: MutableSharedFlow<Event> = MutableSharedFlow()
+
+    private val scope = coroutineScope()
+
+    override val events: Flow<Event> = merge(
+        store.labels.toEvents(),
+        _events
+    )
 
     private val startingCountryModel = CountryModel(
         code = "KZ",
@@ -125,7 +138,7 @@ class SignUpComponentImpl(
 
     override fun createAccount() {
         store.accept(
-            intent = AuthStore.Intent.CreateAccount(
+            intent = SignUpStore.Intent.CreateAccount(
                 model = _model.value.copy(
                     phoneNumber = _model.value.selectedCountry.dialCode + _model.value.phoneNumber
                 )
@@ -306,5 +319,13 @@ fun updateFieldErrorOnSecondFocusLost(
                 wasFocusedBefore = true
             )
         )
+    }
+}
+
+private fun Flow<Label>.toEvents(): Flow<Event> = map { label ->
+    when(label) {
+        is Label.ReceivedError -> {
+            Event.DisplaySnackBar(errorMessage = label.message)
+        }
     }
 }

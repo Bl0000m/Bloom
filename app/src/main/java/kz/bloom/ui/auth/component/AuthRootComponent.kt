@@ -10,16 +10,20 @@ import kz.bloom.ui.auth.outcome.component.OutcomeComponent
 import kz.bloom.ui.auth.pass_code.component.PassCodeComponent
 import kz.bloom.ui.auth.sign_in.component.SignInComponent
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent
-import kz.bloom.ui.country_chooser.component.ChooseCountryComponent
+import kz.bloom.ui.auth.country_chooser.component.ChooseCountryComponent
+import kz.bloom.ui.auth.pass_code.user_has_pin_code.component.UserHasPincodeComponent
 
 public interface AuthRootComponent {
     public data class Model(
-        public val smth: Boolean
+        public val userHasPincodeAndIsGuest: Boolean
     )
 
     public sealed interface Child {
         public data class SignIn(
             public val component: SignInComponent
+        ) : Child
+        public data class UserHasPassCode(
+            public val component: UserHasPincodeComponent
         ) : Child
         public data class SignUp(
             public val component: SignUpComponent

@@ -1,4 +1,4 @@
-package kz.bloom.ui.country_chooser
+package kz.bloom.ui.auth.country_chooser
 
 import com.arkivanov.mvikotlin.core.utils.JvmSerializable
 

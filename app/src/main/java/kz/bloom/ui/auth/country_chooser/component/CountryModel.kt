@@ -1,4 +1,4 @@
-package kz.bloom.ui.country_chooser.component
+package kz.bloom.ui.auth.country_chooser.component
 
 import kotlinx.serialization.Serializable
 

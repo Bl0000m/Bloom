@@ -1,6 +1,8 @@
 package kz.bloom.ui.auth.component
 
 import android.content.Context
+import android.util.Log
+import androidx.compose.ui.platform.LocalGraphicsContext
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
@@ -30,10 +32,15 @@ import kz.bloom.ui.auth.pass_code.component.PassComponentImpl
 import kz.bloom.ui.auth.pass_code.component.PassCodeComponent
 import kz.bloom.ui.auth.sign_in.component.SignInComponentImpl
 import kz.bloom.ui.auth.sign_up.component.SignUpComponentImpl
-import kz.bloom.ui.country_chooser.component.ChooseCountryComponent
-import kz.bloom.ui.country_chooser.component.ChooseCountryComponentImpl
-import kz.bloom.ui.country_chooser.component.CountryModel
+import kz.bloom.ui.auth.country_chooser.component.ChooseCountryComponent
+import kz.bloom.ui.auth.country_chooser.component.ChooseCountryComponentImpl
+import kz.bloom.ui.auth.country_chooser.component.CountryModel
+import kz.bloom.ui.auth.pass_code.user_has_pin_code.component.UserHasPinCodeComponentImpl
+import kz.bloom.ui.auth.pass_code.user_has_pin_code.component.UserHasPincodeComponent
+
+import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 internal class AuthRootComponentImpl(
     componentContext: ComponentContext,
@@ -43,11 +50,19 @@ internal class AuthRootComponentImpl(
     KoinComponent,
     ComponentContext by componentContext {
 
+    private val sharedPreferences by inject<SharedPreferencesSetting>()
+
+    init {
+        Log.d("behold1", sharedPreferences.accessToken.toString())
+    }
+
     private val _model = MutableValue(
         initialValue = Model(
-            smth = true
+            userHasPincodeAndIsGuest = (sharedPreferences.isGuest() && !sharedPreferences.pincode.isNullOrEmpty())
         )
     )
+
+    override val model: Value<Model> = _model
 
     private var currentSignUpComponent: SignUpComponent? = null
 
@@ -56,7 +71,11 @@ internal class AuthRootComponentImpl(
     private val _childStack = childStack(
         source = navigation,
         serializer = Configuration.serializer(),
-        initialConfiguration = Configuration.SignIn,
+        initialConfiguration = if(model.value.userHasPincodeAndIsGuest) {
+            Configuration.UserHasPassCode
+        } else {
+            Configuration.SignIn
+        },
         handleBackButton = true,
         childFactory = { configuration, componentContext ->
             createChild(
@@ -66,7 +85,6 @@ internal class AuthRootComponentImpl(
         }
     )
 
-    override val model: Value<Model> = _model
 
     override val childStack: Value<ChildStack<*, Child>> = _childStack
 
@@ -84,6 +102,12 @@ internal class AuthRootComponentImpl(
             component = confirmEmailComponent(
                 componentContext = componentContext,
                 email = configuration.email
+            )
+        )
+
+        is Configuration.UserHasPassCode -> Child.UserHasPassCode(
+            component = userHasPassCodeComponent(
+                componentContext = componentContext
             )
         )
 
@@ -133,8 +157,7 @@ internal class AuthRootComponentImpl(
         )
         is Configuration.PassCode -> Child.PassCode(
             component = passCodeComponent(
-                componentContext = componentContext,
-                userHasPinCode = configuration.userHasPinCode
+                componentContext = componentContext
             )
         )
     }
@@ -175,7 +198,8 @@ internal class AuthRootComponentImpl(
         componentContext = componentContext,
         email = email,
         openOutcomePage = { kind -> navigation.pushNew(configuration = Configuration.Outcome(kind)) },
-        onBack = { navigation.pop() }
+        onBack = { navigation.pop() },
+        openErrorPage = { navigation.pushNew(configuration = Configuration.Outcome(outcomeKind = OutcomeKind.Error)) }
     )
 
     private fun signInComponent(
@@ -183,12 +207,13 @@ internal class AuthRootComponentImpl(
     ) : SignInComponent = SignInComponentImpl(
         componentContext = componentContext,
         onCreateAccount = { navigation.pushNew(configuration = Configuration.SignUp(null)) },
-        onNavigateBack = onNavigateBack,
+        onNavigateBack = { onNavigateBack() },
         onForgotPassword = {
             navigation.pushNew(
                 configuration = Configuration.FPFillEmail
             )
-        }
+        },
+        onAccountEntered = { onNavigateBack() }
     )
 
     private fun signUpComponent(
@@ -225,7 +250,7 @@ internal class AuthRootComponentImpl(
         outcomeKind = outcomeKind,
         onOpenPass = {
             navigation.pushNew(configuration =
-            Configuration.PassCode(userHasPinCode = false)
+            Configuration.PassCode
             )
         },
         onOpenSignIn = { navigation.popToFirst() }
@@ -244,12 +269,18 @@ internal class AuthRootComponentImpl(
     )
 
     private fun passCodeComponent(
-        componentContext: ComponentContext,
-        userHasPinCode: Boolean
+        componentContext: ComponentContext
     ) : PassCodeComponent = PassComponentImpl(
         componentContext = componentContext,
-        userHasPinCode = userHasPinCode,
         onNavigateBack = { onNavigateBack() }
+    )
+
+    private fun userHasPassCodeComponent(
+        componentContext: ComponentContext
+    ) : UserHasPincodeComponent = UserHasPinCodeComponentImpl(
+        componentContext = componentContext,
+        onNavigateBack = { onNavigateBack() },
+        allowForward = { onNavigateBack() }
     )
 
     @Serializable
@@ -275,8 +306,8 @@ internal class AuthRootComponentImpl(
         @Serializable
         data object ChooseCountry : Configuration
         @Serializable
-        data class PassCode(
-            val userHasPinCode: Boolean
-        ) : Configuration
+        data object PassCode : Configuration
+        @Serializable
+        data object UserHasPassCode : Configuration
     }
 }

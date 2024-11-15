@@ -12,6 +12,7 @@ import kz.bloom.ui.main.component.MainComponent.Model
 import kz.bloom.ui.main.content.NavBarItem
 import kz.bloom.ui.main.data.MainRepository
 import kz.bloom.ui.main.store.MainStore
+import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -31,6 +32,7 @@ ComponentContext by componentContext
     private val mainContext by inject<CoroutineContext>(qualifier = named(name = "Main"))
     private val ioContext by inject<CoroutineContext>(qualifier = named(name = "IO"))
     private val storeFactory by inject<StoreFactory>()
+    private val sharedPreferences by inject<SharedPreferencesSetting>()
 
     private val store: MainStore = instanceKeeper.getStore {
         MainStore(
@@ -44,9 +46,7 @@ ComponentContext by componentContext
     override val model: Value<Model> = store.states.toModels()
 
     override fun profileClicked() {
-        //if (!isAuth)
         onNavigateAuth()
-        //else
     }
 
     override fun categorySelected(navBarItem: NavBarItem) {

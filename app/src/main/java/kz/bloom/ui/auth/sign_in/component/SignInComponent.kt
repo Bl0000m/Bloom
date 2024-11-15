@@ -1,6 +1,7 @@
 package kz.bloom.ui.auth.sign_in.component
 
 import com.arkivanov.decompose.value.Value
+import kotlinx.coroutines.flow.Flow
 
 public interface SignInComponent {
 
@@ -10,6 +11,14 @@ public interface SignInComponent {
         val email: String,
         val password: String
     )
+
+    public sealed interface Event {
+        public data class DisplaySnackBar(
+            public val errorMessage: String
+        ) : Event
+    }
+
+    public val events: Flow<Event>
 
     public fun fillEmail(email: String)
 

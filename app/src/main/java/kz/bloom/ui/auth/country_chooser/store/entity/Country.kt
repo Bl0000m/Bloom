@@ -1,11 +1,11 @@
-package kz.bloom.ui.country_chooser.store.entity
+package kz.bloom.ui.auth.country_chooser.store.entity
 
 import com.arkivanov.mvikotlin.core.utils.JvmSerializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-import kz.bloom.ui.country_chooser.Language
+import kz.bloom.ui.auth.country_chooser.Language
 
 @Serializable
 public data class Country(

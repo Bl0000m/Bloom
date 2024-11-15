@@ -2,7 +2,8 @@ package kz.bloom.ui.auth.sign_up.component
 
 import androidx.compose.material3.SnackbarData
 import com.arkivanov.decompose.value.Value
-import kz.bloom.ui.country_chooser.component.CountryModel
+import kotlinx.coroutines.flow.Flow
+import kz.bloom.ui.auth.country_chooser.component.CountryModel
 
 interface SignUpComponent {
 
@@ -23,6 +24,14 @@ interface SignUpComponent {
         val confirmPasswordErrorOccurred: ErrorBody,
         val snackBarErrorMessage: String
     )
+
+    public sealed interface Event {
+        public data class DisplaySnackBar(
+            public val errorMessage: String
+        ) : Event
+    }
+
+    public val events: Flow<Event>
 
     fun fillName(name: String)
 
