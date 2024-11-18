@@ -1,5 +1,6 @@
 package kz.bloom.ui.auth.sign_up.content
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,16 +22,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,6 +70,9 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
             snackbarHostState = snackbarHostState
         )
     }
+
+    var passwordVisibility by remember { mutableStateOf(false) }
+    var rePasswordVisibility by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         component.events.collect { event ->
@@ -190,10 +199,15 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                         isError = model.phoneNumberErrorOccurred.errorOccurred,
                         singleLine = true,
                         placeholder = null,
-                        trailingContent = { Icon(
-                            modifier = Modifier.clickable { component.clearPhone() },
-                            painter = painterResource(id = R.drawable.ic_close_round_fill_light),
-                            contentDescription = null) },
+                        trailingContent = {
+                            if (model.phoneNumber.isNotEmpty()) {
+                                Icon(
+                                    modifier = Modifier.clickable { component.clearPhone() },
+                                    painter = painterResource(id = R.drawable.ic_close_round_fill_light),
+                                    contentDescription = null
+                                )
+                            }
+                        },
                         labelStyle = MaterialTheme.typography.labelSmall,
                         onValueChange = { component.fillPhone(phoneNumber = it) },
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
@@ -205,13 +219,13 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                         } else VisualTransformation.None,
                         value = model.phoneNumber
                     )
+                    Icon(
+                        modifier = Modifier
+                            .clickable { component.clearPhone() }
+                            .background(color = Color.Black),
+                        painter = painterResource(id = R.drawable.ic_close_round_fill_light),
+                        contentDescription = null)
                 }
-
-                Text(
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
-                    text = model.phoneNumberErrorOccurred.errorText,
-                    color = MaterialTheme.colorScheme.error
-                )
 
                 LabeledTextField(
                     modifier = Modifier
@@ -221,11 +235,22 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                         },
                     label = "ПАРОЛЬ",
                     singleLine = true,
+                    trailingContent = {
+                        if (model.password.isNotEmpty()) {
+                            Icon(
+                                modifier = Modifier.clickable { passwordVisibility = !passwordVisibility },
+                                painter = painterResource(
+                                    if (passwordVisibility) R.drawable.ic_eye else R.drawable.ic_eye_closed
+                                ),
+                                contentDescription = null)
+                        }
+                    },
                     isError = model.passwordErrorOccurred.errorOccurred,
                     placeholder = "",
                     labelStyle = MaterialTheme.typography.labelSmall,
                     onValueChange = { component.fillPassword(password = it) },
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardActions = KeyboardActions(
                         onDone = { rePasswordFocusRequest.requestFocus() }
                     ),
@@ -249,7 +274,16 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                     singleLine = true,
                     placeholder = "",
                     labelStyle = MaterialTheme.typography.labelSmall,
+                    trailingContent = { if (model.passwordConfirm.isNotEmpty()) {
+                        Icon(
+                            modifier = Modifier.clickable { rePasswordVisibility = !rePasswordVisibility },
+                            painter = painterResource(
+                                id = if (rePasswordVisibility) R.drawable.ic_eye else R.drawable.ic_eye_closed
+                            ),
+                            contentDescription = null)
+                    } },
                     onValueChange = { component.fillPasswordConfirm(rePassword = it) },
+                    visualTransformation = if (rePasswordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(
                         onDone = { focusManager.clearFocus() }

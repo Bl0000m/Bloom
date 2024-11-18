@@ -4,7 +4,9 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
@@ -73,12 +76,15 @@ fun LabeledTextField(
         animationSpec = tween(durationMillis = 300)
     )
 
-    Column(
-        modifier = modifier.height(46.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+    Box(
+        modifier = Modifier
+            .height(46.dp)
+            .fillMaxWidth()
     ) {
         Text(
-            modifier = Modifier.padding(top = labelPaddingTop),
+            modifier = Modifier
+                .padding(top = labelPaddingTop)
+                .align(Alignment.TopStart),
             text = label,
             style = labelStyle.copy(fontSize = labelFontSize.sp),
             color = labelColor,
@@ -88,6 +94,7 @@ fun LabeledTextField(
         CustomTextField(
             modifier = Modifier
                 .clip(shape = shape)
+                .align(Alignment.BottomStart)
                 .then(textFieldModifier)
                 .onFocusChanged { focusState ->
                     isFocused = focusState.isFocused

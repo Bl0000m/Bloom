@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -57,8 +58,8 @@ fun CustomTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     cursorColor: Color = MaterialTheme.colorScheme.onPrimary,
 ) {
-    Column {
-        Box {
+    Column (verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        Box(Modifier.padding(top = 6.dp)) {
             val colors = TextFieldDefaults.colors(
                 focusedContainerColor = backgroundColor,
                 unfocusedContainerColor = backgroundColor,
@@ -127,8 +128,7 @@ fun CustomTextField(
                 .height(1.dp)
         ) {
             HorizontalDivider(
-                modifier = Modifier
-                    .weight(1f),
+                modifier = Modifier,
                 thickness = 1.dp,
                 color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
             )
