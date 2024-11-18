@@ -136,6 +136,10 @@ class SignUpComponentImpl(
         _model.update { it.copy(userAgreesToReceiveInfo = tick) }
     }
 
+    override fun clearPhone() {
+        _model.update { it.copy(phoneNumber = "") }
+    }
+
     override fun createAccount() {
         store.accept(
             intent = SignUpStore.Intent.CreateAccount(
@@ -149,6 +153,8 @@ class SignUpComponentImpl(
             store.states.subscribe { state ->
                 if (state.accountCreated && !state.isLoading) {
                     onCreateAccount(_model.value.email)
+                    sharedPreferences.password = _model.value.password
+                    sharedPreferences.username = _model.value.email
                 } else if (!state.accountCreated && !state.isLoading) {
                     onError(OutcomeKind.Error)
                 }

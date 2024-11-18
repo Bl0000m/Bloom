@@ -8,6 +8,7 @@ import com.arkivanov.decompose.value.update
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
+import com.arkivanov.mvikotlin.extensions.coroutines.states
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -75,12 +76,7 @@ class SignInComponentImpl(
         )
     }
 
-    init {
-        Log.d("behold1",sharedPreferences.isAuth().toString())
-        Log.d("behold2",sharedPreferences.accessToken.toString())
-        Log.d("behold3",sharedPreferences.refreshToken.toString())
-        Log.d("behold4", sharedPreferences.pincode.toString())
-    }
+
 
     override val events: Flow<Event> = merge(
         store.labels.toEvents(),
@@ -102,9 +98,12 @@ class SignInComponentImpl(
         store.accept(intent = SignInStore.Intent.EnterAccount(model = _model.value))
         scope.launch {
             delay(500)
-            Log.d("behold", sharedPreferences.isAuth().toString())
-            if(sharedPreferences.isAuth()) {
-                onAccountEntered()
+            store.states.collect { state->
+                if (state.accountEntered) {
+                    onAccountEntered()
+                    sharedPreferences.username = _model.value.email
+                    sharedPreferences.password = _model.value.password
+                }
             }
         }
     }

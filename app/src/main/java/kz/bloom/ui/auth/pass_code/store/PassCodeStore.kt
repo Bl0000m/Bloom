@@ -12,11 +12,13 @@ interface PassCodeStore : Store<Intent, State, Label> {
         val isError: Boolean,
         val isLoading: Boolean,
         val tokenRefreshed: Boolean,
-        val serverIsNotResponding: Boolean
+        val serverIsNotResponding: Boolean,
+        val accountEntered: Boolean
     ) : JvmSerializable
 
     sealed interface Intent : JvmSerializable {
         data class RefreshAccessToken(val refreshToken: String) : Intent
+        data class EnterAccount(val username: String, val password: String) : Intent
     }
 
     sealed interface Label : JvmSerializable {

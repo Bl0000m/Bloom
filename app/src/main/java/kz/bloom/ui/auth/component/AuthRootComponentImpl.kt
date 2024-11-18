@@ -2,7 +2,6 @@ package kz.bloom.ui.auth.component
 
 import android.content.Context
 import android.util.Base64
-import android.util.Log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
@@ -53,13 +52,10 @@ internal class AuthRootComponentImpl(
 
     private val sharedPreferences by inject<SharedPreferencesSetting>()
 
-    init {
-        Log.d("behold1", sharedPreferences.accessToken.toString())
-    }
 
     private val _model = MutableValue(
         initialValue = Model(
-            userHasPinAndTokenExpired = (
+            needShowPin = (
                     isAccessTokenExpired(sharedPreferences.accessToken)
                             &&
                             !sharedPreferences.pincode.isNullOrEmpty()
@@ -76,7 +72,7 @@ internal class AuthRootComponentImpl(
     private val _childStack = childStack(
         source = navigation,
         serializer = Configuration.serializer(),
-        initialConfiguration = if(model.value.userHasPinAndTokenExpired) {
+        initialConfiguration = if(model.value.needShowPin) {
             Configuration.UserHasPassCode
         } else {
             Configuration.SignIn

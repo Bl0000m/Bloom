@@ -45,6 +45,8 @@ interface SignUpComponent {
 
     fun userDoesAgreeToReceiveInfo(tick: Boolean)
 
+    fun clearPhone()
+
     fun createAccount()
 
     fun navigateBack()

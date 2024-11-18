@@ -7,7 +7,7 @@ import kz.bloom.ui.auth.sign_up.component.SignUpComponent
 
 interface AuthApi {
     suspend fun createAccount(model: SignUpComponent.Model) : HttpResponse
-    suspend fun enterAccount(model: SignInComponent.Model) : SignInTokenResponse
+    suspend fun enterAccount(username: String, password: String) : SignInTokenResponse
     suspend fun getConfirmCode(email: String) : HttpResponse
     suspend fun sendConfirmCode(email: String, code: String) : HttpResponse
     suspend fun createNewPass(email: String, password: String, confirmPassword: String) : HttpResponse

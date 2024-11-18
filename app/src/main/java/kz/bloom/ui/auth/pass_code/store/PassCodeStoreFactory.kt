@@ -21,6 +21,7 @@ private sealed interface Message : JvmSerializable {
     data object ErrorOccurred : Message
     data object ServerIsNotResponding : Message
     data object TokenRefreshed: Message
+    data object AccountEntered: Message
 }
 
 private sealed interface Action : JvmSerializable {
@@ -41,7 +42,8 @@ internal fun PassCodeStore(
             isError = false,
             isLoading = false,
             tokenRefreshed = false,
-            serverIsNotResponding = false
+            serverIsNotResponding = false,
+            accountEntered = false
         ),
         reducer = { message ->
             when(message) {
@@ -49,6 +51,7 @@ internal fun PassCodeStore(
                 is Message.LoadingChanged -> copy(isLoading = message.isLoading)
                 is Message.TokenRefreshed -> copy(tokenRefreshed = true)
                 is Message.ServerIsNotResponding -> copy(serverIsNotResponding = true)
+                is Message.AccountEntered -> copy(accountEntered = true)
             }
         },
         bootstrapper = SimpleBootstrapper(),
@@ -86,6 +89,29 @@ private class ExecutorImpl(
                         }
                     } catch (exception: ApiException) {
                         dispatch(message = Message.ErrorOccurred)
+                    }
+                }
+            }
+            is Intent.EnterAccount -> {
+                scope.launch {
+                    try {
+                        dispatch(
+                            message = Message.LoadingChanged(
+                                isLoading = true
+                            )
+                        )
+                        val enteredAccount = withContext(context = ioContext) {
+                            authApi.enterAccount(password = intent.password, username = intent.username)
+                        }
+
+                        if (enteredAccount.accessToken.isNotEmpty()) {
+                            dispatch(message = Message.AccountEntered)
+                            sharedPreferences.accessToken = enteredAccount.accessToken
+                            sharedPreferences.refreshToken = enteredAccount.refreshToken
+                        }
+
+                    } catch (e: ApiException) {
+                        publish(label = Label.ErrorReceived(message = e.error.message))
                     }
                 }
             }

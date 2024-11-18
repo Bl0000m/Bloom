@@ -190,6 +190,10 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                         isError = model.phoneNumberErrorOccurred.errorOccurred,
                         singleLine = true,
                         placeholder = null,
+                        trailingContent = { Icon(
+                            modifier = Modifier.clickable { component.clearPhone() },
+                            painter = painterResource(id = R.drawable.ic_close_round_fill_light),
+                            contentDescription = null) },
                         labelStyle = MaterialTheme.typography.labelSmall,
                         onValueChange = { component.fillPhone(phoneNumber = it) },
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),

@@ -40,4 +40,12 @@ class SharedPreferencesSetting(private val applicationContext: Context) : BaseSh
     var refreshToken: String?
         get() = securityPreference.getTokenRefresh()
         set(value) = securityPreference.setTokenRefresh(value)
+
+    var username: String?
+        get() = sharedPreferencesCanBeRemoved.getString(USERNAME,"")
+        set(value) = putString(USERNAME, value, sharedPreferencesCanBeRemoved)
+
+    var password: String?
+        get() = sharedPreferencesCanBeRemoved.getString(PASSWORD,"")
+        set(value) = putString(PASSWORD, value, sharedPreferencesCanBeRemoved)
 }

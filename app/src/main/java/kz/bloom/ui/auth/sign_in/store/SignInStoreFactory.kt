@@ -81,7 +81,7 @@ private class ExecutorImpl(
                             )
                         )
                         val enteredAccount = withContext(context = ioContext) {
-                            authApi.enterAccount(model = intent.model)
+                            authApi.enterAccount(username = intent.model.email, password = intent.model.password)
                         }
 
                         if (enteredAccount.accessToken.isNotEmpty()) {

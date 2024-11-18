@@ -15,7 +15,7 @@ import kz.bloom.ui.auth.pass_code.user_has_pin_code.component.UserHasPincodeComp
 
 public interface AuthRootComponent {
     public data class Model(
-        public val userHasPinAndTokenExpired: Boolean
+        public val needShowPin: Boolean
     )
 
     public sealed interface Child {

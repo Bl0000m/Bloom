@@ -4,11 +4,16 @@ import android.content.SharedPreferences
 
 abstract class BaseSharedPreferences {
 
+
     protected val SESSION_APP_CONFIG_CAN_BE_REMOVED = "SESSION_APP_CONFIG_CAN_BE_REMOVED"
     protected val SESSION_APP_CONFIG_SAVED = "SESSION_APP_CONFIG_SAVED"
     protected val SESSION_APP_CONFIG_JSON = "shared_pref_file"
 
+    //can be removed
+    protected val USERNAME = "USERNAME"
+    protected val PASSWORD = "PASSWORD"
 
+    //encrypted
     protected val SESSION_APP_CONFIG_CRYPTED = "SESSION_APP_CONFIG_CRYPTED"
     protected val ACCESS_TOKEN = "ACCESS_TOKEN_S"
     protected val REFRESH_TOKEN_ID = "REFRESH_TOKEN_ID_S"

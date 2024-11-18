@@ -21,6 +21,7 @@ import kz.bloom.ui.auth.pass_code.user_has_pin_code.component.UserHasPincodeComp
 import kz.bloom.ui.auth.pass_code.user_has_pin_code.component.UserHasPincodeComponent.Model
 import kz.bloom.ui.auth.pass_code.store.PassCodeStore
 import kz.bloom.ui.auth.pass_code.store.PassCodeStore.Label
+import kz.bloom.ui.intro.splash.isRefreshTokenExpired
 import kz.bloom.ui.ui_components.coroutineScope
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.KoinComponent
@@ -109,17 +110,24 @@ public class UserHasPinCodeComponentImpl(
 
     private fun checkIfPinMatch(enteredPin: String) {
         if (sharedPreferences.pincode == enteredPin) {
-            store.accept(
-                intent =
-                PassCodeStore.Intent.RefreshAccessToken(
-                    refreshToken = sharedPreferences.refreshToken.toString()
+            if (isRefreshTokenExpired(sharedPreferences.refreshToken)) {
+                store.accept(intent = PassCodeStore.Intent.EnterAccount(
+                    username = sharedPreferences.username!!,
+                    password = sharedPreferences.password!!)
                 )
-            )
+            } else {
+                store.accept(
+                    intent =
+                    PassCodeStore.Intent.RefreshAccessToken(
+                        refreshToken = sharedPreferences.refreshToken.toString()
+                    )
+                )
+            }
         } else {
             _model.update { it.copy(pinCodeMissMatch = true) }
         }
         store.states.subscribe { state ->
-            if (state.tokenRefreshed) {
+            if (state.tokenRefreshed || state.accountEntered) {
                 allowForward()
             }
         }

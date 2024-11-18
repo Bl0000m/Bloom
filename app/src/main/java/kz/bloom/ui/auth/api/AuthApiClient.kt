@@ -34,10 +34,10 @@ internal class AuthApiClient(private val client: HttpClient) : AuthApi {
         }
     }
 
-    override suspend fun enterAccount(model: SignInComponent.Model): SignInTokenResponse {
+    override suspend fun enterAccount(username: String, password: String): SignInTokenResponse {
         val requestBody = SignInRequest(
-            username = model.email,
-            password = model.password
+            username = username,
+            password = password
         )
         return client.post(AUTH_ENTER_ACCOUNT) {
             contentType(io.ktor.http.ContentType.Application.Json)
