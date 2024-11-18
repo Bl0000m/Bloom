@@ -18,8 +18,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -28,6 +30,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
@@ -48,6 +52,8 @@ fun SignInContent(modifier: Modifier, component: SignInComponent) {
 
     val emailFocusRequest = remember { FocusRequester() }
     val passwordFocusRequest = remember { FocusRequester() }
+
+    var passwordVisibility by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -127,9 +133,20 @@ fun SignInContent(modifier: Modifier, component: SignInComponent) {
                         .onFocusChanged { focusState ->
                             if (!focusState.isFocused) component.onPasswordFocusLost()
                         },
+                    trailingContent = {
+                        if (model.password.isNotEmpty()) {
+                            Icon(
+                                modifier = Modifier.clickable { passwordVisibility = !passwordVisibility },
+                                painter = painterResource(
+                                    id = if (passwordVisibility) R.drawable.ic_eye else R.drawable.ic_eye_closed
+                                ),
+                                contentDescription = null)
+                        }
+                    },
                     label = "ПАРОЛЬ",
                     singleLine = true,
                     placeholder = "",
+                    visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
                     isError = model.passwordErrorOccurred.errorOccurred,
                     labelStyle = MaterialTheme.typography.labelSmall,
                     onValueChange = { component.fillPassword(password = it) },
