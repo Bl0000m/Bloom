@@ -28,7 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kz.bloom.ui.auth.api.entity.ErrorResponse
 import kz.bloom.ui.ui_components.preference.SecurityPreference
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
-import kz.bloom.ui.ui_components.preference.TokenAuthenticator
+//import kz.bloom.ui.ui_components.preference.TokenAuthenticator
 import okhttp3.Authenticator
 import okio.IOException
 import org.koin.android.ext.koin.androidContext
@@ -52,7 +52,7 @@ val appModule = module {
     single<CoroutineContext>(qualifier = named("IO")) { Dispatchers.IO }
     single<StoreFactory> { DefaultStoreFactory() }
 
-    single<Authenticator> { TokenAuthenticator() }
+    //single<Authenticator> { TokenAuthenticator() }
 
     single {
         HttpClient(OkHttp) {
@@ -87,7 +87,7 @@ val appModule = module {
                 config {
                     retryOnConnectionFailure(true)
                     addInterceptor(loggingInterceptor)
-                    authenticator(authenticator = get())
+                        //authenticator(authenticator = get())
                 }
             }
         }

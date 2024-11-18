@@ -75,6 +75,13 @@ class SignInComponentImpl(
         )
     }
 
+    init {
+        Log.d("behold1",sharedPreferences.isAuth().toString())
+        Log.d("behold2",sharedPreferences.accessToken.toString())
+        Log.d("behold3",sharedPreferences.refreshToken.toString())
+        Log.d("behold4", sharedPreferences.pincode.toString())
+    }
+
     override val events: Flow<Event> = merge(
         store.labels.toEvents(),
         _events
@@ -95,6 +102,7 @@ class SignInComponentImpl(
         store.accept(intent = SignInStore.Intent.EnterAccount(model = _model.value))
         scope.launch {
             delay(500)
+            Log.d("behold", sharedPreferences.isAuth().toString())
             if(sharedPreferences.isAuth()) {
                 onAccountEntered()
             }

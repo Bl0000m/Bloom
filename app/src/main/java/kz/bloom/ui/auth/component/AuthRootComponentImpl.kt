@@ -1,8 +1,8 @@
 package kz.bloom.ui.auth.component
 
 import android.content.Context
+import android.util.Base64
 import android.util.Log
-import androidx.compose.ui.platform.LocalGraphicsContext
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
@@ -39,6 +39,7 @@ import kz.bloom.ui.auth.pass_code.user_has_pin_code.component.UserHasPinCodeComp
 import kz.bloom.ui.auth.pass_code.user_has_pin_code.component.UserHasPincodeComponent
 
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
+import org.json.JSONObject
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -58,7 +59,11 @@ internal class AuthRootComponentImpl(
 
     private val _model = MutableValue(
         initialValue = Model(
-            userHasPincodeAndIsGuest = (sharedPreferences.isGuest() && !sharedPreferences.pincode.isNullOrEmpty())
+            userHasPinAndTokenExpired = (
+                    isAccessTokenExpired(sharedPreferences.accessToken)
+                            &&
+                            !sharedPreferences.pincode.isNullOrEmpty()
+                    )
         )
     )
 
@@ -71,7 +76,7 @@ internal class AuthRootComponentImpl(
     private val _childStack = childStack(
         source = navigation,
         serializer = Configuration.serializer(),
-        initialConfiguration = if(model.value.userHasPincodeAndIsGuest) {
+        initialConfiguration = if(model.value.userHasPinAndTokenExpired) {
             Configuration.UserHasPassCode
         } else {
             Configuration.SignIn
@@ -309,5 +314,17 @@ internal class AuthRootComponentImpl(
         data object PassCode : Configuration
         @Serializable
         data object UserHasPassCode : Configuration
+    }
+}
+
+fun isAccessTokenExpired(accessToken: String?): Boolean {
+    if (accessToken.isNullOrEmpty()) return true
+    return try {
+        val parts = accessToken.split(".")
+        val payload = String(Base64.decode(parts[1], Base64.URL_SAFE))
+        val expiryTime = JSONObject(payload).getLong("exp") * 1000
+        System.currentTimeMillis() > expiryTime
+    } catch (e: Exception) {
+        true
     }
 }
