@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Bloom</string>
+    <string name="my_orders">Мои заказы</string>
+    <string name="my_subscriptions">Мои подписки</string>
+    <string name="event_calendar">Календарь событии</string>
+    <string name="payment_method">Способы оплаты</string>
+    <string name="currency">Валюта</string>
+    <string name="app_language">Язык приложения</string>
+    <string name="notifications">Уведомления</string>
+    <string name="invite_friend">Пригласить друга</string>
+    <string name="about_app">О приложении</string>
 </resources>

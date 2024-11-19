@@ -1,27 +1,26 @@
-package kz.bloom.ui.auth
+package kz.bloom.ui.profile
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.arkivanov.decompose.defaultComponentContext
-import kz.bloom.ui.auth.component.AuthRootComponentImpl
-import kz.bloom.ui.auth.content.AuthRootContent
+import kz.bloom.ui.profile.component.ProfileRootComponentImpl
+import kz.bloom.ui.profile.content.ProfileRootContent
 import kz.bloom.ui.theme.BloomTheme
+import org.koin.core.component.KoinComponent
 
-class AuthActivity : ComponentActivity() {
+class ProfileActivity : ComponentActivity(), KoinComponent {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val component = AuthRootComponentImpl(
+        val component = ProfileRootComponentImpl(
             componentContext = defaultComponentContext(),
-            onNavigateBack = { finish() },
-            context = this
+            onOpenSubscriptions = { },
+            onNavigateBack = { finish() }
         )
-
         setContent {
             BloomTheme {
-                AuthRootContent(component = component)
+                ProfileRootContent(component = component)
             }
         }
     }

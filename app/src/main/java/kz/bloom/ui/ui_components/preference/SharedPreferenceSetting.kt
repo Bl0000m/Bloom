@@ -1,6 +1,7 @@
 package kz.bloom.ui.ui_components.preference
 
 import android.content.Context
+import kz.bloom.ui.intro.splash.isAccessTokenExpired
 
 class SharedPreferencesSetting(private val applicationContext: Context) : BaseSharedPreferences() {
 
@@ -40,6 +41,10 @@ class SharedPreferencesSetting(private val applicationContext: Context) : BaseSh
     var refreshToken: String?
         get() = securityPreference.getTokenRefresh()
         set(value) = securityPreference.setTokenRefresh(value)
+
+    var name: String?
+        get() = sharedPreferencesCanBeRemoved.getString(NAME,"")
+        set(value) = putString(NAME, value, sharedPreferencesCanBeRemoved)
 
     var username: String?
         get() = sharedPreferencesCanBeRemoved.getString(USERNAME,"")

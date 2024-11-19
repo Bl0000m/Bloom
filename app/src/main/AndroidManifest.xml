@@ -33,6 +33,10 @@
 
         <activity android:name=".ui.auth.AuthActivity"/>
 
+        <activity android:name=".ui.profile.ProfileActivity"/>
+
+        <activity android:name=".ui.subscription.SubscriptionActivity"/>
+
 
     </application>
 

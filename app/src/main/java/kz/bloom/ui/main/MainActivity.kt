@@ -13,13 +13,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.defaultComponentContext
+import kz.bloom.ui.intro.splash.isAccessTokenExpired
 import kz.bloom.ui.main.component.MainComponentImpl
 import kz.bloom.ui.main.content.MainContent
 import kz.bloom.ui.main.content.SplashMainContentAnimation
 import kz.bloom.ui.theme.BloomTheme
 import kz.bloom.ui.ui_components.AUTH
+import kz.bloom.ui.ui_components.PROFILE
+import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), KoinComponent {
+    private val sharedPreferences by inject<SharedPreferencesSetting>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -35,7 +42,7 @@ class MainActivity : ComponentActivity() {
                     val component = remember {
                         MainComponentImpl(
                             componentContext = componentContext,
-                            onNavigateAuth = { onNavigateAuth() }
+                            onNavigateAuth = { onNavigateAuthOrProfile() }
                         )
                     }
                     if (isAnimationFinished) {
@@ -46,10 +53,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun onNavigateAuth() {
-        with(Intent()) {
-            setClassName(this@MainActivity, AUTH)
-            startActivity(this)
+    private fun onNavigateAuthOrProfile() {
+        if (sharedPreferences.isAuth() && !isAccessTokenExpired(sharedPreferences.accessToken)) {
+            with(Intent()) {
+                setClassName(this@MainActivity, PROFILE)
+                startActivity(this)
+            }
+        } else {
+            with(Intent()) {
+                setClassName(this@MainActivity, AUTH)
+                startActivity(this)
+            }
         }
     }
 }
