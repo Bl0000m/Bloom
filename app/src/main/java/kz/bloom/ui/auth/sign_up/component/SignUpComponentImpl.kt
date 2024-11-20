@@ -1,5 +1,6 @@
 package kz.bloom.ui.auth.sign_up.component
 
+import android.util.Log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -113,22 +114,27 @@ class SignUpComponentImpl(
     override val model: Value<Model> = _model
 
     override fun fillName(name: String) {
+        _model.update { it.copy(nameErrorOccurred = ErrorBody(errorOccurred = false, errorText = "", wasFocusedBefore = true)) }
         _model.update { it.copy(name = name) }
     }
 
     override fun fillMail(email: String) {
+        _model.update { it.copy(emailErrorOccurred = ErrorBody(errorOccurred = false, errorText = "", wasFocusedBefore = true)) }
         _model.update { it.copy(email = email) }
     }
 
     override fun fillPhone(phoneNumber: String) {
+        _model.update { it.copy(phoneNumberErrorOccurred = ErrorBody(errorOccurred = false, errorText = "", wasFocusedBefore = true)) }
         _model.update { it.copy(phoneNumber = phoneNumber) }
     }
 
     override fun fillPassword(password: String) {
+        _model.update { it.copy(passwordErrorOccurred = ErrorBody(errorOccurred = false, errorText = "", wasFocusedBefore = true)) }
         _model.update { it.copy(password = password) }
     }
 
     override fun fillPasswordConfirm(rePassword: String) {
+        _model.update { it.copy(confirmPasswordErrorOccurred = ErrorBody(errorOccurred = false, errorText = "", wasFocusedBefore = true)) }
         _model.update { it.copy(passwordConfirm = rePassword) }
     }
 
@@ -141,22 +147,24 @@ class SignUpComponentImpl(
     }
 
     override fun createAccount() {
-        store.accept(
-            intent = SignUpStore.Intent.CreateAccount(
-                model = _model.value.copy(
-                    phoneNumber = _model.value.selectedCountry.dialCode + _model.value.phoneNumber
+        if(validateAllFields()) {
+            store.accept(
+                intent = SignUpStore.Intent.CreateAccount(
+                    model = _model.value.copy(
+                        phoneNumber = _model.value.selectedCountry.dialCode + _model.value.phoneNumber
+                    )
                 )
             )
-        )
-        scope.launch {
-            delay(timeMillis = 500L)
-            store.states.subscribe { state ->
-                if (state.accountCreated && !state.isLoading) {
-                    onCreateAccount(_model.value.email)
-                    sharedPreferences.password = _model.value.password
-                    sharedPreferences.username = _model.value.email
-                } else if (!state.accountCreated && !state.isLoading) {
-                    onError(OutcomeKind.Error)
+            scope.launch {
+                delay(timeMillis = 500L)
+                store.states.subscribe { state ->
+                    if (state.accountCreated && !state.isLoading) {
+                        onCreateAccount(_model.value.email)
+                        sharedPreferences.password = _model.value.password
+                        sharedPreferences.username = _model.value.email
+                    } else if (!state.accountCreated && !state.isLoading) {
+                        onError(OutcomeKind.Error)
+                    }
                 }
             }
         }
@@ -228,6 +236,45 @@ class SignUpComponentImpl(
             }
         )
     }
+    private fun validateAllFields(): Boolean {
+        var isValid = true
+
+        _model.update { currentModel ->
+            val updatedModel = currentModel.copy(
+                nameErrorOccurred = updateFieldError(
+                    currentModel.nameErrorOccurred,
+                    { validateName(currentModel.name) }
+                ),
+                emailErrorOccurred = updateFieldError(
+                    currentModel.emailErrorOccurred,
+                    { validateEmail(currentModel.email) }
+                ),
+                phoneNumberErrorOccurred = updateFieldError(
+                    currentModel.phoneNumberErrorOccurred,
+                    { validatePhoneNumber(currentModel.phoneNumber) }
+                ),
+                passwordErrorOccurred = updateFieldError(
+                    currentModel.passwordErrorOccurred,
+                    { validatePassword(currentModel.password) }
+                ),
+                confirmPasswordErrorOccurred = updateFieldError(
+                    currentModel.confirmPasswordErrorOccurred,
+                    { validateConfirmPassword(currentModel.password, currentModel.passwordConfirm) }
+                )
+            )
+            isValid = isValid && !(
+                    updatedModel.nameErrorOccurred.errorOccurred ||
+                            updatedModel.emailErrorOccurred.errorOccurred ||
+                            updatedModel.phoneNumberErrorOccurred.errorOccurred ||
+                            updatedModel.passwordErrorOccurred.errorOccurred ||
+                            updatedModel.confirmPasswordErrorOccurred.errorOccurred
+                    )
+
+            updatedModel
+        }
+
+        return isValid
+    }
 }
 
 fun validateEmail(email: String): String {
@@ -273,11 +320,16 @@ fun validatePassword(password: String): String {
 }
 
 fun validateConfirmPassword(password: String, confirmPassword: String): String {
-    return if (password == confirmPassword) ""
-    else if (confirmPassword.isEmpty()) {
+    if (confirmPassword.isEmpty()) {
         return "Заполните поле."
     }
-    else "Проверьте пароли."
+    if (password.isNotEmpty() && confirmPassword.isNotEmpty()) {
+        if (password == confirmPassword) return ""
+    }
+    if (password != confirmPassword) {
+        return "Проверьте пароли."
+    }
+    return ""
 }
 
 fun validatePhoneNumber(phoneNumber: String): String {
@@ -293,7 +345,7 @@ fun validatePhoneNumber(phoneNumber: String): String {
 fun validateName(name: String): String {
     val nameRegex = "^[A-Za-zА-Яа-я]+$".toRegex()
 
-    if (!name.matches(nameRegex)) {
+    if (!name.matches(nameRegex) && name.isNotEmpty()) {
         return "Используйте только буквы."
     }
     if (name.length < 3) {
@@ -306,7 +358,7 @@ fun validateName(name: String): String {
     return ""
 }
 
-fun updateFieldErrorOnSecondFocusLost(
+private fun updateFieldErrorOnSecondFocusLost(
     errorBody: ErrorBody,
     validateField: () -> String,
     didErrorOccur: () -> Boolean,
@@ -334,4 +386,15 @@ private fun Flow<Label>.toEvents(): Flow<Event> = map { label ->
             Event.DisplaySnackBar(errorMessage = label.message)
         }
     }
+}
+
+private fun updateFieldError(
+    errorBody: ErrorBody,
+    validateField: () -> String
+): ErrorBody {
+    val errorText = validateField()
+    return errorBody.copy(
+        errorOccurred = errorText.isNotEmpty(),
+        errorText = errorText
+    )
 }

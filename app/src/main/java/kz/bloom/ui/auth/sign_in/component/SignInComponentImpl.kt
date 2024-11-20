@@ -27,20 +27,18 @@ import kotlin.coroutines.CoroutineContext
 import kz.bloom.ui.auth.sign_in.component.SignInComponent.Event
 import kz.bloom.ui.auth.sign_in.store.SignInStore.Label
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent.ErrorBody
-import kz.bloom.ui.auth.sign_up.component.updateFieldErrorOnSecondFocusLost
 import kz.bloom.ui.auth.sign_up.component.validateEmail
 import kz.bloom.ui.auth.sign_up.component.validatePassword
 
 class SignInComponentImpl(
     componentContext: ComponentContext,
-    private val onCreateAccount:() -> Unit,
-    private val onNavigateBack:() -> Unit,
-    private val onAccountEntered:() -> Unit,
-    private val onForgotPassword:() -> Unit
-): SignInComponent,
-   KoinComponent,
-   ComponentContext by componentContext
-{
+    private val onCreateAccount: () -> Unit,
+    private val onNavigateBack: () -> Unit,
+    private val onAccountEntered: () -> Unit,
+    private val onForgotPassword: () -> Unit
+) : SignInComponent,
+    KoinComponent,
+    ComponentContext by componentContext {
     private val authApi by inject<AuthApi>()
     private val mainContext by inject<CoroutineContext>(qualifier = named(name = "Main"))
     private val ioContext by inject<CoroutineContext>(qualifier = named(name = "IO"))
@@ -55,7 +53,8 @@ class SignInComponentImpl(
                 errorOccurred = false,
                 errorText = "",
                 wasFocusedBefore = false
-            ),ErrorBody(
+            ),
+            ErrorBody(
                 errorOccurred = false,
                 errorText = "",
                 wasFocusedBefore = false
@@ -77,7 +76,6 @@ class SignInComponentImpl(
     }
 
 
-
     override val events: Flow<Event> = merge(
         store.labels.toEvents(),
         _events
@@ -87,22 +85,42 @@ class SignInComponentImpl(
     override val model: Value<Model> = _model
 
     override fun fillEmail(email: String) {
+        _model.update {
+            it.copy(
+                emailErrorOccurred = ErrorBody(
+                    errorOccurred = false,
+                    errorText = "",
+                    wasFocusedBefore = true
+                )
+            )
+        }
         _model.update { it.copy(email = email) }
     }
 
     override fun fillPassword(password: String) {
+        _model.update {
+            it.copy(
+                passwordErrorOccurred = ErrorBody(
+                    errorOccurred = false,
+                    errorText = "",
+                    wasFocusedBefore = true
+                )
+            )
+        }
         _model.update { it.copy(password = password) }
     }
 
     override fun enterAccount() {
-        store.accept(intent = SignInStore.Intent.EnterAccount(model = _model.value))
-        scope.launch {
-            delay(500)
-            store.states.collect { state->
-                if (state.accountEntered) {
-                    onAccountEntered()
-                    sharedPreferences.username = _model.value.email
-                    sharedPreferences.password = _model.value.password
+        if (validateAllFields()) {
+            store.accept(intent = SignInStore.Intent.EnterAccount(model = _model.value))
+            scope.launch {
+                delay(500)
+                store.states.collect { state ->
+                    if (state.accountEntered) {
+                        onAccountEntered()
+                        sharedPreferences.username = _model.value.email
+                        sharedPreferences.password = _model.value.password
+                    }
                 }
             }
         }
@@ -124,7 +142,7 @@ class SignInComponentImpl(
         updateFieldErrorOnSecondFocusLost(
             errorBody = _model.value.emailErrorOccurred,
             validateField = { validateEmail(_model.value.email) },
-            didErrorOccur = { validateEmail(_model.value.email) != ""},
+            didErrorOccur = { validateEmail(_model.value.email) != "" },
             updateModel = { updatedErrorBody ->
                 _model.update { it.copy(emailErrorOccurred = updatedErrorBody) }
             }
@@ -135,7 +153,7 @@ class SignInComponentImpl(
         updateFieldErrorOnSecondFocusLost(
             errorBody = _model.value.passwordErrorOccurred,
             validateField = { validatePassword(_model.value.password) },
-            didErrorOccur = { validatePassword(_model.value.password) != ""},
+            didErrorOccur = { validatePassword(_model.value.password) != "" },
             updateModel = { updatedErrorBody ->
                 _model.update { it.copy(passwordErrorOccurred = updatedErrorBody) }
             }
@@ -143,10 +161,68 @@ class SignInComponentImpl(
     }
 
     private fun Flow<Label>.toEvents(): Flow<Event> = map { label ->
-        when(label) {
+        when (label) {
             is Label.ReceivedError -> {
                 Event.DisplaySnackBar(errorMessage = label.message)
             }
         }
     }
+
+    private fun validateAllFields(): Boolean {
+        var isValid = true
+
+        _model.update { currentModel ->
+            val updatedModel = currentModel.copy(
+                emailErrorOccurred = updateFieldError(
+                    currentModel.emailErrorOccurred,
+                    { validateEmail(currentModel.email) }
+                ),
+                passwordErrorOccurred = updateFieldError(
+                    currentModel.passwordErrorOccurred,
+                    { validatePassword(currentModel.password) }
+                )
+            )
+            isValid = isValid && !(
+                    updatedModel.emailErrorOccurred.errorOccurred ||
+                            updatedModel.passwordErrorOccurred.errorOccurred
+                    )
+
+            updatedModel
+        }
+
+        return isValid
+    }
+}
+
+private fun updateFieldErrorOnSecondFocusLost(
+    errorBody: ErrorBody,
+    validateField: () -> String,
+    didErrorOccur: () -> Boolean,
+    updateModel: (ErrorBody) -> Unit
+) {
+    if (errorBody.wasFocusedBefore) {
+        updateModel(
+            errorBody.copy(
+                errorText = validateField(),
+                errorOccurred = didErrorOccur()
+            )
+        )
+    } else {
+        updateModel(
+            errorBody.copy(
+                wasFocusedBefore = true
+            )
+        )
+    }
+}
+
+private fun updateFieldError(
+    errorBody: ErrorBody,
+    validateField: () -> String
+): ErrorBody {
+    val errorText = validateField()
+    return errorBody.copy(
+        errorOccurred = errorText.isNotEmpty(),
+        errorText = errorText
+    )
 }

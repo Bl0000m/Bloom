@@ -92,7 +92,7 @@ fun LabeledTextField(
             overflow = TextOverflow.Ellipsis
         )
         CustomTextField(
-            modifier = Modifier
+            modifier = modifier
                 .clip(shape = shape)
                 .align(Alignment.BottomStart)
                 .then(textFieldModifier)

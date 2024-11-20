@@ -2,6 +2,7 @@ package kz.bloom.ui.main
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -54,16 +55,16 @@ class MainActivity : ComponentActivity(), KoinComponent {
     }
 
     private fun onNavigateAuthOrProfile() {
-        if (sharedPreferences.isAuth() && !isAccessTokenExpired(sharedPreferences.accessToken)) {
-            with(Intent()) {
-                setClassName(this@MainActivity, PROFILE)
-                startActivity(this)
-            }
-        } else {
+//        if (sharedPreferences.isAuth() && !isAccessTokenExpired(sharedPreferences.accessToken)) {
+//            with(Intent()) {
+//                setClassName(this@MainActivity, PROFILE)
+//                startActivity(this)
+//            }
+//        } else {
             with(Intent()) {
                 setClassName(this@MainActivity, AUTH)
                 startActivity(this)
             }
-        }
+   //     }
     }
 }

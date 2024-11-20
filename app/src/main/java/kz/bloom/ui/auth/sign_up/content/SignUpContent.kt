@@ -35,7 +35,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -56,6 +55,12 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
 
     val model by component.model.subscribeAsState()
     val focusManager = LocalFocusManager.current
+
+    var nameIsFocused by remember { mutableStateOf(false) }
+    var emailIsFocused by remember { mutableStateOf(false) }
+    var phoneNumberIsFocused by remember { mutableStateOf(false) }
+    var passwordIsFocused by remember { mutableStateOf(false) }
+
     val emailFocusRequest = remember { FocusRequester() }
     val nameFocusRequest = remember { FocusRequester() }
     val phoneNumberFocusRequest = remember { FocusRequester() }
@@ -118,6 +123,11 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                         .focusRequester(nameFocusRequest)
                         .onFocusChanged { focusState ->
                             if (!focusState.isFocused) component.onNameFocusLost()
+                            if (focusState.isFocused) {
+                                nameIsFocused = !nameIsFocused
+                            } else if (!focusState.isFocused) {
+                                nameIsFocused = false
+                            }
                         },
                     label = "ИМЯ",
                     placeholder = "",
@@ -131,6 +141,12 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                     ),
                     value = model.name
                 )
+                if (nameIsFocused && !model.nameErrorOccurred.errorOccurred) {
+                    Text(
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                        text = "Введите ваше имя"
+                    )
+                }
                 Text(
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
                     text = model.nameErrorOccurred.errorText,
@@ -141,6 +157,11 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                         .focusRequester(emailFocusRequest)
                         .onFocusChanged { focusState ->
                             if (!focusState.isFocused) component.onEmailFocusLost()
+                            if (focusState.isFocused) {
+                                emailIsFocused = !emailIsFocused
+                            } else if (!focusState.isFocused) {
+                                emailIsFocused = false
+                            }
                         },
                     label = "ЭЛЕКТРОННАЯ ПОЧТА",
                     singleLine = true,
@@ -154,6 +175,13 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                     ),
                     value = model.email
                 )
+                if (emailIsFocused && !model.emailErrorOccurred.errorOccurred) {
+                    Text(
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                        text = "Введите адрес электронной почты"
+                    )
+                }
+
                 Text(
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
                     text = model.emailErrorOccurred.errorText,
@@ -194,6 +222,11 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                             .focusRequester(phoneNumberFocusRequest)
                             .onFocusChanged { focusState ->
                                 if (!focusState.isFocused) component.onPhoneFocusLost()
+                                if (focusState.isFocused) {
+                                    phoneNumberIsFocused = !phoneNumberIsFocused
+                                } else if (!focusState.isFocused) {
+                                    phoneNumberIsFocused = false
+                                }
                             },
                         label = "НОМЕР ТЕЛЕФОНА",
                         isError = model.phoneNumberErrorOccurred.errorOccurred,
@@ -226,23 +259,42 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                         painter = painterResource(id = R.drawable.ic_close_round_fill_light),
                         contentDescription = null)
                 }
+                if (passwordIsFocused && !model.phoneNumberErrorOccurred.errorOccurred) {
+                    Text(
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                        text = "Добавьте номер телефона"
+                    )
+                }
+                Text(
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                    text = model.phoneNumberErrorOccurred.errorText,
+                    color = MaterialTheme.colorScheme.error
+                )
 
                 LabeledTextField(
                     modifier = Modifier
                         .focusRequester(passwordFocusRequest)
                         .onFocusChanged { focusState ->
                             if (!focusState.isFocused) component.onPasswordFocusLost()
+                            if (focusState.isFocused) {
+                                passwordIsFocused = !passwordIsFocused
+                            } else if(!focusState.isFocused) {
+                                passwordIsFocused = false
+                            }
                         },
                     label = "ПАРОЛЬ",
                     singleLine = true,
                     trailingContent = {
                         if (model.password.isNotEmpty()) {
                             Icon(
-                                modifier = Modifier.clickable { passwordVisibility = !passwordVisibility },
+                                modifier = Modifier.clickable {
+                                    passwordVisibility = !passwordVisibility
+                                },
                                 painter = painterResource(
                                     if (passwordVisibility) R.drawable.ic_eye else R.drawable.ic_eye_closed
                                 ),
-                                contentDescription = null)
+                                contentDescription = null
+                            )
                         }
                     },
                     isError = model.passwordErrorOccurred.errorOccurred,
@@ -256,6 +308,12 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                     ),
                     value = model.password
                 )
+                if (passwordIsFocused && !model.passwordErrorOccurred.errorOccurred) {
+                    Text(
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                        text = "Создайте пароль. Минимальная длина пароля - 8 символов (комбинации цифр, букв и спец. символов)"
+                    )
+                }
 
                 Text(
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
@@ -274,14 +332,19 @@ fun SignUpContent(modifier: Modifier, component: SignUpComponent) {
                     singleLine = true,
                     placeholder = "",
                     labelStyle = MaterialTheme.typography.labelSmall,
-                    trailingContent = { if (model.passwordConfirm.isNotEmpty()) {
-                        Icon(
-                            modifier = Modifier.clickable { rePasswordVisibility = !rePasswordVisibility },
-                            painter = painterResource(
-                                id = if (rePasswordVisibility) R.drawable.ic_eye else R.drawable.ic_eye_closed
-                            ),
-                            contentDescription = null)
-                    } },
+                    trailingContent = {
+                        if (model.passwordConfirm.isNotEmpty()) {
+                            Icon(
+                                modifier = Modifier.clickable {
+                                    rePasswordVisibility = !rePasswordVisibility
+                                },
+                                painter = painterResource(
+                                    id = if (rePasswordVisibility) R.drawable.ic_eye else R.drawable.ic_eye_closed
+                                ),
+                                contentDescription = null
+                            )
+                        }
+                    },
                     onValueChange = { component.fillPasswordConfirm(rePassword = it) },
                     visualTransformation = if (rePasswordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),

@@ -7,7 +7,6 @@ import com.arkivanov.decompose.value.update
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,7 +26,6 @@ import kz.bloom.ui.auth.confirm.forgot_password.creating_new_password.store.Crea
 import kz.bloom.ui.auth.confirm.forgot_password.creating_new_password.component.CreateNewPasswordComponent.Event
 import kz.bloom.ui.auth.confirm.forgot_password.creating_new_password.store.CreateNewPasswordStore.Label
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent.ErrorBody
-import kz.bloom.ui.auth.sign_up.component.updateFieldErrorOnSecondFocusLost
 import kz.bloom.ui.auth.sign_up.component.validateConfirmPassword
 import kz.bloom.ui.auth.sign_up.component.validatePassword
 import kz.bloom.ui.ui_components.coroutineScope
@@ -85,23 +83,29 @@ class CreateNewPasswordComponentImpl(
     )
 
     override fun fillPassword(password: String) {
+        _model.update { it.copy(passwordErrorOccurred = ErrorBody(errorText = "", errorOccurred = false, wasFocusedBefore = true)) }
         _model.update { it.copy(password = password) }
     }
 
     override fun fillConfirmPassword(confirmPassword: String) {
+        _model.update { it.copy(confirmPasswordErrorOccurred = ErrorBody(errorOccurred = false, errorText = "", wasFocusedBefore = true)) }
         _model.update { it.copy(confirmPassword = confirmPassword) }
     }
 
     override fun createNewPass() {
-        scope.launch {
-            store.accept(intent = Intent.CreateNewPass(
-                email = email,
-                password = _model.value.password,
-                confirmPassword = _model.value.confirmPassword)
-            )
-            delay(500)
-            if (store.states.value.newPassCreated) {
-                openOutcomePage(OutcomeKind.RestoreSuccess)
+        if (validateAllFields()) {
+            scope.launch {
+                store.accept(
+                    intent = Intent.CreateNewPass(
+                        email = email,
+                        password = _model.value.password,
+                        confirmPassword = _model.value.confirmPassword
+                    )
+                )
+                delay(500)
+                if (store.states.value.newPassCreated) {
+                    openOutcomePage(OutcomeKind.RestoreSuccess)
+                }
             }
         }
     }
@@ -128,6 +132,31 @@ class CreateNewPasswordComponentImpl(
         )
     }
 
+    private fun validateAllFields(): Boolean {
+        var isValid = true
+
+        _model.update { currentModel ->
+            val updatedModel = currentModel.copy(
+                passwordErrorOccurred = updateFieldError(
+                    currentModel.passwordErrorOccurred,
+                    { validatePassword(currentModel.password) }
+                ),
+                confirmPasswordErrorOccurred = updateFieldError(
+                    currentModel.confirmPasswordErrorOccurred,
+                    { validateConfirmPassword(currentModel.password, currentModel.confirmPassword) }
+                )
+            )
+            isValid = isValid && !(
+                            updatedModel.passwordErrorOccurred.errorOccurred ||
+                            updatedModel.confirmPasswordErrorOccurred.errorOccurred
+                    )
+
+            updatedModel
+        }
+
+        return isValid
+    }
+
     override fun onNavigateBack() {
         onBack()
     }
@@ -139,4 +168,37 @@ private fun Flow<Label>.toEvents(): Flow<Event> = map { label ->
             Event.DisplaySnackBar(errorMessage = label.message)
         }
     }
+}
+
+private fun updateFieldErrorOnSecondFocusLost(
+    errorBody: ErrorBody,
+    validateField: () -> String,
+    didErrorOccur: () -> Boolean,
+    updateModel: (ErrorBody) -> Unit
+) {
+    if (errorBody.wasFocusedBefore) {
+        updateModel(
+            errorBody.copy(
+                errorText = validateField(),
+                errorOccurred = didErrorOccur()
+            )
+        )
+    } else {
+        updateModel(
+            errorBody.copy(
+                wasFocusedBefore = true
+            )
+        )
+    }
+}
+
+private fun updateFieldError(
+    errorBody: ErrorBody,
+    validateField: () -> String
+): ErrorBody {
+    val errorText = validateField()
+    return errorBody.copy(
+        errorOccurred = errorText.isNotEmpty(),
+        errorText = errorText
+    )
 }
