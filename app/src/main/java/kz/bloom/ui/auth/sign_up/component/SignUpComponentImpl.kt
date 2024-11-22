@@ -5,6 +5,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
+import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
@@ -40,12 +41,17 @@ class SignUpComponentImpl(
     private val onOpenCountryChooser: () -> Unit
 ) : SignUpComponent,
     KoinComponent,
+    Lifecycle.Callbacks,
     ComponentContext by componentContext {
     private val authApi by inject<AuthApi>()
     private val mainContext by inject<CoroutineContext>(qualifier = named(name = "Main"))
     private val ioContext by inject<CoroutineContext>(qualifier = named(name = "IO"))
     private val sharedPreferences by inject<SharedPreferencesSetting>()
     private val storeFactory by inject<StoreFactory>()
+
+    override fun onScreenReopened() {
+        onScreenResumed()
+    }
 
     private val store = instanceKeeper.getStore {
         SignUpStore(
@@ -274,6 +280,17 @@ class SignUpComponentImpl(
         }
 
         return isValid
+    }
+    private fun onScreenResumed() {
+        _model.update {
+            it.copy(
+                nameErrorOccurred = it.nameErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false),
+                emailErrorOccurred = it.emailErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false),
+                phoneNumberErrorOccurred = it.phoneNumberErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false),
+                passwordErrorOccurred = it.passwordErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false),
+                confirmPasswordErrorOccurred = it.confirmPasswordErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false)
+            )
+        }
     }
 }
 

@@ -35,6 +35,8 @@ interface SignUpComponent {
 
     fun fillName(name: String)
 
+    fun onScreenReopened()
+
     fun fillMail(email: String)
 
     fun fillPhone(phoneNumber: String)

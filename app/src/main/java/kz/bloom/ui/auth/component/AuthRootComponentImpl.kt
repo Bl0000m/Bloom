@@ -2,15 +2,19 @@ package kz.bloom.ui.auth.component
 
 import android.content.Context
 import android.util.Base64
+import android.util.Log
+import androidx.compose.ui.platform.LocalGraphicsContext
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.StackNavigation
+import com.arkivanov.decompose.router.stack.backStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.popToFirst
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.essenty.lifecycle.doOnResume
 import kotlinx.serialization.Serializable
 import kz.bloom.ui.auth.sign_in.component.SignInComponent
 import kz.bloom.ui.auth.sign_up.component.SignUpComponent
@@ -113,10 +117,14 @@ internal class AuthRootComponentImpl(
         )
 
         is Configuration.SignUp -> {
-            currentSignUpComponent = currentSignUpComponent ?: signUpComponent(
-                componentContext = componentContext,
-                selectedCountry = configuration.selectedCountry
-            )
+            if (currentSignUpComponent == null) {
+                currentSignUpComponent = signUpComponent(
+                    componentContext = componentContext,
+                    selectedCountry = configuration.selectedCountry
+                )
+            } else {
+                currentSignUpComponent?.onScreenReopened()
+            }
             Child.SignUp(component = currentSignUpComponent!!)
         }
 

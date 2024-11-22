@@ -1,9 +1,11 @@
 package kz.bloom.ui.auth.confirm.forgot_password.creating_new_password.component
 
+import android.util.Log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
+import com.arkivanov.essenty.lifecycle.doOnResume
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
@@ -82,6 +84,12 @@ class CreateNewPasswordComponentImpl(
         _events
     )
 
+    init {
+        lifecycle.doOnResume {
+            onScreenResumed()
+        }
+    }
+
     override fun fillPassword(password: String) {
         _model.update { it.copy(passwordErrorOccurred = ErrorBody(errorText = "", errorOccurred = false, wasFocusedBefore = true)) }
         _model.update { it.copy(password = password) }
@@ -159,6 +167,14 @@ class CreateNewPasswordComponentImpl(
 
     override fun onNavigateBack() {
         onBack()
+    }
+    private fun onScreenResumed() {
+        _model.update {
+            it.copy(
+                passwordErrorOccurred = it.passwordErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false),
+                confirmPasswordErrorOccurred = it.confirmPasswordErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false)
+            )
+        }
     }
 }
 

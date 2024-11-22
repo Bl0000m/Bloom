@@ -5,6 +5,8 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
+import com.arkivanov.essenty.lifecycle.Lifecycle
+import com.arkivanov.essenty.lifecycle.doOnResume
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
@@ -95,6 +97,12 @@ class SignInComponentImpl(
             )
         }
         _model.update { it.copy(email = email) }
+    }
+
+    init {
+        lifecycle.doOnResume {
+            onScreenResumed()
+        }
     }
 
     override fun fillPassword(password: String) {
@@ -191,6 +199,15 @@ class SignInComponentImpl(
         }
 
         return isValid
+    }
+
+    private fun onScreenResumed() {
+        _model.update {
+            it.copy(
+                emailErrorOccurred = it.emailErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false),
+                passwordErrorOccurred = it.passwordErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false),
+            )
+        }
     }
 }
 
