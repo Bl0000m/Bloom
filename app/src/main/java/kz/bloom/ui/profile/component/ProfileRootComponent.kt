@@ -2,7 +2,7 @@ package kz.bloom.ui.profile.component
 
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
-import kz.bloom.ui.profile.profile_main.component.ProfileMainComponent
+import kz.bloom.ui.main.profile.component.ProfileMainComponent
 
 interface ProfileRootComponent {
     public data class Model(

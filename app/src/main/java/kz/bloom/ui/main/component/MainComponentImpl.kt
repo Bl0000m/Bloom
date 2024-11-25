@@ -1,62 +1,113 @@
 package kz.bloom.ui.main.component
 
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.value.MutableValue
+import com.arkivanov.decompose.DefaultComponentContext
+import com.arkivanov.decompose.router.stack.ChildStack
+import com.arkivanov.decompose.router.stack.StackNavigation
+import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.popTo
+import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.Value
-import com.arkivanov.decompose.value.operator.map
-import com.arkivanov.mvikotlin.core.instancekeeper.getStore
-import com.arkivanov.mvikotlin.core.store.StoreFactory
-import kz.bloom.libraries.states
-
-import kz.bloom.ui.main.component.MainComponent.Model
-import kz.bloom.ui.main.content.NavBarItem
-import kz.bloom.ui.main.data.MainRepository
-import kz.bloom.ui.main.store.MainStore
+import com.arkivanov.essenty.lifecycle.Lifecycle
+import kotlinx.serialization.Serializable
+import kz.bloom.ui.intro.splash.isAccessTokenExpired
+import kz.bloom.ui.main.bottom_nav_bar.NavBottomBarComponent
+import kz.bloom.ui.main.bottom_nav_bar.NavBottomBarComponentImpl
+import kz.bloom.ui.main.bottom_nav_bar.TabItem
+import kz.bloom.ui.main.component.MainComponent.Child
+import kz.bloom.ui.main.home_page.component.HomePageComponent
+import kz.bloom.ui.main.home_page.component.HomePageComponentImpl
+import kz.bloom.ui.main.profile.component.ProfileMainComponent
+import kz.bloom.ui.main.profile.component.ProfileMainComponentImpl
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.koin.core.qualifier.named
-import kotlin.coroutines.CoroutineContext
 
 
 public class MainComponentImpl(
     componentContext: ComponentContext,
-    private val onNavigateAuth:() -> Unit
-) :
-MainComponent,
-KoinComponent,
-ComponentContext by componentContext
-{
-    private val mainApi by inject<MainRepository>()
-    private val mainContext by inject<CoroutineContext>(qualifier = named(name = "Main"))
-    private val ioContext by inject<CoroutineContext>(qualifier = named(name = "IO"))
-    private val storeFactory by inject<StoreFactory>()
+    private val onOpenSubscriptions: () -> Unit,
+    private val onNeedAuth:() -> Unit
+) : MainComponent,
+    KoinComponent,
+    ComponentContext by componentContext {
+    private val navigation = StackNavigation<Configuration>()
+
     private val sharedPreferences by inject<SharedPreferencesSetting>()
 
-    private val store: MainStore = instanceKeeper.getStore {
-        MainStore(
-            mainApi = mainApi,
-            mainContext = mainContext,
-            ioContext = ioContext,
-            storeFactory = storeFactory)
-    }
+    val navBarComponent: NavBottomBarComponent = NavBottomBarComponentImpl(
+        componentContext = DefaultComponentContext(lifecycle = componentContext.lifecycle),
+        onTabSelect = { tab ->
+            when (tab) {
+                TabItem.HOME -> {
+                    navigation.popTo(0)
+                }
 
+                TabItem.PROFILE -> {
+                    if (sharedPreferences.isAuth() && !isAccessTokenExpired(sharedPreferences.accessToken)) {
+                        navigation.pushNew(configuration = Configuration.Profile)
+                    } else {
+                        onNeedAuth()
+                    }
+                }
+                // Handle other tabs...
+                else -> {}
+            }
+        }
+    )
 
-    override val model: Value<Model> = store.states.toModels()
+    private val _childStack = childStack(
+        source = navigation,
+        serializer = Configuration.serializer(),
+        initialConfiguration = Configuration.Home,
+        handleBackButton = false,
+        childFactory = { configuration, componentContext ->
+            createChild(
+                configuration = configuration,
+                componentContext = componentContext
+            )
+        }
+    )
 
-    override fun profileClicked() {
-        onNavigateAuth()
-    }
+    override val childStack: Value<ChildStack<*, Child>> = _childStack
 
-    override fun categorySelected(navBarItem: NavBarItem) {
-        store.accept(MainStore.Intent.SelectNavBarItem(navBarItem))
-    }
-
-    private fun Value<MainStore.State>.toModels(): Value<Model> = map { state ->
-        Model(
-            pages = state.pagesList,
-            navBarSelectedItem = state.navBarSelectedItem
+    private fun createChild(
+        configuration: Configuration,
+        componentContext: ComponentContext
+    ): Child = when (configuration) {
+        is Configuration.Home -> Child.Home(
+            component = homeComponent(
+                componentContext = componentContext
+            )
         )
+
+        is Configuration.Profile -> Child.Profile(
+            component = profileComponent(
+                componentContext = componentContext
+            )
+        )
+    }
+
+    private fun homeComponent(
+        componentContext: ComponentContext
+    ): HomePageComponent = HomePageComponentImpl(
+        componentContext = componentContext
+    )
+
+    private fun profileComponent(
+        componentContext: ComponentContext
+    ): ProfileMainComponent = ProfileMainComponentImpl(
+        componentContext = componentContext,
+        onOpenSubscriptions = { onOpenSubscriptions() }
+    )
+
+    @Serializable
+    private sealed interface Configuration {
+        @Serializable
+        data object Home : Configuration
+
+        @Serializable
+        data object Profile : Configuration
     }
 }

@@ -1,8 +1,7 @@
-package kz.bloom.ui.profile.profile_main.content
+package kz.bloom.ui.main.profile.content
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,13 +26,12 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.R
-import kz.bloom.ui.profile.profile_main.component.ProfileCategoryType
-import kz.bloom.ui.profile.profile_main.component.ProfileMainComponent
+import kz.bloom.ui.main.profile.component.ProfileCategoryType
+import kz.bloom.ui.main.profile.component.ProfileMainComponent
 
 @Composable
 fun ProfileMainContent(

@@ -8,8 +8,8 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kz.bloom.ui.main.content.NavBarItem
-import kz.bloom.ui.main.data.MainApi
+import kz.bloom.ui.main.bottom_nav_bar.NavBarItem
+import kz.bloom.ui.main.bottom_nav_bar.TabItem
 import kz.bloom.ui.main.data.MainRepository
 import kz.bloom.ui.main.data.entity.PageItem
 import kz.bloom.ui.main.store.MainStore.Intent
@@ -26,7 +26,7 @@ private sealed interface Message : JvmSerializable {
 
     data class LoadingPagesList(val isLoading: Boolean) : Message
 
-    data class NavBarItemSelected(val selectedItem: NavBarItem) : Message
+    data class NavBarItemSelected(val selectedItem: TabItem) : Message
 
     object ErrorOccurred : Message
 }

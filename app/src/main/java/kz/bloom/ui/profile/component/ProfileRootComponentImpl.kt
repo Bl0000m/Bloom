@@ -10,8 +10,8 @@ import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.profile.component.ProfileRootComponent.Model
 import kz.bloom.ui.profile.component.ProfileRootComponent.Child
-import kz.bloom.ui.profile.profile_main.component.ProfileMainComponent
-import kz.bloom.ui.profile.profile_main.component.ProfileMainComponentImpl
+import kz.bloom.ui.main.profile.component.ProfileMainComponent
+import kz.bloom.ui.main.profile.component.ProfileMainComponentImpl
 
 class ProfileRootComponentImpl(
     componentContext: ComponentContext,

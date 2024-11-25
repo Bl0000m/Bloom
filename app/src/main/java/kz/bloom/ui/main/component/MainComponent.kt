@@ -1,18 +1,29 @@
 package kz.bloom.ui.main.component
 
+import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
-import kz.bloom.ui.main.content.NavBarItem
-import kz.bloom.ui.main.data.entity.PageItem
+import kz.bloom.ui.main.home_page.component.HomePageComponent
+import kz.bloom.ui.main.profile.component.ProfileMainComponent
 
 interface MainComponent {
-    public data class Model(
-        val pages: List<PageItem>,
-        val navBarSelectedItem: NavBarItem
-    )
+    sealed interface Child {
+        public data class Home(
+            public val component: HomePageComponent
+        ) : Child
+//        public data class Search(
+//            public val component: SearchComponent
+//        )
+//        public data class Menu(
+//            public val component: MenuComponent
+//        )
+//        public data class Market(
+//            public val component: MarketComponent
+//        )
+        public data class Profile(
+            public val component: ProfileMainComponent
+        ) : Child
+    }
 
-    public val model: Value<Model>
+    public val childStack: Value<ChildStack<*, Child>>
 
-    public fun profileClicked()
-
-    public fun categorySelected(navBarItem: NavBarItem)
 }

@@ -1,4 +1,4 @@
-package kz.bloom.ui.profile.profile_main.component
+package kz.bloom.ui.main.profile.component
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -7,8 +7,8 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import kz.bloom.R
 import org.koin.core.component.KoinComponent
-import kz.bloom.ui.profile.profile_main.component.ProfileMainComponent.Model
-import kz.bloom.ui.profile.profile_main.component.ProfileMainComponent.ProfileCategory
+import kz.bloom.ui.main.profile.component.ProfileMainComponent.Model
+import kz.bloom.ui.main.profile.component.ProfileMainComponent.ProfileCategory
 
 class ProfileMainComponentImpl(
     componentContext: ComponentContext,

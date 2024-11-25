@@ -1,7 +1,5 @@
-package kz.bloom.ui.profile.profile_main.component
+package kz.bloom.ui.main.profile.component
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import com.arkivanov.decompose.value.Value
 import kotlinx.serialization.Serializable
 

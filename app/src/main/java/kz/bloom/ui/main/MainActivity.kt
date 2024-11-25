@@ -2,7 +2,6 @@ package kz.bloom.ui.main
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,13 +13,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.defaultComponentContext
-import kz.bloom.ui.intro.splash.isAccessTokenExpired
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.ui.main.component.MainComponentImpl
+import kz.bloom.ui.main.bottom_nav_bar.BottomNavBar
 import kz.bloom.ui.main.content.MainContent
 import kz.bloom.ui.main.content.SplashMainContentAnimation
 import kz.bloom.ui.theme.BloomTheme
 import kz.bloom.ui.ui_components.AUTH
-import kz.bloom.ui.ui_components.PROFILE
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -30,41 +29,52 @@ class MainActivity : ComponentActivity(), KoinComponent {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
+        enableEdgeToEdge()
         val componentContext = defaultComponentContext()
+
         setContent {
             BloomTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
-                    var isAnimationFinished by remember { mutableStateOf(false) }
+                var isAnimationFinished by remember { mutableStateOf(false) }
+                val mainComponent = remember {
+                    MainComponentImpl(
+                        componentContext = componentContext,
+                        onOpenSubscriptions = { },
+                        onNeedAuth = { openAuth() }
+                    )
+                }
+                val navBarComponent = remember { mainComponent.navBarComponent }
+
+                if (isAnimationFinished) {
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize(),
+                        bottomBar = {
+                            val selectedTab by navBarComponent.selectedTab.subscribeAsState()
+                            BottomNavBar(
+                                selectedTab = selectedTab,
+                                onTabSelected = { navBarComponent.onTabSelected(it) }
+                            )
+                        },
+                        content = { _ ->
+                            MainContent(
+                                component = mainComponent
+                            )
+                        }
+                    )
+                } else {
                     SplashMainContentAnimation(
                         modifier = Modifier.fillMaxSize(),
-                        onAnimationFinish = { isAnimationFinished = true })
-                    val component = remember {
-                        MainComponentImpl(
-                            componentContext = componentContext,
-                            onNavigateAuth = { onNavigateAuthOrProfile() }
-                        )
-                    }
-                    if (isAnimationFinished) {
-                        MainContent(component = component)
-                    }
+                        onAnimationFinish = { isAnimationFinished = true }
+                    )
                 }
             }
         }
     }
 
-    private fun onNavigateAuthOrProfile() {
-//        if (sharedPreferences.isAuth() && !isAccessTokenExpired(sharedPreferences.accessToken)) {
-//            with(Intent()) {
-//                setClassName(this@MainActivity, PROFILE)
-//                startActivity(this)
-//            }
-//        } else {
-            with(Intent()) {
-                setClassName(this@MainActivity, AUTH)
-                startActivity(this)
-            }
-   //     }
+    private fun openAuth() {
+        with(Intent()) {
+            setClassName(this@MainActivity, AUTH)
+            startActivity(this)
+        }
     }
 }
