@@ -29,7 +29,7 @@ class ProfileMainComponentImpl(
     override fun onCategoryClick(categoryType: ProfileCategoryType) {
         when(categoryType) {
             ProfileCategoryType.MY_ORDERS -> { /* Navigate to My Orders */ }
-            ProfileCategoryType.MY_SUBSCRIPTIONS -> onOpenSubscriptions()
+            ProfileCategoryType.MY_SUBSCRIPTIONS -> { onOpenSubscriptions() }
             ProfileCategoryType.EVENT_CALENDAR -> { /* Handle calendar action */ }
             ProfileCategoryType.PAYMENT_METHOD -> { /* Handle payment method */ }
             ProfileCategoryType.CURRENCY -> { /* Handle currency selection */ }

@@ -1,4 +1,4 @@
 package kz.bloom.ui.ui_components
 
 const val AUTH = "kz.bloom.ui.auth.AuthActivity"
-const val PROFILE = "kz.bloom.ui.profile.ProfileActivity"
+const val SUBSCRIPTIONS = "kz.bloom.ui.subscription.SubscriptionActivity"

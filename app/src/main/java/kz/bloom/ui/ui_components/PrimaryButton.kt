@@ -26,7 +26,7 @@ public fun PrimaryButton(
             .clickable { onClick() }
             .fillMaxWidth()
             .height(height = 32.dp)
-            .border(width = 1.dp, color = Color.Black)
+            .border(width = 0.5.dp, color = Color.Black)
     ) {
         Text(
             modifier = Modifier.align(Alignment.Center),

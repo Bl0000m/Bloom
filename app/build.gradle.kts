@@ -120,4 +120,7 @@ dependencies {
 
     // kotlin coroutines
     implementation(dependencyNotation = libs.bundles.coroutines)
+
+    // compose calendar
+    implementation(libs.composecalendar)
 }

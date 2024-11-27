@@ -20,6 +20,7 @@ import kz.bloom.ui.main.content.MainContent
 import kz.bloom.ui.main.content.SplashMainContentAnimation
 import kz.bloom.ui.theme.BloomTheme
 import kz.bloom.ui.ui_components.AUTH
+import kz.bloom.ui.ui_components.SUBSCRIPTIONS
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -39,7 +40,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
                 val mainComponent = remember {
                     MainComponentImpl(
                         componentContext = componentContext,
-                        onOpenSubscriptions = { },
+                        onOpenSubscriptions = { openSubscriptions() },
                         onNeedAuth = { openAuth() }
                     )
                 }
@@ -74,6 +75,12 @@ class MainActivity : ComponentActivity(), KoinComponent {
     private fun openAuth() {
         with(Intent()) {
             setClassName(this@MainActivity, AUTH)
+            startActivity(this)
+        }
+    }
+    private fun openSubscriptions() {
+        with(Intent()) {
+            setClassName(this@MainActivity, SUBSCRIPTIONS)
             startActivity(this)
         }
     }
