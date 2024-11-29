@@ -25,6 +25,33 @@ private val SanFranciscoPro: FontFamily = FontFamily(
     )
 )
 
+private val Inter: FontFamily = FontFamily(
+    Font(
+        resId = R.font.inter_medium,
+        weight = FontWeight.Medium
+    ),
+    Font(
+        resId = R.font.inter_regular,
+        weight = FontWeight.Normal
+    )
+)
+
+val InterTypography = Typography(
+    labelMedium = TextStyle(
+        fontFamily = Inter,
+        fontWeight = FontWeight.Medium,
+        fontSize = 12.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.2.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = Inter,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp,
+        lineHeight = 24.sp
+    )
+)
+
 val Typography = Typography(
     // Body text styles
     bodyLarge = TextStyle(

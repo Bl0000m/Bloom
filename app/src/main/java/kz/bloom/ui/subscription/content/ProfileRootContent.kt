@@ -9,6 +9,7 @@ import com.arkivanov.decompose.extensions.compose.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import kz.bloom.ui.subscription.component.SubscriptionRootComponent
 import kz.bloom.ui.subscription.component.SubscriptionRootComponent.Child
+import kz.bloom.ui.subscription.create_subscription.content.CreateSubscriptionContent
 import kz.bloom.ui.subscription.date_picker.content.DatePickerContent
 import kz.bloom.ui.subscription.subs_list.content.SubsListContent
 
@@ -29,6 +30,10 @@ fun SubscriptionRootContent(component: SubscriptionRootComponent) {
                         component = childInstance.component
                     )
                     is Child.DatePicker -> DatePickerContent(
+                        modifier = contentPaddingModifier,
+                        component = childInstance.component
+                    )
+                    is Child.CreateSubscription -> CreateSubscriptionContent(
                         modifier = contentPaddingModifier,
                         component = childInstance.component
                     )

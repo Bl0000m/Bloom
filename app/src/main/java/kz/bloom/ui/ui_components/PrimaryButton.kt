@@ -1,5 +1,6 @@
 package kz.bloom.ui.ui_components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.dp
 public fun PrimaryButton(
     modifier: Modifier = Modifier,
     textStyle: TextStyle = MaterialTheme.typography.labelSmall,
+    isAlternative: Boolean = false,
     text: String,
     onClick:() -> Unit
 ) {
@@ -25,13 +27,15 @@ public fun PrimaryButton(
         modifier = modifier
             .clickable { onClick() }
             .fillMaxWidth()
-            .height(height = 32.dp)
+            .background(color = if (isAlternative) Color.Black else Color.White)
+            .height(height = if (isAlternative) 40.dp else 32.dp)
             .border(width = 0.5.dp, color = Color.Black)
     ) {
         Text(
             modifier = Modifier.align(Alignment.Center),
             text = text,
-            style = textStyle
+            style = textStyle,
+            color = if (isAlternative) Color.White else Color.Black
         )
     }
 }

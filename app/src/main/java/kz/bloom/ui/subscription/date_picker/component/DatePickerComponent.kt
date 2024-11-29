@@ -27,4 +27,6 @@ interface DatePickerComponent {
     fun chooseDay()
 
     fun onContinue()
+
+    fun onBackPressed()
 }

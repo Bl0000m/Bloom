@@ -13,5 +13,7 @@ interface SubsListComponent {
 
     val model: Value<Model>
 
-    fun chooseDate()
+    fun createSubscription()
+
+    fun onBackPressed()
 }

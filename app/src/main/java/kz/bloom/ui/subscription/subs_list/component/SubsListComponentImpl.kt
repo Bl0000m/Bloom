@@ -8,7 +8,8 @@ import kz.bloom.ui.subscription.subs_list.component.SubsListComponent.Model
 
 class SubsListComponentImpl(
     componentContext: ComponentContext,
-    private val onChooseDate: () -> Unit
+    private val onCreateSubscription: () -> Unit,
+    private val onBackPress:() -> Unit
 ) : SubsListComponent,
     KoinComponent,
     ComponentContext by componentContext
@@ -20,7 +21,11 @@ class SubsListComponentImpl(
     )
     override val model: Value<Model> = _model
 
-    override fun chooseDate() {
-        onChooseDate()
+    override fun createSubscription() {
+        onCreateSubscription()
+    }
+
+    override fun onBackPressed() {
+        onBackPress()
     }
 }

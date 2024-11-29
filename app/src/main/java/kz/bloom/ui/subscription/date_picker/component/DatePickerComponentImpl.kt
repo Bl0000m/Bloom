@@ -9,7 +9,8 @@ import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent.DateIt
 
 class DatePickerComponentImpl(
     componentContext: ComponentContext,
-    onContinuePressed:() -> Unit
+    private val onContinuePressed:() -> Unit,
+    private val onBackPress:() -> Unit
 ) : DatePickerComponent,
     KoinComponent,
     ComponentContext by componentContext
@@ -28,6 +29,10 @@ class DatePickerComponentImpl(
     }
 
     override fun onContinue() {
+        onContinuePressed()
+    }
 
+    override fun onBackPressed() {
+        onBackPress()
     }
 }

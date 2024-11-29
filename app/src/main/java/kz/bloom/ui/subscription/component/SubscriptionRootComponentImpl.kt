@@ -4,11 +4,14 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.Value
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.subscription.component.SubscriptionRootComponent.Child
+import kz.bloom.ui.subscription.create_subscription.component.CreateSubscriptionComponent
+import kz.bloom.ui.subscription.create_subscription.component.CreateSubscriptionComponentImpl
 import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent
 import kz.bloom.ui.subscription.date_picker.component.DatePickerComponentImpl
 import kz.bloom.ui.subscription.subs_list.component.SubsListComponent
@@ -51,20 +54,41 @@ class SubscriptionRootComponentImpl(
                 componentContext = componentContext
             )
         )
+        is Configuration.CreateSubscription -> Child.CreateSubscription(
+            component = createSubscriptionComponent(
+                componentContext = componentContext
+            )
+        )
     }
+
+    private fun createSubscriptionComponent(
+        componentContext: ComponentContext
+    ) : CreateSubscriptionComponent  = CreateSubscriptionComponentImpl(
+        componentContext = componentContext,
+        onBackPressed = { navigation.pop() },
+        onCreate = {
+            navigation.pushNew(configuration = Configuration.DatePicker)
+        }
+    )
 
     private fun subsListComponent(
         componentContext: ComponentContext
     ) : SubsListComponent = SubsListComponentImpl(
         componentContext = componentContext,
-        onChooseDate = { navigation.pushNew(configuration = Configuration.DatePicker) }
+        onCreateSubscription = { navigation.pushNew(configuration = Configuration.CreateSubscription) },
+        onBackPress = { onNavigateBack() }
     )
 
     private fun datePickerComponent(
         componentContext: ComponentContext
     ) : DatePickerComponent = DatePickerComponentImpl(
         componentContext = componentContext,
-        onContinuePressed = { }
+        onContinuePressed = {
+
+        },
+        onBackPress = {
+            navigation.pop()
+        }
     )
 
     @Serializable
@@ -73,5 +97,7 @@ class SubscriptionRootComponentImpl(
         data object SubsList : Configuration
         @Serializable
         data object DatePicker : Configuration
+        @Serializable
+        data object CreateSubscription : Configuration
     }
 }
