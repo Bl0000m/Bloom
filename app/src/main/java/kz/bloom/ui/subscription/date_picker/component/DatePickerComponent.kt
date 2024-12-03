@@ -1,19 +1,19 @@
 package kz.bloom.ui.subscription.date_picker.component
 
 import com.arkivanov.decompose.value.Value
-import java.time.DayOfWeek
-import java.time.Month
+import java.time.LocalDate
+import kotlinx.serialization.Serializable
 
 interface DatePickerComponent {
     data class Model(
-        val pickedDates: List<DateItem>,
-        val pickedDatesLimit: Int
+        val pickedDates: List<DateItem>
     )
 
+    @Serializable
     data class DateItem(
-        val dayOfWeek: DayOfWeek,
-        val month: Month,
-        val dayOfMonth: Int
+        val dayOfMonth: Int,
+        val dayOfWeek: String,
+        val month: String,
     )
 
     enum class TimeOfDay {
@@ -24,9 +24,7 @@ interface DatePickerComponent {
 
     val model: Value<Model>
 
-    fun chooseDay()
-
-    fun onContinue()
+    fun onContinue(selection: List<LocalDate>)
 
     fun onBackPressed()
 }

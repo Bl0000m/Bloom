@@ -6,14 +6,21 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.pushNew
+import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.decompose.value.update
+import java.time.LocalDate
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.subscription.component.SubscriptionRootComponent.Child
+import kz.bloom.ui.subscription.component.SubscriptionRootComponent.Model
 import kz.bloom.ui.subscription.create_subscription.component.CreateSubscriptionComponent
 import kz.bloom.ui.subscription.create_subscription.component.CreateSubscriptionComponentImpl
 import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent
+import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent.DateItem
 import kz.bloom.ui.subscription.date_picker.component.DatePickerComponentImpl
+import kz.bloom.ui.subscription.fill_details.component.FillDetailsComponent
+import kz.bloom.ui.subscription.fill_details.component.FillDetailsComponentImpl
 import kz.bloom.ui.subscription.subs_list.component.SubsListComponent
 import kz.bloom.ui.subscription.subs_list.component.SubsListComponentImpl
 
@@ -37,7 +44,13 @@ class SubscriptionRootComponentImpl(
             )
         }
     )
+    private val _model = MutableValue(
+        initialValue = Model(
+            subscriptionName = ""
+        )
+    )
 
+    override val model: Value<Model> = _model
     override val childStack: Value<ChildStack<*, Child>> = _childStack
 
     private fun createChild(
@@ -59,14 +72,29 @@ class SubscriptionRootComponentImpl(
                 componentContext = componentContext
             )
         )
+        is Configuration.FillDetails -> Child.FillDetails(
+            component = fillDetailsComponent(
+                componentContext = componentContext,
+                configuration.selection
+            )
+        )
     }
+
+    private fun fillDetailsComponent(
+        componentContext: ComponentContext,
+        selection:List<DateItem>
+    ) : FillDetailsComponent = FillDetailsComponentImpl(
+        componentContext = componentContext,
+        selection = selection
+    )
 
     private fun createSubscriptionComponent(
         componentContext: ComponentContext
     ) : CreateSubscriptionComponent  = CreateSubscriptionComponentImpl(
         componentContext = componentContext,
         onBackPressed = { navigation.pop() },
-        onCreate = {
+        onCreate = { name ->
+            _model.update { it.copy(subscriptionName = name) }
             navigation.pushNew(configuration = Configuration.DatePicker)
         }
     )
@@ -83,8 +111,8 @@ class SubscriptionRootComponentImpl(
         componentContext: ComponentContext
     ) : DatePickerComponent = DatePickerComponentImpl(
         componentContext = componentContext,
-        onContinuePressed = {
-
+        onContinuePressed = { selection ->
+            navigation.pushNew(configuration = Configuration.FillDetails(subscriptionName = _model.value.subscriptionName, selection = selection))
         },
         onBackPress = {
             navigation.pop()
@@ -99,5 +127,7 @@ class SubscriptionRootComponentImpl(
         data object DatePicker : Configuration
         @Serializable
         data object CreateSubscription : Configuration
+        @Serializable
+        data class FillDetails(val subscriptionName: String, val selection: List<DateItem>) : Configuration
     }
 }

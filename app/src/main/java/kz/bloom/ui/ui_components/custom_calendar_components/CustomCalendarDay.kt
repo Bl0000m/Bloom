@@ -15,21 +15,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.boguszpawlowski.composecalendar.day.DayState
-import io.github.boguszpawlowski.composecalendar.selection.SelectionState
+import io.github.boguszpawlowski.composecalendar.selection.DynamicSelectionState
 import java.time.LocalDate
 import kz.bloom.ui.theme.InterTypography
 
 @SuppressLint("NewApi")
 @Composable
-public fun <T : SelectionState> CustomDay(
-    state: DayState<T>,
+public fun CustomDay(
+    dayState: DayState<DynamicSelectionState>,
     modifier: Modifier = Modifier,
     selectionColor: Color = MaterialTheme.colorScheme.onPrimary,
     currentDayColor: Color = MaterialTheme.colorScheme.error,
     onClick: (LocalDate) -> Unit = {},
 ) {
-    val date = state.date
-    val selectionState = state.selectionState
+    val date = dayState.date
+    val selectionState = dayState.selectionState
 
     val isSelected = selectionState.isDateSelected(date)
 
@@ -66,7 +66,7 @@ public fun <T : SelectionState> CustomDay(
                 Text(
                     text = date.dayOfMonth.toString(),
                     style = InterTypography.bodyMedium,
-                    color = if (isSelected) Color.White else if (state.isCurrentDay) currentDayColor else Color.Black
+                    color = if (isSelected) Color.White else if (dayState.isCurrentDay) currentDayColor else Color.Black
                 )
             }
         }

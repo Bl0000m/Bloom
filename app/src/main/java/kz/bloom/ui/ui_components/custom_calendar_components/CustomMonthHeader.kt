@@ -1,6 +1,7 @@
 package kz.bloom.ui.ui_components.custom_calendar_components
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,7 +20,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import io.github.boguszpawlowski.composecalendar.header.MonthState
-import java.time.format.TextStyle.FULL
+import java.time.Month
+import java.time.format.TextStyle
 import java.util.Locale
 import kz.bloom.R
 
@@ -28,20 +30,22 @@ import kz.bloom.R
 public fun CustomMonthHeader(
     monthState: MonthState,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    selectedMonth: Month
 ) {
-    Column {
+    Column(modifier = modifier) {
         Row(
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             DecrementButton(monthState = monthState)
             Text(
-                modifier = Modifier.testTag("MonthLabel"),
-                text = monthState.currentMonth.month
-                    .getDisplayName(FULL, Locale.getDefault())
-                    .uppercase()
-                    .replaceFirstChar { it.titlecase() },
+                modifier = Modifier.clickable { onClick() },
+                text = selectedMonth.getDisplayName(
+                    TextStyle.FULL_STANDALONE,
+                    Locale.getDefault()
+                ).uppercase(),
                 style = MaterialTheme.typography.bodyLarge,
             )
             IncrementButton(monthState = monthState)
