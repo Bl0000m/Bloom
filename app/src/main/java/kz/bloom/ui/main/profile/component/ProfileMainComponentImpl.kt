@@ -32,7 +32,6 @@ class ProfileMainComponentImpl(
             ProfileCategoryType.MY_SUBSCRIPTIONS -> { onOpenSubscriptions() }
             ProfileCategoryType.EVENT_CALENDAR -> { /* Handle calendar action */ }
             ProfileCategoryType.PAYMENT_METHOD -> { /* Handle payment method */ }
-            ProfileCategoryType.CURRENCY -> { /* Handle currency selection */ }
             ProfileCategoryType.APP_LANGUAGE -> { /* Handle language change */ }
             ProfileCategoryType.NOTIFICATIONS -> { /* Handle notifications */ }
             ProfileCategoryType.INVITE_FRIEND -> { /* Handle invite friend */ }
@@ -52,7 +51,6 @@ enum class ProfileCategoryType(
     MY_SUBSCRIPTIONS(R.drawable.ic_my_subs, R.string.my_subscriptions),
     EVENT_CALENDAR(R.drawable.ic_calendar, R.string.event_calendar),
     PAYMENT_METHOD(R.drawable.ic_payment_card, R.string.payment_method),
-    CURRENCY(R.drawable.ic_money, R.string.currency),
     APP_LANGUAGE(R.drawable.ic_globe, R.string.app_language),
     NOTIFICATIONS(R.drawable.ic_bell, R.string.notifications),
     INVITE_FRIEND(R.drawable.ic_inter_connect, R.string.invite_friend),

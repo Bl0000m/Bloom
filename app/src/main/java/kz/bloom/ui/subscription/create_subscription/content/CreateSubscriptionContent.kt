@@ -1,11 +1,13 @@
 package kz.bloom.ui.subscription.create_subscription.content
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
@@ -59,17 +62,11 @@ fun CreateSubscriptionContent(
                 sheetState = bottomSheetState,
                 content = {
                     Column(modifier = Modifier) {
-                        Spacer(modifier = Modifier.height(42.dp))
+                        Spacer(modifier = Modifier.height(21.dp))
                         Column(
                             verticalArrangement = Arrangement.spacedBy(19.5.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            HorizontalDivider()
-                            Text(
-                                text = "Выберите тип подписки",
-                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 14.sp),
-                                color = MaterialTheme.colorScheme.secondary
-                            )
                             HorizontalDivider()
                         }
                         model.value.subscriptionType.forEach {
@@ -94,6 +91,8 @@ fun CreateSubscriptionContent(
         }
         Column(
             modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primary)
                 .padding(top = 42.dp)
                 .padding(horizontal = 21.dp)
         ) {
@@ -116,17 +115,20 @@ fun CreateSubscriptionContent(
                     text = "Придумайте название и выбирайте тип из списка\nдля оформления подписки"
                 )
             }
+            Spacer(modifier = Modifier.height(16.dp))
             LabeledTextField(
+                modifier = Modifier.padding(top = 4.dp),
                 value = model.value.subscriptionName,
                 textFieldStyle = MaterialTheme.typography.bodySmall,
                 onValueChange = { component.fillSubName(name = it) },
-                isError = model.value.subscriptionTypeError.isNotEmpty(),
+                isError = model.value.subscriptionNameErrorText.isNotEmpty(),
+
                 singleLine = true,
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
                     onDone = { focusManager.clearFocus() }
                 ),
-                label = if (model.value.subscriptionName.isEmpty())"НАЗВАНИЕ ПОДПИСКИ" else "",
+                label = "НАЗВАНИЕ ПОДПИСКИ",
                 placeholder = ""
             )
 
@@ -137,7 +139,7 @@ fun CreateSubscriptionContent(
                     color = MaterialTheme.colorScheme.error
                 )
             }
-
+            Spacer(modifier = Modifier.height(20.dp))
             Box(modifier = Modifier.clickable {
                 showSheet = true
             }) {
@@ -145,7 +147,10 @@ fun CreateSubscriptionContent(
                     verticalArrangement = Arrangement.spacedBy(11.dp)
                 ) {
                     if (model.value.pickedSubscriptionName.isEmpty()) {
-                        Row {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(
                                 text = "ТИП ПОДПИСКИ",
                                 style = MaterialTheme.typography.bodySmall,

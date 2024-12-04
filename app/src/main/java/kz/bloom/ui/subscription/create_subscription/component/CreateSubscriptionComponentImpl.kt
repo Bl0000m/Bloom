@@ -41,7 +41,7 @@ class CreateSubscriptionComponentImpl(
             onCreate(_model.value.subscriptionName)
         } else if (_model.value.subscriptionName.isEmpty()) {
             _model.update { it.copy(subscriptionNameErrorText = "Заполните поле.") }
-        } else {
+        } else if (_model.value.subscriptionTypeError.isEmpty()){
             _model.update { it.copy(subscriptionTypeError = "Выберите тип подписки.") }
         }
     }

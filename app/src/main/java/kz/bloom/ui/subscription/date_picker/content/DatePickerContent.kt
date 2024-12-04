@@ -102,9 +102,18 @@ fun DatePickerContent(modifier: Modifier = Modifier, component: DatePickerCompon
                 modifier = Modifier.padding(top = 35.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                TimeOfDayItem(timeOfDay = TimeOfDay.FIRST_PART)
-                TimeOfDayItem(timeOfDay = TimeOfDay.SECOND_PART)
-                TimeOfDayItem(timeOfDay = TimeOfDay.LAST_PART)
+                TimeOfDayItem(
+                    timeOfDay = TimeOfDay.FIRST_PART,
+                    isSelected = false
+                )
+                TimeOfDayItem(
+                    timeOfDay = TimeOfDay.SECOND_PART,
+                    isSelected = false
+                )
+                TimeOfDayItem(
+                    timeOfDay = TimeOfDay.LAST_PART,
+                    isSelected = false
+                )
             }
 
             SelectableCalendar(
@@ -230,19 +239,23 @@ fun CustomMonthSelectionDialog(
 }
 
 @Composable
-private fun TimeOfDayItem(modifier: Modifier = Modifier, timeOfDay: TimeOfDay) {
+private fun TimeOfDayItem(
+    modifier: Modifier = Modifier,
+    timeOfDay: TimeOfDay,
+    isSelected: Boolean
+) {
     var timeText by remember { mutableStateOf(value = "") }
     timeText = when (timeOfDay) {
         TimeOfDay.FIRST_PART -> {
-            "с 8:00 до 12:59"
+            "8:00 - 12:59"
         }
 
         TimeOfDay.SECOND_PART -> {
-            "с 13:00 до 17:59"
+            "13:00 - 17:59"
         }
 
         TimeOfDay.LAST_PART -> {
-            "с 18:00 до 22:59"
+            "18:00 - 22:59"
         }
     }
     Box(

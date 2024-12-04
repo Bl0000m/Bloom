@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -46,7 +47,7 @@ fun ProfileMainContent(
             Column(
                 modifier = Modifier
                     .systemBarsPadding()
-                    .padding(top = 4.dp)
+                    .padding(top = 6.dp)
                     .padding(horizontal = 21.dp)
             ) {
                 Row {
@@ -67,7 +68,7 @@ fun ProfileMainContent(
             Column(
                 modifier = modifier
                     .padding(horizontal = 21.dp)
-                    .padding(top = 22.dp)
+                    .padding(top = 4.dp)
                     .padding(paddingValues)
             ) {
                 CoinBalanceContent(coinBalance = model.coinBalance)
@@ -85,6 +86,16 @@ fun ProfileMainContent(
                         )
                     }
                 }
+                Text(
+                    modifier = Modifier.clickable {  },
+                    text = "Закрыть сеанс",
+                    
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    modifier = Modifier.clickable {  },
+                    text = "Удалить свой аккаунт"
+                )
             }
         }
     )
