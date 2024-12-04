@@ -1,10 +1,13 @@
 package kz.bloom.ui.subscription.date_picker.component
 
 import android.annotation.SuppressLint
+import androidx.compose.ui.text.toUpperCase
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent.Model
 import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent.DateItem
@@ -36,11 +39,12 @@ class DatePickerComponentImpl(
 
 @SuppressLint("NewApi")
 fun List<LocalDate>.toSerializedClass() : List<DateItem> {
+    val locale = Locale("ru")
     return this.map { localDate ->
         DateItem(
             dayOfMonth = localDate.dayOfMonth,
-            month = localDate.month.name,
-            dayOfWeek = localDate.dayOfWeek.name
+            month = localDate.month.getDisplayName(TextStyle.FULL, locale),
+            dayOfWeek = localDate.dayOfWeek.getDisplayName(TextStyle.FULL, locale)
         )
     }
 }

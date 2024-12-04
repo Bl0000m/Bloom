@@ -9,4 +9,6 @@ interface FillDetailsComponent {
     )
 
     val model: Value<Model>
+
+    fun onNavigateToRightBack()
 }

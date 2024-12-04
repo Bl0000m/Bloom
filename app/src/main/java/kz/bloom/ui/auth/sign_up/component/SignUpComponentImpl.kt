@@ -120,27 +120,67 @@ class SignUpComponentImpl(
     override val model: Value<Model> = _model
 
     override fun fillName(name: String) {
-        _model.update { it.copy(nameErrorOccurred = ErrorBody(errorOccurred = false, errorText = "", wasFocusedBefore = true)) }
+        _model.update {
+            it.copy(
+                nameErrorOccurred = ErrorBody(
+                    errorOccurred = false,
+                    errorText = "",
+                    wasFocusedBefore = true
+                )
+            )
+        }
         _model.update { it.copy(name = name) }
     }
 
     override fun fillMail(email: String) {
-        _model.update { it.copy(emailErrorOccurred = ErrorBody(errorOccurred = false, errorText = "", wasFocusedBefore = true)) }
+        _model.update {
+            it.copy(
+                emailErrorOccurred = ErrorBody(
+                    errorOccurred = false,
+                    errorText = "",
+                    wasFocusedBefore = true
+                )
+            )
+        }
         _model.update { it.copy(email = email) }
     }
 
     override fun fillPhone(phoneNumber: String) {
-        _model.update { it.copy(phoneNumberErrorOccurred = ErrorBody(errorOccurred = false, errorText = "", wasFocusedBefore = true)) }
+        _model.update {
+            it.copy(
+                phoneNumberErrorOccurred = ErrorBody(
+                    errorOccurred = false,
+                    errorText = "",
+                    wasFocusedBefore = true
+                )
+            )
+        }
         _model.update { it.copy(phoneNumber = phoneNumber) }
     }
 
     override fun fillPassword(password: String) {
-        _model.update { it.copy(passwordErrorOccurred = ErrorBody(errorOccurred = false, errorText = "", wasFocusedBefore = true)) }
+        _model.update {
+            it.copy(
+                passwordErrorOccurred = ErrorBody(
+                    errorOccurred = false,
+                    errorText = "",
+                    wasFocusedBefore = true
+                )
+            )
+        }
         _model.update { it.copy(password = password) }
     }
 
     override fun fillPasswordConfirm(rePassword: String) {
-        _model.update { it.copy(confirmPasswordErrorOccurred = ErrorBody(errorOccurred = false, errorText = "", wasFocusedBefore = true)) }
+        _model.update {
+            it.copy(
+                confirmPasswordErrorOccurred = ErrorBody(
+                    errorOccurred = false,
+                    errorText = "",
+                    wasFocusedBefore = true
+                )
+            )
+        }
         _model.update { it.copy(passwordConfirm = rePassword) }
     }
 
@@ -153,7 +193,7 @@ class SignUpComponentImpl(
     }
 
     override fun createAccount() {
-        if(validateAllFields()) {
+        if (validateAllFields()) {
             store.accept(
                 intent = SignUpStore.Intent.CreateAccount(
                     model = _model.value.copy(
@@ -203,7 +243,7 @@ class SignUpComponentImpl(
         updateFieldErrorOnSecondFocusLost(
             errorBody = _model.value.emailErrorOccurred,
             validateField = { validateEmail(_model.value.email) },
-            didErrorOccur = { validateEmail(_model.value.email) != ""},
+            didErrorOccur = { validateEmail(_model.value.email) != "" },
             updateModel = { updatedErrorBody ->
                 _model.update { it.copy(emailErrorOccurred = updatedErrorBody) }
             }
@@ -214,7 +254,7 @@ class SignUpComponentImpl(
         updateFieldErrorOnSecondFocusLost(
             errorBody = _model.value.phoneNumberErrorOccurred,
             validateField = { validatePhoneNumber(_model.value.phoneNumber) },
-            didErrorOccur = { validatePhoneNumber(_model.value.phoneNumber) != ""},
+            didErrorOccur = { validatePhoneNumber(_model.value.phoneNumber) != "" },
             updateModel = { updatedErrorBody ->
                 _model.update { it.copy(phoneNumberErrorOccurred = updatedErrorBody) }
             }
@@ -225,7 +265,7 @@ class SignUpComponentImpl(
         updateFieldErrorOnSecondFocusLost(
             errorBody = _model.value.passwordErrorOccurred,
             validateField = { validatePassword(_model.value.password) },
-            didErrorOccur = { validatePassword(_model.value.password) != ""},
+            didErrorOccur = { validatePassword(_model.value.password) != "" },
             updateModel = { updatedErrorBody ->
                 _model.update { it.copy(passwordErrorOccurred = updatedErrorBody) }
             }
@@ -235,13 +275,24 @@ class SignUpComponentImpl(
     override fun onConfirmPasswordFocusLost() {
         updateFieldErrorOnSecondFocusLost(
             errorBody = _model.value.confirmPasswordErrorOccurred,
-            validateField = { validateConfirmPassword(_model.value.password, _model.value.passwordConfirm) },
-            didErrorOccur = { validateConfirmPassword(_model.value.password, _model.value.passwordConfirm) != ""},
+            validateField = {
+                validateConfirmPassword(
+                    _model.value.password,
+                    _model.value.passwordConfirm
+                )
+            },
+            didErrorOccur = {
+                validateConfirmPassword(
+                    _model.value.password,
+                    _model.value.passwordConfirm
+                ) != ""
+            },
             updateModel = { updatedErrorBody ->
                 _model.update { it.copy(confirmPasswordErrorOccurred = updatedErrorBody) }
             }
         )
     }
+
     private fun validateAllFields(): Boolean {
         var isValid = true
 
@@ -281,14 +332,35 @@ class SignUpComponentImpl(
 
         return isValid
     }
+
     private fun onScreenResumed() {
         _model.update {
             it.copy(
-                nameErrorOccurred = it.nameErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false),
-                emailErrorOccurred = it.emailErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false),
-                phoneNumberErrorOccurred = it.phoneNumberErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false),
-                passwordErrorOccurred = it.passwordErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false),
-                confirmPasswordErrorOccurred = it.confirmPasswordErrorOccurred.copy(wasFocusedBefore = false, errorText = "", errorOccurred = false)
+                nameErrorOccurred = it.nameErrorOccurred.copy(
+                    wasFocusedBefore = false,
+                    errorText = "",
+                    errorOccurred = false
+                ),
+                emailErrorOccurred = it.emailErrorOccurred.copy(
+                    wasFocusedBefore = false,
+                    errorText = "",
+                    errorOccurred = false
+                ),
+                phoneNumberErrorOccurred = it.phoneNumberErrorOccurred.copy(
+                    wasFocusedBefore = false,
+                    errorText = "",
+                    errorOccurred = false
+                ),
+                passwordErrorOccurred = it.passwordErrorOccurred.copy(
+                    wasFocusedBefore = false,
+                    errorText = "",
+                    errorOccurred = false
+                ),
+                confirmPasswordErrorOccurred = it.confirmPasswordErrorOccurred.copy(
+                    wasFocusedBefore = false,
+                    errorText = "",
+                    errorOccurred = false
+                )
             )
         }
     }
@@ -312,25 +384,22 @@ fun validatePassword(password: String): String {
         return "Заполните поле."
     }
 
-    if (password.length < 8) {
-        return "Минимум 8 символов."
-    }
-
     val digitRegex = ".*[0-9]+.*".toRegex()
     val letterRegex = ".*[A-Za-z]+.*".toRegex()
 
-    if (!password.contains(digitRegex) || !password.contains(letterRegex)) {
-        return "Используйте буквы и цифры."
-    }
+    if (!password.contains(digitRegex)) return "Используйте цифры."
+    if (!password.contains(letterRegex)) return "Используйте буквы."
 
     val uppercaseLetterRegex = ".*[A-Z]+.*".toRegex()
     val lowercaseLetterRegex = ".*[a-z]+.*".toRegex()
     val specialCharacterRegex = ".*[!@#$&*]+.*".toRegex()
 
-    if (!password.contains(uppercaseLetterRegex) ||
-        !password.contains(lowercaseLetterRegex) ||
-        !password.contains(specialCharacterRegex)) {
-        return "Добавьте заглавные, строчные буквы, цифру и символ."
+    if (!password.contains(uppercaseLetterRegex)) return "Добавьте заглавную букву."
+    if (!password.contains(lowercaseLetterRegex)) return "Добавьте строчную букву."
+    if (!password.contains(specialCharacterRegex)) return "Добавьте символ."
+
+    if (password.length < 8) {
+        return "Минимум 8 символов."
     }
 
     return ""
@@ -398,7 +467,7 @@ private fun updateFieldErrorOnSecondFocusLost(
 }
 
 private fun Flow<Label>.toEvents(): Flow<Event> = map { label ->
-    when(label) {
+    when (label) {
         is Label.ReceivedError -> {
             Event.DisplaySnackBar(errorMessage = label.message)
         }

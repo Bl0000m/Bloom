@@ -9,6 +9,7 @@ import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent.DateIt
 
 class FillDetailsComponentImpl(
     componentContext: ComponentContext,
+    private val onNavigateRightBack:() -> Unit,
     selection: List<DateItem>
 ) : FillDetailsComponent, KoinComponent, ComponentContext by componentContext
 {
@@ -20,4 +21,7 @@ class FillDetailsComponentImpl(
 
     override val model: Value<Model> = _model
 
+    override fun onNavigateToRightBack() {
+        onNavigateRightBack()
+    }
 }

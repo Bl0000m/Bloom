@@ -5,6 +5,7 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
+import com.arkivanov.decompose.router.stack.popToFirst
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -85,7 +86,8 @@ class SubscriptionRootComponentImpl(
         selection:List<DateItem>
     ) : FillDetailsComponent = FillDetailsComponentImpl(
         componentContext = componentContext,
-        selection = selection
+        selection = selection,
+        onNavigateRightBack = { navigation.popToFirst() }
     )
 
     private fun createSubscriptionComponent(
