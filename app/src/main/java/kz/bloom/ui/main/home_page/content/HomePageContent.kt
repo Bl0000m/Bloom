@@ -57,7 +57,7 @@ import coil.compose.AsyncImage
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kotlinx.coroutines.delay
 import kz.bloom.R
-import kz.bloom.ui.main.data.entity.PageItem
+import kz.bloom.ui.main.api.entity.PageItem
 import kz.bloom.ui.main.home_page.component.HomePageComponent
 
 @Composable

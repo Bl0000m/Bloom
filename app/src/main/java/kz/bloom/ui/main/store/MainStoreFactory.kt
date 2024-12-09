@@ -8,12 +8,12 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kz.bloom.ui.main.bottom_nav_bar.NavBarItem
 import kz.bloom.ui.main.bottom_nav_bar.TabItem
-import kz.bloom.ui.main.data.MainRepository
-import kz.bloom.ui.main.data.entity.PageItem
+import kz.bloom.ui.main.api.MainApiClient
+import kz.bloom.ui.main.api.entity.PageItem
 import kz.bloom.ui.main.store.MainStore.Intent
 import kz.bloom.ui.main.store.MainStore.State
+import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import kotlin.coroutines.CoroutineContext
 
 private sealed interface Action : JvmSerializable {
@@ -32,10 +32,11 @@ private sealed interface Message : JvmSerializable {
 }
 
 internal fun MainStore(
-    mainApi: MainRepository,
+    mainApi: MainApiClient,
     mainContext: CoroutineContext,
     ioContext: CoroutineContext,
-    storeFactory: StoreFactory
+    storeFactory: StoreFactory,
+    sharedPreferences: SharedPreferencesSetting
 ) : MainStore =
     object : MainStore, Store<Intent, State, Nothing>
             by storeFactory.create<Intent, Action, Message, State, Nothing> (
@@ -67,7 +68,8 @@ internal fun MainStore(
                     ExecutorImpl(
                         mainApi = mainApi,
                         mainContext = mainContext,
-                        ioContext = ioContext
+                        ioContext = ioContext,
+                        sharedPreferences = sharedPreferences
                     )
                 }
             ) {}
@@ -75,7 +77,8 @@ internal fun MainStore(
 private class ExecutorImpl(
     mainContext: CoroutineContext,
     private val ioContext: CoroutineContext,
-    private val mainApi: MainRepository
+    private val mainApi: MainApiClient,
+    private val sharedPreferences: SharedPreferencesSetting
 ) : CoroutineExecutor<Intent, Action, State, Message, Nothing> (mainContext = mainContext)
 {
     override fun executeAction(action: Action, getState: () -> State) {
@@ -110,6 +113,24 @@ private class ExecutorImpl(
                     try {
                         dispatch(message = Message.NavBarItemSelected(selectedItem = intent.navBarItem))
                     } catch (exception : Exception) {
+                        dispatch(message = Message.ErrorOccurred)
+                    }
+                }
+            }
+            is Intent.GetUserInfo -> {
+                scope.launch {
+                    try {
+                        val userInfoResponse = withContext(context = ioContext) {
+                            async { mainApi.getUserInfo(intent.accessToken) }
+                        }
+                        val userInfo = userInfoResponse.await()
+                        if (userInfo.name.isNotEmpty()) {
+                            sharedPreferences.name = userInfo.name
+                            sharedPreferences.userId = userInfo.id.toString()
+                            sharedPreferences.username = userInfo.email
+                            sharedPreferences.phoneNumber = userInfo.phoneNumber
+                        }
+                    } catch (e: Exception) {
                         dispatch(message = Message.ErrorOccurred)
                     }
                 }

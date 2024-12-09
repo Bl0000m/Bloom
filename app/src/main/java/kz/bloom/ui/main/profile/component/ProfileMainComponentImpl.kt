@@ -9,6 +9,8 @@ import kz.bloom.R
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.main.profile.component.ProfileMainComponent.Model
 import kz.bloom.ui.main.profile.component.ProfileMainComponent.ProfileCategory
+import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
+import org.koin.core.component.inject
 
 class ProfileMainComponentImpl(
     componentContext: ComponentContext,
@@ -17,9 +19,11 @@ class ProfileMainComponentImpl(
     KoinComponent,
     ComponentContext by componentContext {
 
+    private val sharedPreferences by inject<SharedPreferencesSetting>()
+
     private val _model = MutableValue(
         initialValue = Model(
-            name = "Олжас",
+            name = sharedPreferences.name ?: "Гость",
             coinBalance = 42.5,
             profileCategories = categories
         )

@@ -118,7 +118,9 @@ class SubscriptionRootComponentImpl(
         },
         onBackPress = {
             navigation.pop()
-        }
+        },
+        subscriptionName = _model.value.subscriptionName,
+        subscriptionTypeId = "1"
     )
 
     @Serializable

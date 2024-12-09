@@ -13,6 +13,8 @@ abstract class BaseSharedPreferences {
     protected val USERNAME = "USERNAME"
     protected val PASSWORD = "PASSWORD"
     protected val NAME = "NAME"
+    protected val PHONENUMBER = "PHONENUMBER"
+    protected val USER_ID = "USER_ID"
 
     //encrypted
     protected val SESSION_APP_CONFIG_CRYPTED = "SESSION_APP_CONFIG_CRYPTED"

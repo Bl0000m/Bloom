@@ -16,26 +16,39 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 
 @Composable
-public fun PrimaryButton(
+fun PrimaryButton(
     modifier: Modifier = Modifier,
     textStyle: TextStyle = MaterialTheme.typography.labelSmall,
     isAlternative: Boolean = false,
+    isEnabled: Boolean = true,
     text: String,
-    onClick:() -> Unit
+    onClick: () -> Unit
 ) {
+    val borderColor = if (isEnabled) Color.Black else Color(0x80CCCCCC)
+    val textColor = if (isEnabled) {
+        if (isAlternative) Color.White else Color.Black
+    } else {
+        Color(0x80CCCCCC)
+    }
+
     Box(
         modifier = modifier
-            .clickable { onClick() }
             .fillMaxWidth()
-            .background(color = if (isAlternative) Color.Black else Color.White)
+            .background(
+                color = if (isAlternative) Color.Black else Color.White,
+                shape = MaterialTheme.shapes.small
+            )
             .height(height = if (isAlternative) 40.dp else 32.dp)
-            .border(width = 0.5.dp, color = Color.Black)
+            .border(width = 0.5.dp, color = borderColor)
+            .then(
+                if (isEnabled) Modifier.clickable { onClick() } else Modifier
+            )
     ) {
         Text(
             modifier = Modifier.align(Alignment.Center),
             text = text,
             style = textStyle,
-            color = if (isAlternative) Color.White else Color.Black
+            color = textColor
         )
     }
 }

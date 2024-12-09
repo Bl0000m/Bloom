@@ -1,6 +1,7 @@
 package kz.bloom.ui.subscription.date_picker.content
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +20,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,7 +61,9 @@ fun DatePickerContent(modifier: Modifier = Modifier, component: DatePickerCompon
     val showMonthPicker = remember { mutableStateOf(false) }
     val currentMonth = remember { mutableStateOf(YearMonth.now()) }
 
-    val monthState  = remember {
+    val model = component.model.subscribeAsState()
+
+    val monthState = remember {
         MonthState(
             initialMonth = currentMonth.value,
             minMonth = YearMonth.now().minusYears(1),
@@ -71,6 +76,11 @@ fun DatePickerContent(modifier: Modifier = Modifier, component: DatePickerCompon
             selection = emptyList(),
             selectionMode = SelectionMode.Multiple
         )
+    }
+    var isPrimaryBTNEnabled by remember { mutableStateOf(false) }
+
+    LaunchedEffect(model.value.selectedTimeOfDay, model.value.pickedDates) {
+        isPrimaryBTNEnabled = model.value.selectedTimeOfDay != null && model.value.pickedDates.isNotEmpty()
     }
 
     Box(modifier = modifier) {
@@ -102,20 +112,16 @@ fun DatePickerContent(modifier: Modifier = Modifier, component: DatePickerCompon
                 modifier = Modifier.padding(top = 35.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                TimeOfDayItem(
-                    timeOfDay = TimeOfDay.FIRST_PART,
-                    isSelected = false
-                )
-                TimeOfDayItem(
-                    timeOfDay = TimeOfDay.SECOND_PART,
-                    isSelected = false
-                )
-                TimeOfDayItem(
-                    timeOfDay = TimeOfDay.LAST_PART,
-                    isSelected = false
-                )
+                model.value.timeOfDayItems.forEach { timeOfDay ->
+                    TimeOfDayItem(
+                        timeOfDay = timeOfDay,
+                        isSelected = model.value.selectedTimeOfDay == timeOfDay,
+                        onClick = { selectedTime ->
+                            component.onTimeOfDaySelected(timeOfDay = selectedTime)
+                        }
+                    )
+                }
             }
-
             SelectableCalendar(
                 modifier = Modifier.padding(top = 35.dp),
                 showAdjacentMonths = false,
@@ -126,8 +132,12 @@ fun DatePickerContent(modifier: Modifier = Modifier, component: DatePickerCompon
                 dayContent = {
                     CustomDay(
                         dayState = it,
-                        onClick = { date -> selectionState.onDateSelected(date) }
-                    ) },
+                        onClick = {
+                            date -> selectionState.onDateSelected(date)
+                            component.pickADate(selection = selectionState.selection)
+                        }
+                    )
+                },
                 monthHeader = {
                     CustomMonthHeader(
                         monthState = monthState,
@@ -143,6 +153,7 @@ fun DatePickerContent(modifier: Modifier = Modifier, component: DatePickerCompon
             PrimaryButton(
                 modifier = Modifier.padding(bottom = 21.dp),
                 text = "ПРОДОЛЖИТЬ",
+                isEnabled = isPrimaryBTNEnabled,
                 textStyle = MaterialTheme.typography.bodySmall,
                 onClick = { component.onContinue(selectionState.selection) }
             )
@@ -183,8 +194,7 @@ fun CustomMonthSelectionDialog(
                     .fillMaxWidth()
                     .padding(horizontal = 21.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RectangleShape
+                        color = MaterialTheme.colorScheme.primary, shape = RectangleShape
                     )
                     .border(
                         width = 1.dp,
@@ -242,7 +252,8 @@ fun CustomMonthSelectionDialog(
 private fun TimeOfDayItem(
     modifier: Modifier = Modifier,
     timeOfDay: TimeOfDay,
-    isSelected: Boolean
+    isSelected: Boolean,
+    onClick: (TimeOfDay) -> Unit
 ) {
     var timeText by remember { mutableStateOf(value = "") }
     timeText = when (timeOfDay) {
@@ -262,12 +273,15 @@ private fun TimeOfDayItem(
         modifier = modifier
             .height(25.dp)
             .border(width = 0.5.dp, color = Color.Black)
+            .clickable { onClick(timeOfDay) }
+            .background(color = if (isSelected) Color.Black else MaterialTheme.colorScheme.primary)
     ) {
         Text(
             modifier = Modifier
                 .padding(vertical = 5.5.dp, horizontal = 10.dp)
                 .align(Alignment.Center),
             text = timeText,
+            color = if (isSelected) Color.White else Color.Black,
             style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.1.sp)
         )
     }

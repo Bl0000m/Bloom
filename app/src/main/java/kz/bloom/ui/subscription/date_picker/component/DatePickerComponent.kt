@@ -6,7 +6,9 @@ import kotlinx.serialization.Serializable
 
 interface DatePickerComponent {
     data class Model(
-        val pickedDates: List<DateItem>
+        val pickedDates: List<DateItem>,
+        val timeOfDayItems: List<TimeOfDay>,
+        val selectedTimeOfDay: TimeOfDay? = null
     )
 
     @Serializable
@@ -14,6 +16,7 @@ interface DatePickerComponent {
         val dayOfMonth: Int,
         val dayOfWeek: String,
         val month: String,
+        val year: Int
     )
 
     enum class TimeOfDay {
@@ -27,4 +30,8 @@ interface DatePickerComponent {
     fun onContinue(selection: List<LocalDate>)
 
     fun onBackPressed()
+
+    fun pickADate(selection: List<LocalDate>)
+
+    fun onTimeOfDaySelected(timeOfDay: TimeOfDay)
 }

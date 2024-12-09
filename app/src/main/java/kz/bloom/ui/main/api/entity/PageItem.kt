@@ -1,4 +1,4 @@
-package kz.bloom.ui.main.data.entity
+package kz.bloom.ui.main.api.entity
 
 data class PageItem(
     val imageUrl: String,

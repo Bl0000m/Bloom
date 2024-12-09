@@ -9,11 +9,9 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kz.bloom.ui.main.bottom_nav_bar.NavBottomBarComponent.Model
 import kz.bloom.R
 import kz.bloom.libraries.states
-import kz.bloom.ui.main.component.MainComponent
-import kz.bloom.ui.main.data.MainRepository
+import kz.bloom.ui.main.api.MainApiClient
 import kz.bloom.ui.main.store.MainStore
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
-import org.koin.core.Koin
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
@@ -35,7 +33,7 @@ class NavBottomBarComponentImpl(
     private val _selectedTab = MutableValue(initialValue = TabItem.HOME)
     override val selectedTab: Value<TabItem> = _selectedTab
 
-    private val mainApi by inject<MainRepository>()
+    private val mainApi by inject<MainApiClient>()
     private val mainContext by inject<CoroutineContext>(qualifier = named(name = "Main"))
     private val ioContext by inject<CoroutineContext>(qualifier = named(name = "IO"))
     private val storeFactory by inject<StoreFactory>()
@@ -46,7 +44,9 @@ class NavBottomBarComponentImpl(
             mainApi = mainApi,
             mainContext = mainContext,
             ioContext = ioContext,
-            storeFactory = storeFactory)
+            storeFactory = storeFactory,
+            sharedPreferences = sharedPreferences
+        )
     }
 
     override val model: Value<Model> = store.states.toModels()

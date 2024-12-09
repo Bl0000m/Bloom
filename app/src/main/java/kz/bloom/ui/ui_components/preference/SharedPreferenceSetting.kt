@@ -53,4 +53,12 @@ class SharedPreferencesSetting(private val applicationContext: Context) : BaseSh
     var password: String?
         get() = sharedPreferencesCanBeRemoved.getString(PASSWORD,"")
         set(value) = putString(PASSWORD, value, sharedPreferencesCanBeRemoved)
+
+    var phoneNumber: String?
+        get() = sharedPreferencesCanBeRemoved.getString(PHONENUMBER, "")
+        set(value) = putString(PHONENUMBER, value, sharedPreferencesCanBeRemoved)
+
+    var userId: String?
+        get() = sharedPreferencesCanBeRemoved.getString(USER_ID, "")
+        set(value) = putString(USER_ID, value, sharedPreferencesCanBeRemoved)
 }
