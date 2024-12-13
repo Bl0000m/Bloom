@@ -10,7 +10,7 @@ interface DatePickerStore : Store<Intent, State, Nothing> {
     data class State(
         val isLoading: Boolean,
         val isError: Boolean,
-        val subscriptionCreated: Boolean
+        val subscriptionId: Long
     ) : JvmSerializable
 
     sealed interface Intent : JvmSerializable {

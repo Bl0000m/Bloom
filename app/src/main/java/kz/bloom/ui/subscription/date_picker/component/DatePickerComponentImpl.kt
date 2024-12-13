@@ -1,17 +1,17 @@
 package kz.bloom.ui.subscription.date_picker.component
 
 import android.annotation.SuppressLint
-import android.util.Log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
-import com.arkivanov.essenty.lifecycle.doOnResume
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlinx.coroutines.launch
+import kz.bloom.libraries.states
 import kz.bloom.ui.subscription.api.SubscriptionApi
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent.Model
@@ -20,6 +20,7 @@ import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent.TimeOf
 import kz.bloom.ui.subscription.date_picker.store.DatePickerStore
 import kz.bloom.ui.subscription.date_picker.store.DatePickerStore.DateItemDetailed
 import kz.bloom.ui.subscription.date_picker.store.DatePickerStore.Intent
+import kz.bloom.ui.ui_components.coroutineScope
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
@@ -27,7 +28,7 @@ import kotlin.coroutines.CoroutineContext
 
 class DatePickerComponentImpl(
     componentContext: ComponentContext,
-    private val onContinuePressed: (selection: List<DateItem>) -> Unit,
+    private val onContinuePressed: (subscriptionId: Long) -> Unit,
     private val onBackPress: () -> Unit,
     private val subscriptionName: String,
     private val subscriptionTypeId: String
@@ -55,6 +56,8 @@ class DatePickerComponentImpl(
         )
     )
 
+    private val scope = coroutineScope()
+
     override val model: Value<Model> = _model
 
     init {
@@ -67,15 +70,20 @@ class DatePickerComponentImpl(
 
     override fun onContinue(selection: List<LocalDate>) {
         _model.update { it.copy(pickedDates = selection.toSerializedClass()) }
-        store.accept(
-            intent = Intent.CreateSubscription(
-                userId = sharedPreferences.userId!!,
-                subscriptionName = subscriptionName,
-                subscriptionTypeId = subscriptionTypeId,
-                dates = _model.value.pickedDates.toDetailedDateItems(_model.value.selectedTimeOfDay!!)
+        scope.launch {
+            store.accept(
+                intent = Intent.CreateSubscription(
+                    userId = sharedPreferences.userId!!,
+                    subscriptionName = subscriptionName,
+                    subscriptionTypeId = subscriptionTypeId,
+                    dates = _model.value.pickedDates.toDetailedDateItems(_model.value.selectedTimeOfDay!!)
+                )
             )
-        )
-        onContinuePressed(selection.toSerializedClass())
+            store.states.subscribe {
+                if (it.subscriptionId.toInt() != 0)
+                    onContinuePressed(it.subscriptionId)
+            }
+        }
     }
 
     override fun onBackPressed() {

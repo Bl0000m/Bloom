@@ -1,14 +1,18 @@
 package kz.bloom.ui.subscription.fill_details.component
 
 import com.arkivanov.decompose.value.Value
-import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent.DateItem
 
 interface FillDetailsComponent {
     data class Model(
-        val selection: List<DateItem>
+        val bouquet: Bouquet
     )
 
     val model: Value<Model>
 
-    fun onNavigateToRightBack()
+    data class Bouquet(
+        val id: Int,
+        val name: String,
+        val supplier: String,
+        val coast: Double
+    )
 }

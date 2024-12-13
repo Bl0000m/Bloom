@@ -5,12 +5,14 @@ import com.arkivanov.decompose.value.Value
 import kz.bloom.ui.subscription.create_subscription.component.CreateSubscriptionComponent
 import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent
 import kz.bloom.ui.subscription.fill_details.component.FillDetailsComponent
+import kz.bloom.ui.subscription.order_list.component.OrderListComponent
 import kz.bloom.ui.subscription.subs_list.component.SubsListComponent
 
 interface SubscriptionRootComponent {
 
     data class Model(
-        val subscriptionName: String
+        val subscriptionName: String,
+        val subscriptionId: Long
     )
 
     val model: Value<Model>
@@ -24,6 +26,9 @@ interface SubscriptionRootComponent {
         ) : Child
         public data class CreateSubscription(
             public val component: CreateSubscriptionComponent
+        ) : Child
+        public data class OrderList(
+            public val component: OrderListComponent
         ) : Child
         public data class FillDetails(
             public val component: FillDetailsComponent

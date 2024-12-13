@@ -1,5 +1,6 @@
 package kz.bloom.ui.subscription.date_picker.store
 
+import android.util.Log
 import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
@@ -16,7 +17,8 @@ import kotlin.coroutines.CoroutineContext
 
 private sealed interface Message : JvmSerializable {
     data class LoadingChanged(val isLoading: Boolean) : Message
-    data object ErrorOccurred: Message
+    data object ErrorOccurred : Message
+    data class SubscriptionCreated(val subscriptionId: Long) : Message
 }
 
 internal fun DatePickerStore(
@@ -25,19 +27,28 @@ internal fun DatePickerStore(
     storeFactory: StoreFactory,
     sharedPreferences: SharedPreferencesSetting,
     subscriptionApi: SubscriptionApi
-) : DatePickerStore =
+): DatePickerStore =
     object : DatePickerStore, Store<Intent, State, Nothing>
     by storeFactory.create<Intent, Nothing, Message, State, Nothing>(
         name = "DatePickerStore",
         initialState = State(
             isError = false,
             isLoading = false,
-            subscriptionCreated = false,
+            subscriptionId = 0
         ),
         reducer = { message ->
-            when(message) {
-                is Message.ErrorOccurred -> { copy(isError = true) }
-                is Message.LoadingChanged -> { copy(isLoading = message.isLoading) }
+            when (message) {
+                is Message.ErrorOccurred -> {
+                    copy(isError = true)
+                }
+
+                is Message.LoadingChanged -> {
+                    copy(isLoading = message.isLoading)
+                }
+
+                is Message.SubscriptionCreated -> {
+                    copy(subscriptionId = message.subscriptionId)
+                }
             }
         },
         bootstrapper = SimpleBootstrapper(),
@@ -61,23 +72,26 @@ private class ExecutorImpl(
 ) {
     override fun executeIntent(intent: Intent, getState: () -> State) {
         super.executeIntent(intent, getState)
-        when(intent) {
+        when (intent) {
             is Intent.CreateSubscription -> {
                 scope.launch {
                     try {
-                        val createSubscription = withContext(context = ioContext) {
+                        val createSubscriptionResponse = withContext(context = ioContext) {
                             subsApi.createSubscription(
                                 requestBody = CreateSubscriptionRequestBody(
-                                    userId = intent.userId.toInt(),
+                                    userId = intent.userId.toLong(),
                                     name = intent.subscriptionName,
-                                    subscriptionTypeId = intent.subscriptionTypeId.toInt(),
+                                    subscriptionTypeId = intent.subscriptionTypeId.toLong(),
                                     orderDates = intent.dates
                                 ),
-                                token = sharedPreferences.accessToken!!
+                                token = sharedPreferences.accessToken ?: throw IllegalStateException("Access token is missing")
                             )
                         }
+                        dispatch(message = Message.SubscriptionCreated(subscriptionId = createSubscriptionResponse.id))
+                        Log.d("behold1", createSubscriptionResponse.id.toString())
                     } catch (e: Exception) {
                         dispatch(message = Message.ErrorOccurred)
+                        Log.e("CreateSubscription", "Error occurred while creating subscription", e)
                     }
                 }
             }
