@@ -1,5 +1,6 @@
 package kz.bloom.ui.auth
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,7 +17,14 @@ class AuthActivity : ComponentActivity() {
         val component = AuthRootComponentImpl(
             componentContext = defaultComponentContext(),
             onNavigateBack = { finish() },
-            context = this
+            context = this,
+            onTokenUpdated = {
+                val resultIntent = Intent().apply {
+                    putExtra("EXTRA_TOKEN_UPDATED", true)
+                }
+                setResult(RESULT_OK, resultIntent)
+                finish()
+            }
         )
 
         setContent {

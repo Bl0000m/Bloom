@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import kz.bloom.R
-import kz.bloom.ui.main.bottom_nav_bar.TabItem
 
 @Composable
 fun BottomNavBar(
@@ -32,19 +31,18 @@ fun BottomNavBar(
 ) {
     Surface(
         modifier = modifier
-            .fillMaxWidth()
-            .height(76.dp),
+            .fillMaxWidth(),
         color = Color.White
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(horizontal = 32.dp)
                 .padding(
-                    start = 50.dp,
                     bottom = 38.dp,
                     top = 14.dp
                 ),
-            horizontalArrangement = Arrangement.spacedBy(45.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             NavBarItem(

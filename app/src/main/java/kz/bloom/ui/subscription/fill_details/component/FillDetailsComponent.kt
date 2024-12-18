@@ -15,4 +15,8 @@ interface FillDetailsComponent {
         val supplier: String,
         val coast: Double
     )
+
+    fun chooseFlower()
+
+    fun onClose()
 }

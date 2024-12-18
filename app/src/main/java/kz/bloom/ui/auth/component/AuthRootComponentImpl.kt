@@ -49,7 +49,8 @@ import org.koin.core.component.inject
 internal class AuthRootComponentImpl(
     componentContext: ComponentContext,
     private val onNavigateBack:() -> Unit,
-    private val context: Context
+    private val context: Context,
+    private val onTokenUpdated:() -> Unit
 ) : AuthRootComponent,
     KoinComponent,
     ComponentContext by componentContext {
@@ -289,7 +290,9 @@ internal class AuthRootComponentImpl(
     ) : UserHasPincodeComponent = UserHasPinCodeComponentImpl(
         componentContext = componentContext,
         onNavigateBack = { onNavigateBack() },
-        allowForward = { onNavigateBack() }
+        allowForward = {
+            onTokenUpdated()
+        }
     )
 
     @Serializable

@@ -2,6 +2,7 @@ package kz.bloom.ui.subscription.component
 
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
+import kz.bloom.ui.subscription.choose_flower.component.ChooseFlowerComponent
 import kz.bloom.ui.subscription.create_subscription.component.CreateSubscriptionComponent
 import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent
 import kz.bloom.ui.subscription.fill_details.component.FillDetailsComponent
@@ -33,6 +34,10 @@ interface SubscriptionRootComponent {
         public data class FillDetails(
             public val component: FillDetailsComponent
         ) : Child
+        public data class ChooseFlower(
+            public val component: ChooseFlowerComponent
+        ) : Child
+
     }
 
     public val childStack: Value<ChildStack<*, Child>>

@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -59,6 +60,7 @@ import kotlinx.coroutines.delay
 import kz.bloom.R
 import kz.bloom.ui.main.api.entity.PageItem
 import kz.bloom.ui.main.home_page.component.HomePageComponent
+import kz.bloom.ui.main.isButtonNavigationEnabled
 
 @Composable
 fun HomePageContent(modifier: Modifier, component: HomePageComponent) {
@@ -218,7 +220,12 @@ private fun PageContent(
     categoryNames: List<String>,
     isContentWhite: Boolean
 ) {
-    Box(modifier = modifier.fillMaxHeight()) {
+    Box(
+        modifier = modifier.fillMaxHeight().
+        padding(bottom = if (isButtonNavigationEnabled(LocalContext.current))
+            34.dp else 0.dp
+        ),
+    ) {
         if (item.index != 4 && item.index != 0) {
             PagerIndicatorContent(
                 modifier = Modifier

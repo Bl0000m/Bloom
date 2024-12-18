@@ -1,6 +1,7 @@
 package kz.bloom.ui.subscription.fill_details.content
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,15 +40,32 @@ fun FillDetailsContent(modifier: Modifier = Modifier, component: FillDetailsComp
         )
         Spacer(modifier = Modifier.height(35.dp))
         Text(
+            text = "ВЫБЕРИТЕ БУКЕТ",
+            style = MaterialTheme.typography.bodySmall
+        )
+        DetailContent(
+            icon = R.drawable.ic_flower,
+            actionText = "ВЫБЕРИТЕ ВРЕМЯ И ДАТУ ДОСТАВКИ",
+            onClick = { component.chooseFlower() }
+        )
+        Text(
             text = "ДАТА ДОСТАВКИ",
             style = MaterialTheme.typography.bodySmall
         )
-        DetailContent(icon = R.drawable.ic_clock, actionText = "ВЫБЕРИТЕ ВРЕМЯ И ДАТУ ДОСТАВКИ")
+        DetailContent(
+            icon = R.drawable.ic_clock,
+            actionText = "ВЫБЕРИТЕ ВРЕМЯ И ДАТУ ДОСТАВКИ",
+            onClick = { }
+        )
         Text(
             text = "АДРЕС ДОСТАВКИ",
             style = MaterialTheme.typography.bodySmall
         )
-        DetailContent(icon = R.drawable.ic_clock, actionText = "ВЫБЕРИТЕ АДРЕС ДОСТАВКИ")
+        DetailContent(
+            icon = R.drawable.ic_geo_pin,
+            actionText = "ВЫБЕРИТЕ АДРЕС ДОСТАВКИ",
+            onClick = { }
+        )
         Spacer(modifier = Modifier.weight(1f))
         PrimaryButton(
             modifier = Modifier.padding(bottom = 21.dp),
@@ -62,9 +80,10 @@ fun FillDetailsContent(modifier: Modifier = Modifier, component: FillDetailsComp
 private fun DetailContent(
     modifier: Modifier = Modifier,
     icon: Int,
-    actionText: String
+    actionText: String,
+    onClick:() -> Unit
 ) {
-    Column(modifier = modifier.padding(top = 20.dp, bottom = 35.dp)) {
+    Column(modifier = modifier.padding(top = 20.dp, bottom = 35.dp).clickable { onClick() }) {
         HorizontalDivider(thickness = 0.5.dp)
         Row(
             modifier = Modifier.padding(vertical = 16.dp, horizontal = 21.dp),

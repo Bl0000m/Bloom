@@ -9,7 +9,8 @@ import kz.bloom.ui.subscription.fill_details.component.FillDetailsComponent.Bouq
 
 class FillDetailsComponentImpl(
     componentContext: ComponentContext,
-    private val onClosePressed:() -> Unit
+    private val onClosePressed:() -> Unit,
+    private val onChooseFlower:() -> Unit
 ) : FillDetailsComponent, KoinComponent, ComponentContext by componentContext
 {
     private val _model = MutableValue(
@@ -25,4 +26,11 @@ class FillDetailsComponentImpl(
 
     override val model: Value<Model> = _model
 
+    override fun chooseFlower() {
+        onChooseFlower()
+    }
+
+    override fun onClose() {
+        onClosePressed()
+    }
 }

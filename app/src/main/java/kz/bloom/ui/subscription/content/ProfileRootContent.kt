@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
+import kz.bloom.ui.subscription.choose_flower.content.ChooseFlowerContent
 import kz.bloom.ui.subscription.component.SubscriptionRootComponent
 import kz.bloom.ui.subscription.component.SubscriptionRootComponent.Child
 import kz.bloom.ui.subscription.create_subscription.content.CreateSubscriptionContent
@@ -44,6 +45,10 @@ fun SubscriptionRootContent(component: SubscriptionRootComponent) {
                         component = childInstance.component
                     )
                     is Child.FillDetails -> FillDetailsContent(
+                        modifier = contentPaddingModifier,
+                        component = childInstance.component
+                    )
+                    is Child.ChooseFlower -> ChooseFlowerContent(
                         modifier = contentPaddingModifier,
                         component = childInstance.component
                     )

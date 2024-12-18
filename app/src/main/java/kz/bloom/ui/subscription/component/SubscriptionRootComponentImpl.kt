@@ -11,6 +11,8 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import kotlinx.serialization.Serializable
+import kz.bloom.ui.subscription.choose_flower.component.ChooseFlowerComponent
+import kz.bloom.ui.subscription.choose_flower.component.ChooseFlowerComponentImpl
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.subscription.component.SubscriptionRootComponent.Child
 import kz.bloom.ui.subscription.component.SubscriptionRootComponent.Model
@@ -85,13 +87,19 @@ class SubscriptionRootComponentImpl(
                 componentContext = componentContext
             )
         )
+        is Configuration.ChooseFlower -> Child.ChooseFlower(
+            component = chooseFlower(
+                componentContext = componentContext
+            )
+        )
     }
 
     private fun fillDetailsComponent(
         componentContext: ComponentContext
     ) : FillDetailsComponent = FillDetailsComponentImpl(
         componentContext = componentContext,
-        onClosePressed = { }
+        onClosePressed = { },
+        onChooseFlower = { navigation.pushNew(configuration = Configuration.ChooseFlower)}
     )
 
     private fun orderListComponent(
@@ -137,6 +145,12 @@ class SubscriptionRootComponentImpl(
         subscriptionTypeId = "1"
     )
 
+    private fun chooseFlower(
+        componentContext: ComponentContext
+    ) : ChooseFlowerComponent = ChooseFlowerComponentImpl(
+        componentContext = componentContext
+    )
+
     @Serializable
     private sealed interface Configuration {
         @Serializable
@@ -149,5 +163,7 @@ class SubscriptionRootComponentImpl(
         data class OrderList(val subscriptionName: String) : Configuration
         @Serializable
         data object FillDetails : Configuration
+        @Serializable
+        data object ChooseFlower : Configuration
     }
 }
