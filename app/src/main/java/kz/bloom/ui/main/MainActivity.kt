@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import kz.bloom.ui.main.component.MainComponent.Event
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,8 +25,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.coroutineScope
 import com.arkivanov.decompose.defaultComponentContext
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kz.bloom.ui.auth.AuthActivity
 import kz.bloom.ui.main.component.MainComponentImpl
 import kz.bloom.ui.main.bottom_nav_bar.BottomNavBar
@@ -48,29 +56,30 @@ class MainActivity : ComponentActivity(), KoinComponent {
         setContent {
             val restoredTabState = remember { mutableStateOf<String?>(null) }
             var isAnimationFinished by remember { mutableStateOf(false) }
-            val authLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == RESULT_OK) {
-                    val authSuccess = result.data?.getBooleanExtra("EXTRA_AUTH_SUCCESS", false) ?: false
-                    val restoredTab = result.data?.getStringExtra("EXTRA_RESTORED_TAB")
-
-                    if (authSuccess && restoredTab != null) {
-                        restoredTabState.value  = restoredTab
-                    }
-                }
-            }
             val mainComponent = remember {
                 MainComponentImpl(
                     componentContext = componentContext,
-                    onOpenSubscriptions = { openSubscriptions() },
-                    onNeedAuth = { openAuth(authLauncher) }
+                    onOpenSubscriptions = { openSubscriptions() }
                 )
             }
             val navBarComponent = remember { mainComponent.navBarComponent }
-
-            LaunchedEffect(navBarComponent) {
-                restoredTabState.value?.let { restoredTab ->
-                    navBarComponent.onTabSelected(TabItem.valueOf(restoredTab))
-                    restoredTabState.value = null
+            val authLauncher =
+                rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                    restoredTabState.value = mainComponent.rememberTab?.name
+                    lifecycle.coroutineScope.launch {
+                        restoredTabState.value?.let { restoredTab ->
+                            navBarComponent.onOpenRestoredTab(TabItem.valueOf(restoredTab))
+                            restoredTabState.value = null
+                        }
+                    }
+                }
+            LaunchedEffect(Unit) {
+                mainComponent.events.collectLatest { event ->
+                    when (event) {
+                        is Event.OpenAuth -> {
+                            openAuth(authLauncher)
+                        }
+                    }
                 }
             }
             BloomTheme {

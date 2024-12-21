@@ -9,7 +9,12 @@ import com.arkivanov.decompose.router.stack.popTo
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.Lifecycle
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import kz.bloom.ui.auth.sign_up.component.SignUpComponent
 import kz.bloom.ui.intro.splash.isAccessTokenExpired
 import kz.bloom.ui.main.bottom_nav_bar.NavBottomBarComponent
 import kz.bloom.ui.main.bottom_nav_bar.NavBottomBarComponentImpl
@@ -20,6 +25,8 @@ import kz.bloom.ui.main.home_page.component.HomePageComponentImpl
 import kz.bloom.ui.main.profile.component.ProfileMainComponent
 import kz.bloom.ui.main.profile.component.ProfileMainComponentImpl
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
+import kz.bloom.ui.main.component.MainComponent.Event
+import kz.bloom.ui.ui_components.coroutineScope
 
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -27,14 +34,15 @@ import org.koin.core.component.inject
 
 public class MainComponentImpl(
     componentContext: ComponentContext,
-    private val onOpenSubscriptions: () -> Unit,
-    private val onNeedAuth:() -> Unit
+    private val onOpenSubscriptions: () -> Unit
 ) : MainComponent,
     KoinComponent,
     ComponentContext by componentContext {
     private val navigation = StackNavigation<Configuration>()
 
     private val sharedPreferences by inject<SharedPreferencesSetting>()
+    var rememberTab: TabItem? = null
+    private val scope = coroutineScope()
 
     val navBarComponent: NavBottomBarComponent = NavBottomBarComponentImpl(
         componentContext = DefaultComponentContext(lifecycle = componentContext.lifecycle),
@@ -48,7 +56,10 @@ public class MainComponentImpl(
                     if (sharedPreferences.isAuth() && !isAccessTokenExpired(sharedPreferences.accessToken)) {
                         navigation.pushNew(configuration = Configuration.Profile)
                     } else {
-                        onNeedAuth()
+                        rememberTab = tab
+                        scope.launch {
+                            _events.emit(value = Event.OpenAuth)
+                        }
                     }
                 }
                 // Handle other tabs...
@@ -69,6 +80,10 @@ public class MainComponentImpl(
             )
         }
     )
+
+    private val _events: MutableSharedFlow<Event> = MutableSharedFlow()
+
+    override val events: Flow<Event> = _events
 
     override val childStack: Value<ChildStack<*, Child>> = _childStack
 

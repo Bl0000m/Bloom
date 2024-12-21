@@ -2,6 +2,7 @@ package kz.bloom.ui.main.component
 
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
+import kotlinx.coroutines.flow.Flow
 import kz.bloom.ui.main.home_page.component.HomePageComponent
 import kz.bloom.ui.main.profile.component.ProfileMainComponent
 
@@ -23,6 +24,12 @@ interface MainComponent {
             public val component: ProfileMainComponent
         ) : Child
     }
+
+    public sealed interface Event {
+        public data object OpenAuth: Event
+    }
+
+    public val events: Flow<Event>
 
     public val childStack: Value<ChildStack<*, Child>>
 

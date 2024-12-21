@@ -20,7 +20,7 @@ class AuthActivity : ComponentActivity() {
             context = this,
             onTokenUpdated = {
                 val resultIntent = Intent().apply {
-                    putExtra("EXTRA_TOKEN_UPDATED", true)
+                    putExtra("EXTRA_AUTH_SUCCESS", true)
                 }
                 setResult(RESULT_OK, resultIntent)
                 finish()

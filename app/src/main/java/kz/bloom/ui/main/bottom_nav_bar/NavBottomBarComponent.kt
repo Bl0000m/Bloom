@@ -12,5 +12,7 @@ interface NavBottomBarComponent {
     val selectedTab: Value<TabItem>
 
     fun onTabSelected(tab: TabItem)
+
+    fun onOpenRestoredTab(tab: TabItem)
 }
 

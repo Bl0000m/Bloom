@@ -1,5 +1,6 @@
 package kz.bloom.ui.main.bottom_nav_bar
 
+import android.util.Log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -52,12 +53,15 @@ class NavBottomBarComponentImpl(
     override val model: Value<Model> = store.states.toModels()
 
     override fun onTabSelected(tab: TabItem) {
-
         if (_selectedTab.value != tab) {
             _selectedTab.value = tab
             onTabSelect(tab)
             store.accept(MainStore.Intent.SelectNavBarItem(tab))
         }
+    }
+
+    override fun onOpenRestoredTab(tab: TabItem) {
+        onTabSelect(tab)
     }
 }
 

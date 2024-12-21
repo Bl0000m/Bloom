@@ -34,7 +34,7 @@ internal fun orderListStoreFactory(
     subscriptionId: Long
 ) : OrderListStore =
     object : OrderListStore, Store<Intent, State, Nothing>
-by storeFactory.create<Intent, Action, Message, State,Nothing>(
+by storeFactory.create<Intent, Action, Message, State, Nothing>(
     name = "OrderListStore",
     initialState = State(
         orderList = emptyList(),

@@ -148,7 +148,8 @@ class SubscriptionRootComponentImpl(
     private fun chooseFlower(
         componentContext: ComponentContext
     ) : ChooseFlowerComponent = ChooseFlowerComponentImpl(
-        componentContext = componentContext
+        componentContext = componentContext,
+        onFlowerConsidered = { }
     )
 
     @Serializable

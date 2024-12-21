@@ -1,6 +1,6 @@
 package kz.bloom.ui.subscription.choose_flower.content
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -18,14 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.ui.subscription.choose_flower.component.ChooseFlowerComponent
-import kz.bloom.ui.subscription.choose_flower.component.ChooseFlowerComponent.FlowerItem
+import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.BouquetDTO
 
 @Composable
 fun ChooseFlowerContent(modifier: Modifier = Modifier, component: ChooseFlowerComponent) {
@@ -35,28 +35,37 @@ fun ChooseFlowerContent(modifier: Modifier = Modifier, component: ChooseFlowerCo
         columns = GridCells.Fixed(2),
         modifier = modifier.fillMaxSize(),
     ) {
-        
+        items(model.value.bouquetsInfo) { bouquet ->
+            FlowerItemCard(
+                bouquetInfo = bouquet,
+                onClick = { component.flowerConsidered(it) }
+            )
+        }
     }
 }
 
 @Composable
-fun FlowerItemCard(flower: FlowerItem) {
+fun FlowerItemCard(
+    bouquetInfo: BouquetDTO,
+    onClick:(bouquetDTO: BouquetDTO) -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.7f),
+            .aspectRatio(0.7f)
+            .clickable { onClick(bouquetInfo) },
         shape = RectangleShape
     ) {
         Column {
-            Image(
-                painter = painterResource(id = flower.imageRes),
-                contentDescription = flower.title,
+            AsyncImage(
+                model = bouquetInfo.bouquetPhotos.first().url,
+                contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth(),
                 contentScale = ContentScale.Crop
             )
             Text(
-                text = flower.title,
+                text = bouquetInfo.name,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 8.dp),
@@ -65,7 +74,7 @@ fun FlowerItemCard(flower: FlowerItem) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = flower.price,
+                text = bouquetInfo.price.toString(),
                 fontSize = 12.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(horizontal = 8.dp)

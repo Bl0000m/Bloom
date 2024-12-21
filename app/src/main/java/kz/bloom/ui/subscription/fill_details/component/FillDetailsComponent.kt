@@ -4,17 +4,10 @@ import com.arkivanov.decompose.value.Value
 
 interface FillDetailsComponent {
     data class Model(
-        val bouquet: Bouquet
+        val bouquet: Boolean
     )
 
     val model: Value<Model>
-
-    data class Bouquet(
-        val id: Int,
-        val name: String,
-        val supplier: String,
-        val coast: Double
-    )
 
     fun chooseFlower()
 
