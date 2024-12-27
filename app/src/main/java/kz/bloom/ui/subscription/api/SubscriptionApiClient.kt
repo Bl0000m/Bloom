@@ -7,6 +7,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.contentType
+import kz.bloom.ui.subscription.api.entity.BouquetDetailsResponse
 import kz.bloom.ui.subscription.api.entity.CreateSubscriptionRequestBody
 import kz.bloom.ui.subscription.api.entity.CreateSubscriptionResponseBody
 import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.BouquetDTO
@@ -36,9 +37,16 @@ internal class SubscriptionApiClient(private val client: HttpClient) : Subscript
         }.body<List<BouquetDTO>>()
     }
 
+    override suspend fun loadBouquetDetails(bouquetId: Long, token: String): BouquetDetailsResponse {
+        return client.get("$BOUQUET_DETAILS/$bouquetId") {
+            headers.append("Authorization", "Bearer $token")
+        }.body<BouquetDetailsResponse>()
+    }
+
     companion object {
         const val SUBS_CREATE_SUBSCRIPTION = "v1/client/subscription"
         const val ORDER_LOAD = "v1/client/order/subscription"
         const val BOUQUET = "v1/bouquet"
+        const val BOUQUET_DETAILS = "v1/bouquet"
     }
 }

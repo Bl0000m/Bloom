@@ -1,5 +1,6 @@
 package kz.bloom.ui.subscription.choose_flower.store
 
+import android.util.Log
 import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
@@ -8,8 +9,10 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kz.bloom.ui.subscription.api.SubscriptionApi
+import kz.bloom.ui.subscription.api.entity.BouquetDetailsResponse
 import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.BouquetDTO
 import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.State
+import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.Intent
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import kotlin.coroutines.CoroutineContext
 
@@ -17,6 +20,7 @@ private sealed interface Message : JvmSerializable {
     data class LoadingChanged(val isLoading: Boolean) : Message
     data object ErrorOccurred : Message
     data class BouquetsLoaded(val bouquets: List<BouquetDTO>) : Message
+    data class BouquetDetailsLoaded(val bouquetDetails: BouquetDetailsResponse) : Message
 }
 
 private sealed interface Action : JvmSerializable {
@@ -30,11 +34,12 @@ internal fun chooseFlowerStore(
     sharedPreferences: SharedPreferencesSetting,
     subscriptionApi: SubscriptionApi
 ): ChooseFlowerStore =
-    object : ChooseFlowerStore, Store<Nothing, State, Nothing>
-    by storeFactory.create<Nothing, Action, Message, State, Nothing>(
+    object : ChooseFlowerStore, Store<Intent, State, Nothing>
+    by storeFactory.create<Intent, Action, Message, State, Nothing>(
         name = "ChooseFlowerStore",
         initialState = State(
             bouquets = emptyList(),
+            bouquetDetails = null,
             isLoading = false,
             isError = false
         ),
@@ -50,6 +55,10 @@ internal fun chooseFlowerStore(
 
                 is Message.BouquetsLoaded -> {
                     copy(bouquets = message.bouquets)
+                }
+
+                is Message.BouquetDetailsLoaded -> {
+                    copy(bouquetDetails = message.bouquetDetails)
                 }
             }
         },
@@ -69,12 +78,12 @@ private class ExecutorImpl(
     private val ioContext: CoroutineContext,
     private val sharedPreferences: SharedPreferencesSetting,
     private val subscriptionApi: SubscriptionApi
-) : CoroutineExecutor<Nothing, Action, State, Message, Nothing>(
+) : CoroutineExecutor<Intent, Action, State, Message, Nothing>(
     mainContext = mainContext
 ) {
     override fun executeAction(action: Action, getState: () -> State) {
         super.executeAction(action, getState)
-        when(action) {
+        when (action) {
             is Action.LoadBouquets -> {
                 scope.launch {
                     try {
@@ -82,6 +91,27 @@ private class ExecutorImpl(
                             subscriptionApi.loadBouquets(token = sharedPreferences.accessToken!!)
                         }
                         dispatch(message = Message.BouquetsLoaded(bouquetResponse))
+                    } catch (e: Exception) {
+                        dispatch(message = Message.ErrorOccurred)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun executeIntent(intent: Intent, getState: () -> State) {
+        super.executeIntent(intent, getState)
+        when (intent) {
+            is Intent.LoadSpecificBouquet -> {
+                scope.launch {
+                    try {
+                        val bouquetDetailsResponse = withContext(context = ioContext) {
+                            subscriptionApi.loadBouquetDetails(
+                                bouquetId = intent.id,
+                                token = sharedPreferences.accessToken!!
+                            )
+                        }
+                        dispatch(message = Message.BouquetDetailsLoaded(bouquetDetailsResponse))
                     } catch (e: Exception) {
                         dispatch(message = Message.ErrorOccurred)
                     }

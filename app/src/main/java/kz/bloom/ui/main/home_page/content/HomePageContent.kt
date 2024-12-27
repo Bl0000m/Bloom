@@ -350,7 +350,7 @@ private fun PagerIndicatorContent(
 }
 
 @Composable
-private fun VerticalPagerIndicator(
+fun VerticalPagerIndicator(
     modifier: Modifier = Modifier,
     pageCount: Int,
     currentPage: Int,

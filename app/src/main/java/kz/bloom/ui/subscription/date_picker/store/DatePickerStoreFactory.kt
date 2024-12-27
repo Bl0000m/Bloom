@@ -88,7 +88,6 @@ private class ExecutorImpl(
                             )
                         }
                         dispatch(message = Message.SubscriptionCreated(subscriptionId = createSubscriptionResponse.id))
-                        Log.d("behold1", createSubscriptionResponse.id.toString())
                     } catch (e: Exception) {
                         dispatch(message = Message.ErrorOccurred)
                         Log.e("CreateSubscription", "Error occurred while creating subscription", e)

@@ -149,7 +149,7 @@ class SubscriptionRootComponentImpl(
         componentContext: ComponentContext
     ) : ChooseFlowerComponent = ChooseFlowerComponentImpl(
         componentContext = componentContext,
-        onFlowerConsidered = { }
+        onCloseBouquet = { navigation.pop() }
     )
 
     @Serializable

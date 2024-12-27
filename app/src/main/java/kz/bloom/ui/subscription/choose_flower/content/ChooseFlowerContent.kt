@@ -1,45 +1,333 @@
 package kz.bloom.ui.subscription.choose_flower.content
 
+import android.annotation.SuppressLint
+import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import kz.bloom.R
+import kz.bloom.ui.main.home_page.content.VerticalPagerIndicator
+import kz.bloom.ui.subscription.api.entity.AdditionalElements
+import kz.bloom.ui.subscription.api.entity.BouquetDetailsResponse
+import kz.bloom.ui.subscription.api.entity.FlowerVarietyInfo
 import kz.bloom.ui.subscription.choose_flower.component.ChooseFlowerComponent
+import kz.bloom.ui.subscription.choose_flower.component.ChooseFlowerComponent.Event
 import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.BouquetDTO
+import kz.bloom.ui.subscription.order_list.store.BouquetPhoto
+import kz.bloom.ui.ui_components.PrimaryButton
 
 @Composable
 fun ChooseFlowerContent(modifier: Modifier = Modifier, component: ChooseFlowerComponent) {
     val model = component.model.subscribeAsState()
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = modifier.fillMaxSize(),
-    ) {
-        items(model.value.bouquetsInfo) { bouquet ->
-            FlowerItemCard(
-                bouquetInfo = bouquet,
-                onClick = { component.flowerConsidered(it) }
+    var bouquetDetails by remember { mutableStateOf<BouquetDetailsResponse?>(null) }
+
+    LaunchedEffect(Unit) {
+        component.events.collect { event ->
+            when (event) {
+                is Event.DisplayBouquetDetails -> {
+                    bouquetDetails = event.bouquet
+                }
+            }
+        }
+    }
+    Column(modifier = Modifier.background(color = Color.White)) {
+        if (bouquetDetails == null) {
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 15.dp, horizontal = 21.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    modifier = Modifier.clickable { component.closeBouquet() },
+                    painter = painterResource(id = R.drawable.ic_arrow_back_black),
+                    contentDescription = null
+                )
+            }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = modifier.fillMaxSize(),
+            ) {
+                items(model.value.bouquetsInfo) { bouquet ->
+                    FlowerItemCard(
+                        bouquetInfo = bouquet,
+                        onClick = { component.flowerConsidered(it) },
+                        onAddadClicked = { }
+                    )
+                }
+            }
+        } else {
+            CustomBottomSheetDialog(
+                modifier = Modifier.fillMaxSize(),
+                bouquetInfo = bouquetDetails!!,
+                bouquetPhotos = model.value.bouquetPhotos,
+                onCloseDetails = { bouquetDetails = null }
             )
+        }
+    }
+}
+
+@Composable
+fun CustomBottomSheetDialog(
+    bouquetInfo: BouquetDetailsResponse,
+    modifier: Modifier = Modifier,
+    bouquetPhotos: List<BouquetPhoto>,
+    initialHeight: Dp = 150.dp,
+    expandedHeight: Dp = 400.dp,
+    onCloseDetails: () -> Unit
+) {
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val density = LocalDensity.current
+    var sheetHeight by remember { mutableStateOf(initialHeight) }
+    val dragOffset = remember { Animatable(0f) }
+    val listState = rememberLazyListState()
+    val snapFlingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.background(color = Color.White)) {
+            Column(modifier = Modifier.align(Alignment.TopStart)) {
+                Row(modifier = Modifier.padding(vertical = 16.dp, horizontal = 21.dp)) {
+                    Icon(
+                        modifier = Modifier.clickable { onCloseDetails() },
+                        painter = painterResource(id = R.drawable.ic_close_square_light),
+                        contentDescription = null
+                    )
+                }
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .padding(bottom = sheetHeight),
+                    state = listState,
+                    flingBehavior = snapFlingBehavior
+                ) {
+                    items(bouquetPhotos) { photo ->
+                        AsyncImage(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight()
+                                .height(height = screenHeight - initialHeight),
+                            model = photo.url,
+                            contentScale = ContentScale.FillHeight,
+                            contentDescription = null
+                        )
+                    }
+                }
+            }
+            VerticalPagerIndicator(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 170.dp, end = 21.dp),
+                pageCount = bouquetPhotos.size,
+                currentPage = listState.firstVisibleItemIndex,
+                isContentWhite = true
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(sheetHeight)
+                .align(Alignment.BottomStart)
+                .background(color = Color.White)
+                .draggable(
+                    orientation = Orientation.Vertical,
+                    state = rememberDraggableState { delta ->
+                        val newHeight = with(density) { sheetHeight.toPx() } - delta
+                        sheetHeight = with(density) {
+                            newHeight
+                                .coerceIn(initialHeight.toPx(), expandedHeight.toPx())
+                                .toDp()
+                        }
+                    },
+                    onDragStopped = {
+                        val targetHeight = if (sheetHeight > (initialHeight + expandedHeight) / 2) {
+                            expandedHeight
+                        } else {
+                            initialHeight
+                        }
+                        dragOffset.animateTo(0f)
+                        sheetHeight = targetHeight
+                    }
+                )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = Color.Transparent)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(vertical = 5.dp)
+                        .background(color = Color.Transparent),
+                    horizontalArrangement = Arrangement.Absolute.SpaceBetween
+                ) {
+                    Spacer(modifier = Modifier.weight(0.5f))
+                    Box(
+                        modifier = Modifier
+                            .width(80.dp)
+                            .height(3.dp)
+                            .background(Color.Gray, RoundedCornerShape(50))
+                    )
+                    Spacer(modifier = Modifier.weight(0.5f))
+                }
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 21.dp)
+                        .padding(top = 20.dp)
+                        .background(color = Color.Transparent)
+                ) {
+                    Text(
+                        text = bouquetInfo.name.uppercase(),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "${bouquetInfo.price} BLM".uppercase(),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                    PrimaryButton(
+                        text = "ВЫБРАТЬ",
+                        onClick = { /* Handle selection */ }
+                    )
+                    Spacer(modifier = Modifier.height(30.dp))
+                    Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(
+                            text = "Автор: ${bouquetInfo.companyName}",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(35.dp))
+                    Text(
+                        text = "СОСТАВ БУКЕТА",
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Column {
+                        bouquetInfo.flowerVarietyInfo.forEach { item ->
+                            FlowerConsistItem(
+                                modifier = Modifier,
+                                flowerConsist = item
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(35.dp))
+                    Text(
+                        text = "ДОПОЛНИТЕЛЬНЫЕ ЭЛЕМЕНТЫ",
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Column {
+                        bouquetInfo.additionalElements.forEach { item ->
+                            AdditionalItemsItem(additional = item)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AdditionalItemsItem(modifier: Modifier = Modifier, additional: AdditionalElements) {
+    Box(modifier = modifier.border(width = 0.5.dp, color = Color.Black)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = additional.name,
+                style = MaterialTheme.typography.labelSmall
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = "${additional.quantity} шт.",
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
+    }
+}
+
+@Composable
+private fun FlowerConsistItem(modifier: Modifier = Modifier, flowerConsist: FlowerVarietyInfo) {
+    Box(modifier = modifier.border(width = 0.5.dp, color = Color.Black)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = flowerConsist.name, style = MaterialTheme.typography.bodySmall)
+            Spacer(modifier = Modifier.weight(1f))
+            Text(text = "${flowerConsist.quantity} шт.", style = MaterialTheme.typography.bodySmall)
         }
     }
 }
@@ -47,39 +335,46 @@ fun ChooseFlowerContent(modifier: Modifier = Modifier, component: ChooseFlowerCo
 @Composable
 fun FlowerItemCard(
     bouquetInfo: BouquetDTO,
-    onClick:(bouquetDTO: BouquetDTO) -> Unit
+    onClick: (bouquetDTO: BouquetDTO) -> Unit,
+    onAddadClicked: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(0.7f)
-            .clickable { onClick(bouquetInfo) },
-        shape = RectangleShape
+    Column(
+        modifier = Modifier.background(color = Color.White),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Column {
+        Box(modifier = Modifier.fillMaxSize()) {
             AsyncImage(
                 model = bouquetInfo.bouquetPhotos.first().url,
                 contentDescription = null,
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .aspectRatio(0.65f)
+                    .clickable { onClick(bouquetInfo) },
                 contentScale = ContentScale.Crop
             )
-            Text(
-                text = bouquetInfo.name,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 8.dp),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+            Icon(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 13.dp)
+                    .clickable { onAddadClicked() },
+                painter = painterResource(id = R.drawable.ic_add_button),
+                contentDescription = null
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = bouquetInfo.price.toString(),
-                fontSize = 12.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
         }
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = bouquetInfo.name.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(horizontal = 8.dp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = "${bouquetInfo.price} BLM",
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
