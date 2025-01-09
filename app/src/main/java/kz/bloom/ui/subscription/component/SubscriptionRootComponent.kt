@@ -2,10 +2,12 @@ package kz.bloom.ui.subscription.component
 
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
+import kz.bloom.ui.subscription.choose_company.component.ChooseCompanyComponent
 import kz.bloom.ui.subscription.choose_flower.component.ChooseFlowerComponent
 import kz.bloom.ui.subscription.create_subscription.component.CreateSubscriptionComponent
 import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent
 import kz.bloom.ui.subscription.fill_details.component.FillDetailsComponent
+import kz.bloom.ui.subscription.flower_details.component.FlowerDetailsComponent
 import kz.bloom.ui.subscription.order_list.component.OrderListComponent
 import kz.bloom.ui.subscription.subs_list.component.SubsListComponent
 
@@ -36,6 +38,12 @@ interface SubscriptionRootComponent {
         ) : Child
         public data class ChooseFlower(
             public val component: ChooseFlowerComponent
+        ) : Child
+        public data class FlowerDetails(
+            public val component: FlowerDetailsComponent
+        ) : Child
+        public data class ChooseCompany(
+            public val component: ChooseCompanyComponent
         ) : Child
 
     }

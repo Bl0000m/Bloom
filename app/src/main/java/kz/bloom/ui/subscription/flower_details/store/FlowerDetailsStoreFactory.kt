@@ -1,5 +1,7 @@
-package kz.bloom.ui.subscription.choose_flower.store
+package kz.bloom.ui.subscription.flower_details.store
 
+import android.util.Log
+import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.BouquetDTO
 import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
@@ -9,53 +11,50 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kz.bloom.ui.subscription.api.SubscriptionApi
 import kz.bloom.ui.subscription.api.entity.BouquetDetailsResponse
-import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.BouquetDTO
-import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.State
-import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.Intent
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
+import kz.bloom.ui.subscription.flower_details.store.FlowerDetailsStore.State
+import kz.bloom.ui.subscription.flower_details.store.FlowerDetailsStore.Intent
 import kotlin.coroutines.CoroutineContext
 
 private sealed interface Message : JvmSerializable {
-    data class LoadingChanged(val isLoading: Boolean) : Message
     data object ErrorOccurred : Message
-    data class BouquetsLoaded(val bouquets: List<BouquetDTO>) : Message
+    data class BouquetDetailsLoaded(val bouquetDetails: BouquetDetailsResponse) : Message
 }
 
 private sealed interface Action : JvmSerializable {
-    data object LoadBouquets : Action
+    data class LoadSpecificBouquet(val bouquetId: Long): Action
 }
-
-internal fun chooseFlowerStore(
+internal fun flowerDetailsStore(
     mainContext: CoroutineContext,
     ioContext: CoroutineContext,
     storeFactory: StoreFactory,
     sharedPreferences: SharedPreferencesSetting,
-    subscriptionApi: SubscriptionApi
-): ChooseFlowerStore =
-    object : ChooseFlowerStore, Store<Intent, State, Nothing>
+    subscriptionApi: SubscriptionApi,
+    bouquetDTO: BouquetDTO
+) : FlowerDetailsStore =
+    object : FlowerDetailsStore, Store<Intent, State, Nothing>
     by storeFactory.create<Intent, Action, Message, State, Nothing>(
-        name = "ChooseFlowerStore",
+        name = "FlowerDetailsStore",
         initialState = State(
-            bouquets = emptyList(),
-            isLoading = false,
+            bouquetDetailsResponse = BouquetDetailsResponse(
+                id = 0,
+                name = "",
+                author = "",
+                bouquetPhotos = emptyList(),
+                bouquetStyle = "",
+                flowerVarietyInfo = emptyList(),
+                additionalElements = emptyList(),
+                branchBouquetInfo = emptyList()
+            ),
             isError = false
         ),
         reducer = { message ->
-            when (message) {
-                is Message.ErrorOccurred -> {
-                    copy(isError = true)
-                }
-
-                is Message.LoadingChanged -> {
-                    copy(isLoading = message.isLoading)
-                }
-
-                is Message.BouquetsLoaded -> {
-                    copy(bouquets = message.bouquets)
-                }
+            when(message) {
+                is Message.BouquetDetailsLoaded -> copy(bouquetDetailsResponse = message.bouquetDetails)
+                is Message.ErrorOccurred -> copy(isError = true)
             }
         },
-        bootstrapper = SimpleBootstrapper(Action.LoadBouquets),
+        bootstrapper = SimpleBootstrapper(Action.LoadSpecificBouquet(bouquetId = bouquetDTO.id)),
         executorFactory = {
             ExecutorImpl(
                 mainContext = mainContext,
@@ -76,14 +75,18 @@ private class ExecutorImpl(
 ) {
     override fun executeAction(action: Action, getState: () -> State) {
         super.executeAction(action, getState)
-        when (action) {
-            is Action.LoadBouquets -> {
+        when(action) {
+            is Action.LoadSpecificBouquet -> {
                 scope.launch {
                     try {
-                        val bouquetResponse = withContext(context = ioContext) {
-                            subscriptionApi.loadBouquets(token = sharedPreferences.accessToken!!)
+                        val bouquetDetailsResponse = withContext(context = ioContext) {
+                            subscriptionApi.loadBouquetDetails(
+                                bouquetId = action.bouquetId,
+                                token = sharedPreferences.accessToken!!
+                            )
                         }
-                        dispatch(message = Message.BouquetsLoaded(bouquetResponse))
+                        Log.d("behold11", bouquetDetailsResponse.toString())
+                        dispatch(message = Message.BouquetDetailsLoaded(bouquetDetailsResponse))
                     } catch (e: Exception) {
                         dispatch(message = Message.ErrorOccurred)
                     }

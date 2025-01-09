@@ -11,18 +11,23 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import kotlinx.serialization.Serializable
+import kz.bloom.ui.subscription.choose_company.component.ChooseCompanyComponent
+import kz.bloom.ui.subscription.choose_company.component.ChooseCompanyComponentImpl
 import kz.bloom.ui.subscription.choose_flower.component.ChooseFlowerComponent
+import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.BouquetDTO
 import kz.bloom.ui.subscription.choose_flower.component.ChooseFlowerComponentImpl
+import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.subscription.component.SubscriptionRootComponent.Child
 import kz.bloom.ui.subscription.component.SubscriptionRootComponent.Model
 import kz.bloom.ui.subscription.create_subscription.component.CreateSubscriptionComponent
 import kz.bloom.ui.subscription.create_subscription.component.CreateSubscriptionComponentImpl
 import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent
-import kz.bloom.ui.subscription.date_picker.component.DatePickerComponent.DateItem
 import kz.bloom.ui.subscription.date_picker.component.DatePickerComponentImpl
 import kz.bloom.ui.subscription.fill_details.component.FillDetailsComponent
 import kz.bloom.ui.subscription.fill_details.component.FillDetailsComponentImpl
+import kz.bloom.ui.subscription.flower_details.component.FlowerDetailsComponent
+import kz.bloom.ui.subscription.flower_details.component.FlowerDetailsComponentImpl
 import kz.bloom.ui.subscription.order_list.component.OrderListComponent
 import kz.bloom.ui.subscription.order_list.component.OrderListComponentImpl
 import kz.bloom.ui.subscription.subs_list.component.SubsListComponent
@@ -92,14 +97,48 @@ class SubscriptionRootComponentImpl(
                 componentContext = componentContext
             )
         )
+        is Configuration.FlowerDetails -> Child.FlowerDetails(
+            component = flowerDetails(
+                componentContext = componentContext,
+                bouquetDTO = configuration.bouquetDTO
+            )
+        )
+        is Configuration.ChooseCompany -> Child.ChooseCompany(
+            component = chooseCompany(
+                componentContext = componentContext,
+                bouquetId = configuration.bouquetId
+            )
+        )
     }
+
+    private fun chooseCompany(
+        componentContext: ComponentContext,
+        bouquetId: Long,
+    ) : ChooseCompanyComponent = ChooseCompanyComponentImpl(
+        componentContext = componentContext,
+        bouquetId = bouquetId,
+        onBranchPicked = { branchId ->
+
+        },
+        onNavigateBack = { navigation.pop() }
+    )
+
+    private fun flowerDetails(
+        componentContext: ComponentContext,
+        bouquetDTO: BouquetDTO,
+    ) : FlowerDetailsComponent = FlowerDetailsComponentImpl(
+        componentContext = componentContext,
+        bouquetDTO = bouquetDTO,
+        onCloseDetails = { navigation.pop() },
+        onBouquetPicked = { navigation.pushNew(configuration = Configuration.ChooseCompany(it)) }
+    )
 
     private fun fillDetailsComponent(
         componentContext: ComponentContext
     ) : FillDetailsComponent = FillDetailsComponentImpl(
         componentContext = componentContext,
         onClosePressed = { },
-        onChooseFlower = { navigation.pushNew(configuration = Configuration.ChooseFlower)}
+        onChooseFlower = { navigation.pushNew(configuration = Configuration.ChooseFlower) }
     )
 
     private fun orderListComponent(
@@ -149,7 +188,10 @@ class SubscriptionRootComponentImpl(
         componentContext: ComponentContext
     ) : ChooseFlowerComponent = ChooseFlowerComponentImpl(
         componentContext = componentContext,
-        onCloseBouquet = { navigation.pop() }
+        onCloseBouquet = { navigation.pop() },
+        onFlowerConsidered = { bouquetDTO ->
+            navigation.pushNew(configuration = Configuration.FlowerDetails(bouquetDTO = bouquetDTO))
+        }
     )
 
     @Serializable
@@ -166,5 +208,9 @@ class SubscriptionRootComponentImpl(
         data object FillDetails : Configuration
         @Serializable
         data object ChooseFlower : Configuration
+        @Serializable
+        data class FlowerDetails(val bouquetDTO: BouquetDTO) : Configuration
+        @Serializable
+        data class ChooseCompany(val bouquetId: Long) : Configuration
     }
 }
