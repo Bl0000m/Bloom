@@ -2,6 +2,8 @@ package kz.bloom.ui.subscription.component
 
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
+import kz.bloom.ui.subscription.add_address.component.AddAddressComponent
+import kz.bloom.ui.subscription.address_list.component.AddressListComponent
 import kz.bloom.ui.subscription.choose_company.component.ChooseCompanyComponent
 import kz.bloom.ui.subscription.choose_flower.component.ChooseFlowerComponent
 import kz.bloom.ui.subscription.create_subscription.component.CreateSubscriptionComponent
@@ -44,6 +46,12 @@ interface SubscriptionRootComponent {
         ) : Child
         public data class ChooseCompany(
             public val component: ChooseCompanyComponent
+        ) : Child
+        public data class AddressList(
+            public val component: AddressListComponent
+        ) : Child
+        public data class AddAddress(
+            public val component: AddAddressComponent
         ) : Child
 
     }

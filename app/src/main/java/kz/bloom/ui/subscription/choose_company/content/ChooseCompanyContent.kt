@@ -54,7 +54,7 @@ fun ChooseCompanyContent(modifier: Modifier = Modifier, component: ChooseCompany
                     name = company.companyName,
                     price = company.price,
                     branchId = company.branchId,
-                    onBranchPicked = { branchId -> component.branchPicked(branchId) }
+                    onBranchPicked = { branchId, price -> component.branchPicked(branchId = branchId, price = price) }
                 )
                 HorizontalDivider(color = Color.Gray, thickness = 0.5.dp)
             }
@@ -68,7 +68,7 @@ private fun CompanyItem(
     name: String,
     price: String,
     branchId: Long,
-    onBranchPicked: (branchId: Long) -> Unit
+    onBranchPicked: (branchId: Long, price: String) -> Unit
 ) {
     Column(
         modifier = modifier.fillMaxWidth()
@@ -85,7 +85,7 @@ private fun CompanyItem(
             Spacer(modifier = Modifier.weight(1f))
             Box(modifier = Modifier
                 .background(color = Color.Black)
-                .clickable { onBranchPicked(branchId) }
+                .clickable { onBranchPicked(branchId, price) }
             ) {
                 Text(
                     modifier = Modifier

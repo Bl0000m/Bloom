@@ -16,6 +16,7 @@ import kotlin.coroutines.CoroutineContext
 
 private sealed interface Message : JvmSerializable {
     data object ErrorOccurred : Message
+    data object OrderFilled : Message
     data class CompaniesRawLoaded(val companiesRaw: BouquetDetailsResponse) : Message
 }
 
@@ -45,12 +46,14 @@ internal fun chooseCompanyStore(
                 additionalElements = emptyList(),
                 branchBouquetInfo = emptyList()
             ),
-            isError = false
+            isError = false,
+            orderFilled = false
         ),
         reducer = { message ->
             when (message) {
                 is Message.ErrorOccurred -> copy(isError = true)
                 is Message.CompaniesRawLoaded -> copy(companiesRaw = message.companiesRaw)
+                is Message.OrderFilled -> copy(orderFilled = true)
             }
         },
         bootstrapper = SimpleBootstrapper(Action.LoadCompanies(bouquetId = bouquetId)),
@@ -85,6 +88,27 @@ private class ExecutorImpl(
                             )
                         }
                         dispatch(message = Message.CompaniesRawLoaded(companyDetailsResponse))
+                    } catch (e: Exception) {
+                        dispatch(message = Message.ErrorOccurred)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun executeIntent(intent: Intent, getState: () -> State) {
+        super.executeIntent(intent, getState)
+        when(intent) {
+            is Intent.FillOrder -> {
+                scope.launch {
+                    try {
+                        val fillOrderResponse = withContext(context = ioContext) {
+                            subscriptionApi.fillOrder(
+                                orderRequestBody = intent.orderRequestBody,
+                                token = sharedPreferences.accessToken!!
+                            )
+                        }
+                        dispatch(message = Message.OrderFilled)
                     } catch (e: Exception) {
                         dispatch(message = Message.ErrorOccurred)
                     }

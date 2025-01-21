@@ -15,7 +15,7 @@ interface ChooseCompanyComponent {
 
     val model: Value<Model>
 
-    fun branchPicked(branchId: Long)
+    fun branchPicked(branchId: Long, price: String)
 
     fun navigateBack()
 }

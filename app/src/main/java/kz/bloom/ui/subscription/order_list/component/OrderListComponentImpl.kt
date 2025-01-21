@@ -1,5 +1,6 @@
 package kz.bloom.ui.subscription.order_list.component
 
+import android.util.Log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -20,7 +21,7 @@ import kotlin.coroutines.CoroutineContext
 class OrderListComponentImpl(
     componentContext: ComponentContext,
     private val onNavigateRightBack:() -> Unit,
-    private val onFillOrder: () -> Unit,
+    private val onFillOrder: (orderId: Long) -> Unit,
     subscriptionId: Long
 ) : OrderListComponent, KoinComponent, ComponentContext by componentContext
 {
@@ -60,7 +61,7 @@ class OrderListComponentImpl(
         onNavigateRightBack()
     }
 
-    override fun openIndividualOrder() {
-        onFillOrder()
+    override fun openIndividualOrder(orderId: Long) {
+        onFillOrder(orderId)
     }
 }

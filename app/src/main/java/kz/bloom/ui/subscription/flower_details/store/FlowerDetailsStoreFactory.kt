@@ -85,7 +85,6 @@ private class ExecutorImpl(
                                 token = sharedPreferences.accessToken!!
                             )
                         }
-                        Log.d("behold11", bouquetDetailsResponse.toString())
                         dispatch(message = Message.BouquetDetailsLoaded(bouquetDetailsResponse))
                     } catch (e: Exception) {
                         dispatch(message = Message.ErrorOccurred)

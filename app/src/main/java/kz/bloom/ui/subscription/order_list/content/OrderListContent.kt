@@ -87,7 +87,7 @@ fun OrderListContent(modifier: Modifier = Modifier, component: OrderListComponen
                     day = date.toDay(),
                     month = date.toMonthInRussian(),
                     dayOfWeek = date.toDayOfWeek().uppercase(),
-                    onClick = { component.openIndividualOrder() }
+                    onClick = { component.openIndividualOrder(model.value.orders[index].id) }
                 )
             }
         }

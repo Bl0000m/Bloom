@@ -1,22 +1,29 @@
 package kz.bloom.ui.subscription.component
 
+import androidx.core.view.KeyEventDispatcher.Component
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
+import com.arkivanov.decompose.router.stack.backStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
+import com.arkivanov.decompose.router.stack.popTo
 import com.arkivanov.decompose.router.stack.popToFirst
+import com.arkivanov.decompose.router.stack.popWhile
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import kotlinx.serialization.Serializable
+import kz.bloom.ui.subscription.add_address.component.AddAddressComponent
+import kz.bloom.ui.subscription.add_address.component.AddAddressComponentImpl
+import kz.bloom.ui.subscription.address_list.component.AddressListComponent
+import kz.bloom.ui.subscription.address_list.component.AddressListComponentImpl
 import kz.bloom.ui.subscription.choose_company.component.ChooseCompanyComponent
 import kz.bloom.ui.subscription.choose_company.component.ChooseCompanyComponentImpl
 import kz.bloom.ui.subscription.choose_flower.component.ChooseFlowerComponent
 import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.BouquetDTO
 import kz.bloom.ui.subscription.choose_flower.component.ChooseFlowerComponentImpl
-import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.subscription.component.SubscriptionRootComponent.Child
 import kz.bloom.ui.subscription.component.SubscriptionRootComponent.Model
@@ -89,36 +96,67 @@ class SubscriptionRootComponentImpl(
         )
         is Configuration.FillDetails -> Child.FillDetails(
             component = fillDetailsComponent(
-                componentContext = componentContext
+                componentContext = componentContext,
+                orderId = configuration.orderId
             )
         )
         is Configuration.ChooseFlower -> Child.ChooseFlower(
             component = chooseFlower(
-                componentContext = componentContext
+                componentContext = componentContext,
+                orderId = configuration.orderId
             )
         )
         is Configuration.FlowerDetails -> Child.FlowerDetails(
             component = flowerDetails(
                 componentContext = componentContext,
-                bouquetDTO = configuration.bouquetDTO
+                bouquetDTO = configuration.bouquetDTO,
+                orderId = configuration.orderId
             )
         )
         is Configuration.ChooseCompany -> Child.ChooseCompany(
             component = chooseCompany(
                 componentContext = componentContext,
-                bouquetId = configuration.bouquetId
+                bouquetId = configuration.bouquetId,
+                orderId = configuration.orderId
+            )
+        )
+        is Configuration.AddressList -> Child.AddressList(
+            component = addressList(
+                componentContext = componentContext
+            )
+        )
+        is Configuration.AddAddress -> Child.AddAddress(
+            component = addAddress(
+                componentContext = componentContext
             )
         )
     }
 
+    private fun addAddress(
+        componentContext: ComponentContext
+    ) : AddAddressComponent = AddAddressComponentImpl(
+        componentContext = componentContext
+    )
+
+    private fun addressList(
+        componentContext: ComponentContext
+    ) : AddressListComponent = AddressListComponentImpl(
+        componentContext = componentContext,
+        onAddAddress = { navigation.pushNew(configuration = Configuration.AddAddress) }
+    )
+
     private fun chooseCompany(
         componentContext: ComponentContext,
         bouquetId: Long,
+        orderId: Long
     ) : ChooseCompanyComponent = ChooseCompanyComponentImpl(
         componentContext = componentContext,
         bouquetId = bouquetId,
-        onBranchPicked = { branchId ->
-
+        orderId = orderId,
+        onBranchPicked = {
+            navigation.popWhile { configuration ->
+                configuration !is Configuration.FillDetails
+            }
         },
         onNavigateBack = { navigation.pop() }
     )
@@ -126,19 +164,14 @@ class SubscriptionRootComponentImpl(
     private fun flowerDetails(
         componentContext: ComponentContext,
         bouquetDTO: BouquetDTO,
+        orderId: Long
     ) : FlowerDetailsComponent = FlowerDetailsComponentImpl(
         componentContext = componentContext,
         bouquetDTO = bouquetDTO,
         onCloseDetails = { navigation.pop() },
-        onBouquetPicked = { navigation.pushNew(configuration = Configuration.ChooseCompany(it)) }
-    )
-
-    private fun fillDetailsComponent(
-        componentContext: ComponentContext
-    ) : FillDetailsComponent = FillDetailsComponentImpl(
-        componentContext = componentContext,
-        onClosePressed = { },
-        onChooseFlower = { navigation.pushNew(configuration = Configuration.ChooseFlower) }
+        onBouquetPicked = { bouquetId ->
+            navigation.pushNew(configuration = Configuration.ChooseCompany(bouquetId = bouquetId, orderId = orderId))
+        }
     )
 
     private fun orderListComponent(
@@ -147,7 +180,20 @@ class SubscriptionRootComponentImpl(
         componentContext = componentContext,
         onNavigateRightBack = { navigation.popToFirst() },
         subscriptionId = _model.value.subscriptionId,
-        onFillOrder = { navigation.pushNew(configuration = Configuration.FillDetails) }
+        onFillOrder = { orderId ->
+            navigation.pushNew(configuration = Configuration.FillDetails(orderId = orderId))
+        }
+    )
+
+    private fun fillDetailsComponent(
+        componentContext: ComponentContext,
+        orderId: Long
+    ) : FillDetailsComponent = FillDetailsComponentImpl(
+        componentContext = componentContext,
+        onClosePressed = { navigation.pop() },
+        onChooseFlower = { navigation.pushNew(configuration = Configuration.ChooseFlower(orderId = orderId)) },
+        onAddressClicked = { navigation.pushNew(configuration = Configuration.AddressList)},
+        orderId = orderId
     )
 
     private fun createSubscriptionComponent(
@@ -185,12 +231,13 @@ class SubscriptionRootComponentImpl(
     )
 
     private fun chooseFlower(
-        componentContext: ComponentContext
+        componentContext: ComponentContext,
+        orderId: Long
     ) : ChooseFlowerComponent = ChooseFlowerComponentImpl(
         componentContext = componentContext,
         onCloseBouquet = { navigation.pop() },
         onFlowerConsidered = { bouquetDTO ->
-            navigation.pushNew(configuration = Configuration.FlowerDetails(bouquetDTO = bouquetDTO))
+            navigation.pushNew(configuration = Configuration.FlowerDetails(bouquetDTO = bouquetDTO, orderId = orderId))
         }
     )
 
@@ -205,12 +252,16 @@ class SubscriptionRootComponentImpl(
         @Serializable
         data class OrderList(val subscriptionName: String) : Configuration
         @Serializable
-        data object FillDetails : Configuration
+        data class FillDetails(val orderId: Long) : Configuration
         @Serializable
-        data object ChooseFlower : Configuration
+        data class ChooseFlower(val orderId: Long) : Configuration
         @Serializable
-        data class FlowerDetails(val bouquetDTO: BouquetDTO) : Configuration
+        data class FlowerDetails(val bouquetDTO: BouquetDTO, val orderId: Long) : Configuration
         @Serializable
-        data class ChooseCompany(val bouquetId: Long) : Configuration
+        data class ChooseCompany(val bouquetId: Long, val orderId: Long) : Configuration
+        @Serializable
+        data object AddressList : Configuration
+        @Serializable
+        data object AddAddress : Configuration
     }
 }

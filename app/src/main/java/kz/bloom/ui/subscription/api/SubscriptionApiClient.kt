@@ -3,14 +3,17 @@ package kz.bloom.ui.subscription.api
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.contentType
+import kz.bloom.ui.subscription.add_address.store.AddAddressStore
 import kz.bloom.ui.subscription.api.entity.BouquetDetailsResponse
+import kz.bloom.ui.subscription.api.entity.CreateOrderRequestBody
 import kz.bloom.ui.subscription.api.entity.CreateSubscriptionRequestBody
 import kz.bloom.ui.subscription.api.entity.CreateSubscriptionResponseBody
 import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.BouquetDTO
+import kz.bloom.ui.subscription.fill_details.store.FillDetailsStore.OrderDetails
 import kz.bloom.ui.subscription.order_list.store.Order
 
 internal class SubscriptionApiClient(private val client: HttpClient) : SubscriptionApi {
@@ -43,10 +46,42 @@ internal class SubscriptionApiClient(private val client: HttpClient) : Subscript
         }.body<BouquetDetailsResponse>()
     }
 
+    override suspend fun fillOrder(
+        orderRequestBody: CreateOrderRequestBody,
+        token: String
+    ): HttpResponse {
+        return client.post(FILL_ORDER) {
+            contentType(io.ktor.http.ContentType.Application.Json)
+            headers.append("Authorization", "Bearer $token")
+            setBody(orderRequestBody)
+        }
+    }
+
+    override suspend fun getOrderDetails(orderId: Long, token: String): OrderDetails {
+        return client.get("$GET_ORDER_DETAILS/$orderId") {
+            contentType(io.ktor.http.ContentType.Application.Json)
+            headers.append("Authorization", "Bearer $token")
+        }.body<OrderDetails>()
+    }
+
+    override suspend fun createOrderAddress(
+        addressRequestBody: AddAddressStore.AddressDto,
+        token: String
+    ): HttpResponse {
+        return client.post(CREATE_ORDER_ADDRESS) {
+            contentType(io.ktor.http.ContentType.Application.Json)
+            headers.append("Authorization", "Bearer $token")
+            setBody(addressRequestBody)
+        }
+    }
+
     companion object {
         const val SUBS_CREATE_SUBSCRIPTION = "v1/client/subscription"
         const val ORDER_LOAD = "v1/client/order/subscription"
         const val BOUQUET = "v1/bouquet"
         const val BOUQUET_DETAILS = "v1/bouquet"
+        const val FILL_ORDER = "v1/client/order"
+        const val GET_ORDER_DETAILS = "v1/client/order"
+        const val CREATE_ORDER_ADDRESS = "v1/address/order"
     }
 }
