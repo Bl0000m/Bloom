@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -27,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -44,6 +46,7 @@ fun CustomTextField(
     isError: Boolean = false,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
+    isHalf: Boolean = false,
     leadingContent: @Composable (() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null,
     additionalContent: @Composable (() -> Unit)? = null,
@@ -56,6 +59,8 @@ fun CustomTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     cursorColor: Color = MaterialTheme.colorScheme.onPrimary,
 ) {
+    val halfTheWidth = (0.45f * LocalConfiguration.current.screenWidthDp).dp
+
     Column (verticalArrangement = Arrangement.spacedBy(3.dp)) {
         Box(Modifier.padding(top = 6.dp)) {
             val colors = TextFieldDefaults.colors(
@@ -73,12 +78,20 @@ fun CustomTextField(
 
             BasicTextField(
                 enabled = enabled,
-                modifier = modifier
-                    .background(
+                modifier = if (!isHalf) {
+                    modifier
+                        .background(
+                            color = backgroundColor,
+                            shape = RoundedCornerShape(2.dp)
+                        )
+                        .fillMaxWidth()
+                } else {
+                    modifier.background(
                         color = backgroundColor,
                         shape = RoundedCornerShape(2.dp)
                     )
-                    .fillMaxWidth(),
+                        .width(halfTheWidth)
+                },
                 value = value,
                 onValueChange = onValueChange,
                 textStyle = textStyle.merge(TextStyle(color = textColor)),
@@ -121,9 +134,15 @@ fun CustomTextField(
             }
         }
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
+            modifier = if (!isHalf) {
+                Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+            } else {
+                Modifier
+                    .width(halfTheWidth)
+                    .height(1.dp)
+            }
         ) {
             HorizontalDivider(
                 modifier = Modifier,

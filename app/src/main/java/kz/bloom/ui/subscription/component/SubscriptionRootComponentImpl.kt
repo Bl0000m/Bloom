@@ -122,27 +122,33 @@ class SubscriptionRootComponentImpl(
         )
         is Configuration.AddressList -> Child.AddressList(
             component = addressList(
-                componentContext = componentContext
+                componentContext = componentContext,
+                orderId = configuration.orderId
             )
         )
         is Configuration.AddAddress -> Child.AddAddress(
             component = addAddress(
-                componentContext = componentContext
+                componentContext = componentContext,
+                orderId = configuration.orderId
             )
         )
     }
 
     private fun addAddress(
-        componentContext: ComponentContext
+        componentContext: ComponentContext,
+        orderId: Long
     ) : AddAddressComponent = AddAddressComponentImpl(
-        componentContext = componentContext
+        componentContext = componentContext,
+        orderId = orderId,
+        onNavigateBack = { navigation.pop() }
     )
 
     private fun addressList(
-        componentContext: ComponentContext
+        componentContext: ComponentContext,
+        orderId: Long
     ) : AddressListComponent = AddressListComponentImpl(
         componentContext = componentContext,
-        onAddAddress = { navigation.pushNew(configuration = Configuration.AddAddress) }
+        onAddAddress = { navigation.pushNew(configuration = Configuration.AddAddress(orderId = orderId)) }
     )
 
     private fun chooseCompany(
@@ -192,7 +198,7 @@ class SubscriptionRootComponentImpl(
         componentContext = componentContext,
         onClosePressed = { navigation.pop() },
         onChooseFlower = { navigation.pushNew(configuration = Configuration.ChooseFlower(orderId = orderId)) },
-        onAddressClicked = { navigation.pushNew(configuration = Configuration.AddressList)},
+        onAddressClicked = { navigation.pushNew(configuration = Configuration.AddressList(orderId = orderId)) },
         orderId = orderId
     )
 
@@ -260,8 +266,8 @@ class SubscriptionRootComponentImpl(
         @Serializable
         data class ChooseCompany(val bouquetId: Long, val orderId: Long) : Configuration
         @Serializable
-        data object AddressList : Configuration
+        data class AddressList(val orderId: Long) : Configuration
         @Serializable
-        data object AddAddress : Configuration
+        data class AddAddress(val orderId: Long) : Configuration
     }
 }

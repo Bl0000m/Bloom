@@ -1,16 +1,21 @@
 package kz.bloom.ui.subscription.add_address.component
 
+import android.util.Log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.decompose.value.operator.map
 import com.arkivanov.decompose.value.update
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import kotlinx.coroutines.flow.combine
+import kz.bloom.libraries.states
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.subscription.add_address.component.AddAddressComponent.Model
 import kz.bloom.ui.subscription.add_address.store.AddAddressStore
 import kz.bloom.ui.subscription.add_address.store.AddAddressStore.AddressDto
 import kz.bloom.ui.subscription.add_address.store.AddAddressStore.Intent
 import kz.bloom.ui.subscription.add_address.store.addAddressStore
+import kz.bloom.ui.subscription.add_address.store.AddAddressStore.State
 import kz.bloom.ui.subscription.api.SubscriptionApi
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.inject
@@ -19,6 +24,7 @@ import kotlin.coroutines.CoroutineContext
 
 internal class AddAddressComponentImpl(
     componentContext: ComponentContext,
+    private val onNavigateBack:() -> Unit,
     private val orderId: Long
 
 ) : AddAddressComponent, KoinComponent, ComponentContext by componentContext {
@@ -34,7 +40,8 @@ internal class AddAddressComponentImpl(
         ioContext = ioContext,
         storeFactory = storeFactory,
         sharedPreferencesSetting = sharedPreferences,
-        subscriptionApi = subscriptionApi
+        subscriptionApi = subscriptionApi,
+        orderId = orderId
     )
 
     private val _model = MutableValue(
@@ -51,11 +58,15 @@ internal class AddAddressComponentImpl(
         )
     )
 
-    override val model: Value<Model> = _model
-
-    override fun onCityFill(city: String) {
-        _model.update { it.copy(city = city) }
+    init {
+        store.states.subscribe { state ->
+            if (state.city != "") {
+                _model.update { it.copy(city = state.city) }
+            }
+        }
     }
+
+    override val model: Value<Model> = _model
 
     override fun onStreetFill(street: String) {
         _model.update { it.copy(street = street) }
@@ -96,6 +107,11 @@ internal class AddAddressComponentImpl(
             )
         )
     }
+
+    override fun navigateBack() {
+        onNavigateBack()
+    }
+
     private fun MutableValue<Model>.toAddressDto(orderId: Long) : AddressDto {
         return AddressDto(
             street = this.value.street,
@@ -104,13 +120,13 @@ internal class AddAddressComponentImpl(
             entrance = this.value.entry,
             intercom = this.value.intercom,
             floor = this.value.floor.toInt(),
-            city = this.value.city,
             postalCode = null,
             latitude = null,
             longitude = null,
             orderId = orderId,
             recipientPhone = this.value.recipientPhoneNumber,
-            comment = this.value.comment
+            comment = this.value.comment,
+            city = this.value.city
         )
     }
 }

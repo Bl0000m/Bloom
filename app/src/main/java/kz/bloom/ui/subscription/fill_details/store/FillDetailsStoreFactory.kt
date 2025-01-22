@@ -8,6 +8,8 @@ import com.arkivanov.mvikotlin.core.utils.JvmSerializable
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kz.bloom.ui.subscription.add_address.store.AddAddressStore
+import kz.bloom.ui.subscription.add_address.store.AddAddressStore.AddressDto
 import kz.bloom.ui.subscription.api.SubscriptionApi
 import kz.bloom.ui.subscription.fill_details.store.FillDetailsStore.State
 import kz.bloom.ui.subscription.fill_details.store.FillDetailsStore.Intent
@@ -44,7 +46,21 @@ internal fun fillDetailsStore(
             orderDetails = OrderDetails(
                 id = 0,
                 orderCode = 0,
-                address = "",
+                address = AddressDto(
+                    city = "",
+                    street = "",
+                    building = "",
+                    apartment = null,
+                    entrance = null,
+                    intercom = null,
+                    floor = null,
+                    postalCode = null,
+                    latitude = null,
+                    longitude = null,
+                    orderId = 0,
+                    recipientPhone = "",
+                    comment = null
+                ),
                 bouquetInfo = BouquetInfo1(
                     id = 0,
                     name = "",

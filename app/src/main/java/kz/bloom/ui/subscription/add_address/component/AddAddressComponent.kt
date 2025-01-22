@@ -17,8 +17,6 @@ interface AddAddressComponent {
 
     val model: Value<Model>
 
-    fun onCityFill(city: String)
-
     fun onStreetFill(street: String)
 
     fun onHouseFill(house: String)
@@ -36,5 +34,7 @@ interface AddAddressComponent {
     fun onCommentFill(comment: String)
 
     fun createAddress()
+
+    fun navigateBack()
 
 }

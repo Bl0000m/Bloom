@@ -94,7 +94,7 @@ fun FillDetailsContent(modifier: Modifier = Modifier, component: FillDetailsComp
         DetailContent(
             icon = R.drawable.ic_geo_pin,
             actionText = "ВЫБЕРИТЕ АДРЕС ДОСТАВКИ",
-            onClick = { component.onAddressClicked() }
+            onClick = { component.addressClicked() }
         )
         Spacer(modifier = Modifier.weight(1f))
         PrimaryButton(

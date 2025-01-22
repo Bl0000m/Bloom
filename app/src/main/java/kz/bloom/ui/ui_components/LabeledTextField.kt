@@ -43,6 +43,7 @@ fun LabeledTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
+    isHalf: Boolean = false,
     shape: Shape = RoundedCornerShape(12.dp),
     labelStyle: TextStyle = LocalTextStyle.current.copy(color = Color(0xFF555555)),
     textFieldStyle: TextStyle = labelStyle,
@@ -79,7 +80,6 @@ fun LabeledTextField(
     Box(
         modifier = Modifier
             .height(46.dp)
-            .fillMaxWidth()
     ) {
         Text(
             modifier = Modifier
@@ -104,6 +104,7 @@ fun LabeledTextField(
             onValueChange = onValueChange,
             placeholder = placeholder,
             enabled = enabled,
+            isHalf = isHalf,
             isError = isError,
             maxLines = maxLines,
             readOnly = readOnly,
