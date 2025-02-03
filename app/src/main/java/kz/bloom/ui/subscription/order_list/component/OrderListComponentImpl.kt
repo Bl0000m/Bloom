@@ -21,7 +21,7 @@ import kotlin.coroutines.CoroutineContext
 class OrderListComponentImpl(
     componentContext: ComponentContext,
     private val onNavigateRightBack:() -> Unit,
-    private val onFillOrder: (orderId: Long) -> Unit,
+    private val onFillOrder: (orderId: Long, deliveryDate: String) -> Unit,
     subscriptionId: Long
 ) : OrderListComponent, KoinComponent, ComponentContext by componentContext
 {
@@ -43,7 +43,7 @@ class OrderListComponentImpl(
 
     private val _model = MutableValue(
         initialValue = Model(
-            orders = emptyList(),
+            orders = emptyList()
         )
     )
 
@@ -61,7 +61,7 @@ class OrderListComponentImpl(
         onNavigateRightBack()
     }
 
-    override fun openIndividualOrder(orderId: Long) {
-        onFillOrder(orderId)
+    override fun openIndividualOrder(orderId: Long, deliveryDate: String) {
+        onFillOrder(orderId, deliveryDate)
     }
 }

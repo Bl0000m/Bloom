@@ -53,11 +53,14 @@ fun OrderListContent(modifier: Modifier = Modifier, component: OrderListComponen
         )
     }
     Column {
-        Column(modifier = modifier.padding(horizontal = 21.dp).padding(top = 8.dp)) {
+        Column(modifier = modifier
+            .padding(horizontal = 21.dp)
+            .padding(top = 8.dp)) {
             Icon(
                 modifier = Modifier.clickable { component.onNavigateToRightBack() },
                 painter = painterResource(id = R.drawable.ic_close_square_light),
-                contentDescription = null)
+                contentDescription = null
+            )
             Spacer(modifier = Modifier.height(41.dp))
             Text(
                 text = "ЗАПОЛНИТЕ ДЕТАЛИ ЗАКАЗА",
@@ -78,8 +81,8 @@ fun OrderListContent(modifier: Modifier = Modifier, component: OrderListComponen
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             items(
                 count = model.value.orders.size,
-                key = {
-                    index -> model.value.orders[index].id
+                key = { index ->
+                    model.value.orders[index].id
                 }
             ) { index ->
                 val date = model.value.orders[index].deliveryDate
@@ -87,23 +90,32 @@ fun OrderListContent(modifier: Modifier = Modifier, component: OrderListComponen
                     day = date.toDay(),
                     month = date.toMonthInRussian(),
                     dayOfWeek = date.toDayOfWeek().uppercase(),
-                    onClick = { component.openIndividualOrder(model.value.orders[index].id) }
+                    onClick = {
+                        component.openIndividualOrder(
+                            orderId = model.value.orders[index].id,
+                            deliveryDate = date.toDay() + " " +
+                                    date.toMonthInRussian() + ", " +
+                                    date.toDayOfWeek().uppercase()
+                        )
+                    }
                 )
             }
         }
     }
 }
+
 @Composable
 private fun IndividualOrderPanels(
     modifier: Modifier = Modifier,
     day: String,
     month: String,
     dayOfWeek: String,
-    onClick:() -> Unit
+    onClick: () -> Unit
 ) {
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(20.dp))
-        Row(modifier = Modifier.padding(start = 21.dp, end = 19.dp),
+        Row(
+            modifier = Modifier.padding(start = 21.dp, end = 19.dp),
             horizontalArrangement = Arrangement.spacedBy(11.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -141,22 +153,24 @@ private fun IndividualOrderPanels(
 @Composable
 private fun UserInformingDialog(
     modifier: Modifier = Modifier,
-    onDismiss:() -> Unit
+    onDismiss: () -> Unit
 ) {
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.White.copy(alpha = 0.7F))
-        .blur(30.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White.copy(alpha = 0.7F))
+            .blur(30.dp)
     ) {
         Popup(
             onDismissRequest = { onDismiss() },
             alignment = Alignment.Center
         ) {
-            Box(modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = 21.dp)
-                .border(width = 0.5.dp, color = Color.Black)
-                .background(color = Color.White)
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 21.dp)
+                    .border(width = 0.5.dp, color = Color.Black)
+                    .background(color = Color.White)
             ) {
                 Column(modifier = Modifier.padding(top = 20.dp, start = 18.dp, bottom = 10.dp)) {
                     Row(modifier = Modifier.padding(end = 12.dp)) {
@@ -165,7 +179,10 @@ private fun UserInformingDialog(
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Spacer(modifier = Modifier.weight(1f))
-                        Icon(painter = painterResource(id = R.drawable.ic_close_square_light), contentDescription = null)
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_close_square_light),
+                            contentDescription = null
+                        )
                     }
                     Spacer(modifier = Modifier.height(15.dp))
                     Text(
@@ -192,14 +209,14 @@ private fun UserInformingDialog(
 }
 
 @SuppressLint("NewApi")
-private fun String.toDayOfWeek(locale: Locale = Locale.getDefault()) : String {
+private fun String.toDayOfWeek(locale: Locale = Locale.getDefault()): String {
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val localDate = LocalDate.parse(this, formatter)
     return localDate.dayOfWeek.getDisplayName(TextStyle.FULL, locale)
 }
 
-private fun String.toDay() : String {
-    return this.split("-")[2]
+private fun String.toDay(): String {
+    return this.split("-")[2].toInt().toString()
 }
 
 private fun String.toMonthInRussian(): String {

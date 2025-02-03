@@ -3,7 +3,6 @@ package kz.bloom.ui.subscription.fill_details.store
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.utils.JvmSerializable
 import kotlinx.serialization.Serializable
-import kz.bloom.ui.subscription.add_address.store.AddAddressStore.AddressDto
 import kz.bloom.ui.subscription.api.entity.CreateOrderRequestBody
 import kz.bloom.ui.subscription.fill_details.store.FillDetailsStore.State
 import kz.bloom.ui.subscription.fill_details.store.FillDetailsStore.Intent
@@ -13,7 +12,8 @@ interface FillDetailsStore : Store<Intent, State, Nothing> {
         val isError: Boolean,
         val orderDetails: OrderDetails,
         val addressBeenFilled: Boolean,
-        val detailsLoaded: Boolean
+        val bouquetDetailsLoaded: Boolean,
+        val addressDetailsLoaded: Boolean
     ) : JvmSerializable
 
     sealed interface Intent : JvmSerializable {
@@ -25,7 +25,7 @@ interface FillDetailsStore : Store<Intent, State, Nothing> {
     data class OrderDetails(
         val id: Long,
         val orderCode: Long? = null,
-        val address: AddressDto?,
+        val address: DetailAddressDto?,
         val bouquetInfo: BouquetInfo1? = null,
         val branchDivisionInfoDto: BranchDivisionInfoDto,
         val assemblyCost: Double,
@@ -33,6 +33,23 @@ interface FillDetailsStore : Store<Intent, State, Nothing> {
         val deliveryStartTime: String,
         val deliveryEndTime: String,
         val orderStatus: String
+    )
+
+    @Serializable
+    data class DetailAddressDto(
+        val id: Long,
+        val street: String,
+        val building: String,
+        val apartment: String,
+        val entrance: String,
+        val intercom: String,
+        val floor: Int?,
+        val city: String,
+        val postalCode: String?,
+        val latitude: Int?,
+        val longitude: Int?,
+        val recipientPhone: String,
+        val comment: String
     )
 
     @Serializable

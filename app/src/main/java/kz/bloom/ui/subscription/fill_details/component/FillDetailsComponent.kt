@@ -6,7 +6,9 @@ import kz.bloom.ui.subscription.fill_details.store.FillDetailsStore.OrderDetails
 interface FillDetailsComponent {
     data class Model(
         val orderDetails: OrderDetails,
-        val orderDetailsLoaded: Boolean
+        val bouquetDetailsLoaded: Boolean,
+        val addressDetailsLoaded: Boolean,
+        val deliveryDate: String
     )
 
     val model: Value<Model>

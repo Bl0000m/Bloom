@@ -13,6 +13,7 @@ import kz.bloom.ui.subscription.flower_details.component.FlowerDetailsComponent.
 import kz.bloom.ui.subscription.flower_details.store.flowerDetailsStore
 import kz.bloom.ui.subscription.flower_details.store.FlowerDetailsStore.State
 import kz.bloom.ui.subscription.order_list.store.BouquetPhoto
+import kz.bloom.ui.ui_components.coroutineScope
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -40,7 +41,6 @@ class FlowerDetailsComponentImpl(
         bouquetDTO = bouquetDTO
     )
     override val model: Value<Model> = store.states.toModels(bouquetDTO)
-
 
     override fun closeDetails() {
         onCloseDetails()

@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
+import kz.bloom.ui.auth.country_chooser.ChooseCountryContent
 import kz.bloom.ui.subscription.add_address.content.AddAddressContent
 import kz.bloom.ui.subscription.address_list.content.AddressListContent
 import kz.bloom.ui.subscription.choose_company.content.ChooseCompanyContent
@@ -72,6 +73,10 @@ fun SubscriptionRootContent(component: SubscriptionRootComponent) {
                     is Child.AddAddress -> AddAddressContent(
                         modifier = contentPaddingModifier,
                         component = childInstance.component
+                    )
+                    is Child.CountryChoose -> ChooseCountryContent(
+                        component = childInstance.component,
+                        modifier = contentPaddingModifier
                     )
                 }
             }

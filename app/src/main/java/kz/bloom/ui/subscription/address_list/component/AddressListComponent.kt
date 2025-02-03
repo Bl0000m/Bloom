@@ -16,4 +16,6 @@ interface AddressListComponent {
     )
 
     fun addAddress()
+
+    fun navigateBack()
 }

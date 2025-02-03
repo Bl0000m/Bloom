@@ -1,7 +1,6 @@
 package kz.bloom.ui.subscription.fill_details.content
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,23 +8,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -38,7 +35,9 @@ import kz.bloom.ui.ui_components.PrimaryButton
 
 @Composable
 fun FillDetailsContent(modifier: Modifier = Modifier, component: FillDetailsComponent) {
-    val model = component.model.subscribeAsState()
+    val model by component.model.subscribeAsState()
+
+    rememberUpdatedState(newValue = model.addressDetailsLoaded)
 
     Column(
         modifier = modifier
@@ -47,18 +46,22 @@ fun FillDetailsContent(modifier: Modifier = Modifier, component: FillDetailsComp
             .padding(top = 8.dp)
     ) {
         Icon(
+            modifier = Modifier
+                .padding(start = 21.dp)
+                .clickable { component.onClose() },
             painter = painterResource(id = R.drawable.ic_close_square_light),
             contentDescription = null
         )
         Spacer(modifier = Modifier.height(41.dp))
         Text(
+            modifier = Modifier.padding(horizontal = 21.dp),
             text = "ДЕТАЛИ ЗАКАЗА",
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier = Modifier.height(35.dp))
 
-        if (model.value.orderDetailsLoaded) {
-            val orderDetails = model.value.orderDetails
+        if (model.bouquetDetailsLoaded) {
+            val orderDetails = model.orderDetails
             FilledBouquetContent(
                 orderCode = orderDetails.orderCode.toString(),
                 branchName = orderDetails.branchDivisionInfoDto.divisionType,
@@ -69,36 +72,54 @@ fun FillDetailsContent(modifier: Modifier = Modifier, component: FillDetailsComp
             )
         } else {
             Text(
+                modifier = Modifier.padding(horizontal = 21.dp),
                 text = "БУКЕТ",
                 style = MaterialTheme.typography.bodySmall
             )
             DetailContent(
+                modifier = Modifier.padding(horizontal = 21.dp),
                 icon = R.drawable.ic_flower,
                 actionText = "ВЫБЕРИТЕ БУКЕТ",
                 onClick = { component.chooseFlower() }
             )
         }
         Text(
+            modifier = Modifier.padding(horizontal = 21.dp),
             text = "ДАТА ДОСТАВКИ",
             style = MaterialTheme.typography.bodySmall
         )
         DetailContent(
+            modifier = Modifier.padding(horizontal = 21.dp),
             icon = R.drawable.ic_clock,
-            actionText = "ВЫБЕРИТЕ ВРЕМЯ И ДАТУ ДОСТАВКИ",
+            actionText = model.deliveryDate,
             onClick = { }
         )
         Text(
+            modifier = Modifier.padding(horizontal = 21.dp),
             text = "АДРЕС ДОСТАВКИ",
             style = MaterialTheme.typography.bodySmall
         )
-        DetailContent(
-            icon = R.drawable.ic_geo_pin,
-            actionText = "ВЫБЕРИТЕ АДРЕС ДОСТАВКИ",
-            onClick = { component.addressClicked() }
-        )
+        if (model.addressDetailsLoaded) {
+            DetailContent(
+                modifier = Modifier.padding(horizontal = 21.dp),
+                icon = R.drawable.ic_geo_pin,
+                actionText = "${model.orderDetails.address!!.street} ${model.orderDetails.address!!.building}",
+                onClick = { component.addressClicked() }
+            )
+        } else {
+            DetailContent(
+                modifier = Modifier.padding(horizontal = 21.dp),
+                icon = R.drawable.ic_geo_pin,
+                actionText = "ВЫБЕРИТЕ АДРЕС ДОСТАВКИ",
+                onClick = { component.addressClicked() }
+            )
+        }
+
         Spacer(modifier = Modifier.weight(1f))
         PrimaryButton(
-            modifier = Modifier.padding(bottom = 21.dp),
+            modifier = Modifier
+                .padding(bottom = 21.dp)
+                .padding(horizontal = 21.dp),
             text = "ПРОДОЛЖИТЬ",
             onClick = { }
         )
@@ -116,9 +137,11 @@ fun FilledBouquetContent(
     status: String,
     bouquetPhotoUrl: String
 ) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(bottom = 35.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 35.dp)
+    ) {
         HorizontalDivider(thickness = 0.5.dp)
         Box(
             modifier = modifier

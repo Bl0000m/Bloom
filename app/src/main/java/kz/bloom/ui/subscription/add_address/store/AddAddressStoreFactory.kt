@@ -103,9 +103,7 @@ private class ExecutorImpl(
                             )
                         }
                         dispatch(message = Message.CityNameLoaded(getBranchCityString.branchDivisionInfoDto.address))
-                        Log.d("behold2", getBranchCityString.branchDivisionInfoDto.address)
                     } catch (e: Exception) {
-                        Log.d("beholdE", e.message.toString())
                         dispatch(message = Message.ErrorOccurred)
                     }
                 }

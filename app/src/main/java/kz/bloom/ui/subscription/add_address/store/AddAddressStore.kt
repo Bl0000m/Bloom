@@ -29,7 +29,7 @@ interface AddAddressStore: Store<Intent, State, Nothing> {
         val postalCode: String?,
         val latitude: Double?,
         val longitude: Double?,
-        val orderId: Long,
+        val orderId: Long?,
         val recipientPhone: String,
         val comment: String?
     )

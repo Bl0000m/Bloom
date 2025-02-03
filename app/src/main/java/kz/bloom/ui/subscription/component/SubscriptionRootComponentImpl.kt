@@ -1,5 +1,6 @@
 package kz.bloom.ui.subscription.component
 
+import android.content.Context
 import androidx.core.view.KeyEventDispatcher.Component
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
@@ -15,6 +16,9 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import kotlinx.serialization.Serializable
+import kz.bloom.ui.auth.country_chooser.component.ChooseCountryComponent
+import kz.bloom.ui.auth.country_chooser.component.ChooseCountryComponentImpl
+import kz.bloom.ui.auth.country_chooser.component.CountryModel
 import kz.bloom.ui.subscription.add_address.component.AddAddressComponent
 import kz.bloom.ui.subscription.add_address.component.AddAddressComponentImpl
 import kz.bloom.ui.subscription.address_list.component.AddressListComponent
@@ -42,7 +46,8 @@ import kz.bloom.ui.subscription.subs_list.component.SubsListComponentImpl
 
 class SubscriptionRootComponentImpl(
     componentContext: ComponentContext,
-    private val onNavigateBack: () -> Unit
+    private val onNavigateBack: () -> Unit,
+    private val context: Context
 ) : SubscriptionRootComponent,
     KoinComponent,
     ComponentContext by componentContext {
@@ -68,6 +73,9 @@ class SubscriptionRootComponentImpl(
     )
 
     override val model: Value<Model> = _model
+
+    private var currentAddAddressComponent: AddAddressComponent? = null
+
     override val childStack: Value<ChildStack<*, Child>> = _childStack
 
     private fun createChild(
@@ -79,33 +87,40 @@ class SubscriptionRootComponentImpl(
                 componentContext = componentContext
             )
         )
+
         is Configuration.DatePicker -> Child.DatePicker(
             component = datePickerComponent(
                 componentContext = componentContext
             )
         )
+
         is Configuration.CreateSubscription -> Child.CreateSubscription(
             component = createSubscriptionComponent(
                 componentContext = componentContext
             )
         )
+
         is Configuration.OrderList -> Child.OrderList(
             component = orderListComponent(
                 componentContext = componentContext
             )
         )
+
         is Configuration.FillDetails -> Child.FillDetails(
             component = fillDetailsComponent(
                 componentContext = componentContext,
-                orderId = configuration.orderId
+                orderId = configuration.orderId,
+                deliveryDate = configuration.deliveryDate
             )
         )
+
         is Configuration.ChooseFlower -> Child.ChooseFlower(
             component = chooseFlower(
                 componentContext = componentContext,
                 orderId = configuration.orderId
             )
         )
+
         is Configuration.FlowerDetails -> Child.FlowerDetails(
             component = flowerDetails(
                 componentContext = componentContext,
@@ -113,6 +128,7 @@ class SubscriptionRootComponentImpl(
                 orderId = configuration.orderId
             )
         )
+
         is Configuration.ChooseCompany -> Child.ChooseCompany(
             component = chooseCompany(
                 componentContext = componentContext,
@@ -120,42 +136,89 @@ class SubscriptionRootComponentImpl(
                 orderId = configuration.orderId
             )
         )
+
         is Configuration.AddressList -> Child.AddressList(
             component = addressList(
                 componentContext = componentContext,
                 orderId = configuration.orderId
             )
         )
-        is Configuration.AddAddress -> Child.AddAddress(
-            component = addAddress(
+
+        is Configuration.ChooseCountry -> Child.CountryChoose(
+            component = chooseCountryComponent(
                 componentContext = componentContext,
-                orderId = configuration.orderId
+                onCountrySelected = { selectedCountry ->
+                    currentAddAddressComponent?.updateSelectedCountry(selectedCountry)
+                    navigation.pop()
+                }
             )
         )
+
+        is Configuration.AddAddress -> {
+            if (currentAddAddressComponent == null) {
+                currentAddAddressComponent = addAddress(
+                    componentContext = componentContext,
+                    orderId = configuration.orderId,
+                    selectedCountry = configuration.selectedCountry
+                )
+            }
+            Child.AddAddress(component = currentAddAddressComponent!!)
+        }
     }
 
     private fun addAddress(
         componentContext: ComponentContext,
+        selectedCountry: CountryModel?,
         orderId: Long
-    ) : AddAddressComponent = AddAddressComponentImpl(
+    ): AddAddressComponent = AddAddressComponentImpl(
         componentContext = componentContext,
         orderId = orderId,
-        onNavigateBack = { navigation.pop() }
+        selectedCountry = selectedCountry,
+        onNavigateBack = { navigation.pop() },
+        onOpenCountryChooser = {
+            navigation.pushNew(
+                configuration = Configuration.ChooseCountry
+            )
+        },
+        onNavigateToOrderDetails = {
+            navigation.popWhile { configuration ->
+                configuration !is Configuration.FillDetails
+            }
+        }
+    )
+
+    private fun chooseCountryComponent(
+        componentContext: ComponentContext,
+        onCountrySelected: (CountryModel) -> Unit,
+    ): ChooseCountryComponent = ChooseCountryComponentImpl(
+        componentContext = componentContext,
+        onCountrySelected = { selectedCountry ->
+            onCountrySelected(selectedCountry)
+        },
+        onNavigateBack = { navigation.pop() },
+        context = context
     )
 
     private fun addressList(
         componentContext: ComponentContext,
         orderId: Long
-    ) : AddressListComponent = AddressListComponentImpl(
+    ): AddressListComponent = AddressListComponentImpl(
         componentContext = componentContext,
-        onAddAddress = { navigation.pushNew(configuration = Configuration.AddAddress(orderId = orderId)) }
+        onAddAddress = {
+            navigation.pushNew(
+                configuration = Configuration.AddAddress(
+                    orderId = orderId,
+                    selectedCountry = null)
+            )
+        },
+        onNavigateBack = { navigation.pop() }
     )
 
     private fun chooseCompany(
         componentContext: ComponentContext,
         bouquetId: Long,
         orderId: Long
-    ) : ChooseCompanyComponent = ChooseCompanyComponentImpl(
+    ): ChooseCompanyComponent = ChooseCompanyComponentImpl(
         componentContext = componentContext,
         bouquetId = bouquetId,
         orderId = orderId,
@@ -171,40 +234,47 @@ class SubscriptionRootComponentImpl(
         componentContext: ComponentContext,
         bouquetDTO: BouquetDTO,
         orderId: Long
-    ) : FlowerDetailsComponent = FlowerDetailsComponentImpl(
+    ): FlowerDetailsComponent = FlowerDetailsComponentImpl(
         componentContext = componentContext,
         bouquetDTO = bouquetDTO,
         onCloseDetails = { navigation.pop() },
         onBouquetPicked = { bouquetId ->
-            navigation.pushNew(configuration = Configuration.ChooseCompany(bouquetId = bouquetId, orderId = orderId))
+            navigation.pushNew(
+                configuration = Configuration.ChooseCompany(
+                    bouquetId = bouquetId,
+                    orderId = orderId
+                )
+            )
         }
     )
 
     private fun orderListComponent(
         componentContext: ComponentContext
-    ) : OrderListComponent = OrderListComponentImpl(
+    ): OrderListComponent = OrderListComponentImpl(
         componentContext = componentContext,
         onNavigateRightBack = { navigation.popToFirst() },
         subscriptionId = _model.value.subscriptionId,
-        onFillOrder = { orderId ->
-            navigation.pushNew(configuration = Configuration.FillDetails(orderId = orderId))
+        onFillOrder = { orderId, deliveryDate ->
+            navigation.pushNew(configuration = Configuration.FillDetails(orderId = orderId, deliveryDate = deliveryDate))
         }
     )
 
     private fun fillDetailsComponent(
         componentContext: ComponentContext,
-        orderId: Long
-    ) : FillDetailsComponent = FillDetailsComponentImpl(
+        orderId: Long,
+        deliveryDate: String
+    ): FillDetailsComponent = FillDetailsComponentImpl(
         componentContext = componentContext,
         onClosePressed = { navigation.pop() },
         onChooseFlower = { navigation.pushNew(configuration = Configuration.ChooseFlower(orderId = orderId)) },
         onAddressClicked = { navigation.pushNew(configuration = Configuration.AddressList(orderId = orderId)) },
-        orderId = orderId
+        orderId = orderId,
+        deliveryDate = deliveryDate
     )
 
     private fun createSubscriptionComponent(
         componentContext: ComponentContext
-    ) : CreateSubscriptionComponent  = CreateSubscriptionComponentImpl(
+    ): CreateSubscriptionComponent = CreateSubscriptionComponentImpl(
         componentContext = componentContext,
         onBackPressed = { navigation.pop() },
         onCreate = { name ->
@@ -215,7 +285,7 @@ class SubscriptionRootComponentImpl(
 
     private fun subsListComponent(
         componentContext: ComponentContext
-    ) : SubsListComponent = SubsListComponentImpl(
+    ): SubsListComponent = SubsListComponentImpl(
         componentContext = componentContext,
         onCreateSubscription = { navigation.pushNew(configuration = Configuration.CreateSubscription) },
         onBackPress = { onNavigateBack() }
@@ -223,7 +293,7 @@ class SubscriptionRootComponentImpl(
 
     private fun datePickerComponent(
         componentContext: ComponentContext
-    ) : DatePickerComponent = DatePickerComponentImpl(
+    ): DatePickerComponent = DatePickerComponentImpl(
         componentContext = componentContext,
         onContinuePressed = { subscriptionId ->
             _model.update { it.copy(subscriptionId = subscriptionId) }
@@ -239,11 +309,16 @@ class SubscriptionRootComponentImpl(
     private fun chooseFlower(
         componentContext: ComponentContext,
         orderId: Long
-    ) : ChooseFlowerComponent = ChooseFlowerComponentImpl(
+    ): ChooseFlowerComponent = ChooseFlowerComponentImpl(
         componentContext = componentContext,
         onCloseBouquet = { navigation.pop() },
         onFlowerConsidered = { bouquetDTO ->
-            navigation.pushNew(configuration = Configuration.FlowerDetails(bouquetDTO = bouquetDTO, orderId = orderId))
+            navigation.pushNew(
+                configuration = Configuration.FlowerDetails(
+                    bouquetDTO = bouquetDTO,
+                    orderId = orderId
+                )
+            )
         }
     )
 
@@ -251,23 +326,38 @@ class SubscriptionRootComponentImpl(
     private sealed interface Configuration {
         @Serializable
         data object SubsList : Configuration
+
         @Serializable
         data object DatePicker : Configuration
+
         @Serializable
         data object CreateSubscription : Configuration
+
         @Serializable
         data class OrderList(val subscriptionName: String) : Configuration
+
         @Serializable
-        data class FillDetails(val orderId: Long) : Configuration
+        data class FillDetails(val orderId: Long, val deliveryDate: String) : Configuration
+
         @Serializable
         data class ChooseFlower(val orderId: Long) : Configuration
+
         @Serializable
         data class FlowerDetails(val bouquetDTO: BouquetDTO, val orderId: Long) : Configuration
+
         @Serializable
         data class ChooseCompany(val bouquetId: Long, val orderId: Long) : Configuration
+
         @Serializable
         data class AddressList(val orderId: Long) : Configuration
+
         @Serializable
-        data class AddAddress(val orderId: Long) : Configuration
+        data class AddAddress(
+            val orderId: Long,
+            val selectedCountry: CountryModel?
+        ) : Configuration
+
+        @Serializable
+        data object ChooseCountry : Configuration
     }
 }

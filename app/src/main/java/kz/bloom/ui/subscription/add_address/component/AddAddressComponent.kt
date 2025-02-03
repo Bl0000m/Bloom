@@ -1,6 +1,7 @@
 package kz.bloom.ui.subscription.add_address.component
 
 import com.arkivanov.decompose.value.Value
+import kz.bloom.ui.auth.country_chooser.component.CountryModel
 
 interface AddAddressComponent {
     data class Model(
@@ -12,7 +13,9 @@ interface AddAddressComponent {
         val intercom: String,
         val floor: String,
         val recipientPhoneNumber: String,
-        val comment: String
+        val comment: String,
+        val selectedCountry: CountryModel,
+        val isPrimaryButtonEnabled: Boolean
     )
 
     val model: Value<Model>
@@ -34,6 +37,12 @@ interface AddAddressComponent {
     fun onCommentFill(comment: String)
 
     fun createAddress()
+
+    fun clearPhone()
+
+    fun openCountryChooser()
+
+    fun updateSelectedCountry(country: CountryModel)
 
     fun navigateBack()
 

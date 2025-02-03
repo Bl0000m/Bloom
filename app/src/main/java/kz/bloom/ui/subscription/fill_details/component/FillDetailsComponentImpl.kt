@@ -23,7 +23,8 @@ class FillDetailsComponentImpl(
     private val onClosePressed:() -> Unit,
     private val onChooseFlower:() -> Unit,
     private val onAddressClicked:() -> Unit,
-    private val orderId: Long
+    private val orderId: Long,
+    deliveryDate: String
 ) : FillDetailsComponent, KoinComponent, ComponentContext by componentContext
 {
     private val mainContext by inject<CoroutineContext>(qualifier = named(name = "Main"))
@@ -40,7 +41,7 @@ class FillDetailsComponentImpl(
         subscriptionApi = subscriptionApi
     )
 
-    override val model: Value<Model> = store.states.toModels()
+    override val model: Value<Model> = store.states.toModels(deliveryDate)
 
 
     init {
@@ -51,10 +52,12 @@ class FillDetailsComponentImpl(
         }
     }
 
-    private fun Value<State>.toModels(): Value<Model> = map { state ->
+    private fun Value<State>.toModels(deliveryDate: String): Value<Model> = map { state ->
         Model(
             orderDetails = state.orderDetails,
-            orderDetailsLoaded = state.detailsLoaded
+            bouquetDetailsLoaded = state.bouquetDetailsLoaded,
+            addressDetailsLoaded = state.addressDetailsLoaded,
+            deliveryDate = deliveryDate
         )
     }
 

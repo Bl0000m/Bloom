@@ -15,7 +15,8 @@ class SubscriptionActivity : ComponentActivity(), KoinComponent {
         super.onCreate(savedInstanceState)
         val component = SubscriptionRootComponentImpl(
             componentContext = defaultComponentContext(),
-            onNavigateBack = { finish() }
+            onNavigateBack = { finish() },
+            context = this
         )
         setContent {
             BloomTheme {

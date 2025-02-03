@@ -12,6 +12,7 @@ import kz.bloom.ui.subscription.api.entity.BouquetDetailsResponse
 import kz.bloom.ui.subscription.api.entity.CreateOrderRequestBody
 import kz.bloom.ui.subscription.api.entity.CreateSubscriptionRequestBody
 import kz.bloom.ui.subscription.api.entity.CreateSubscriptionResponseBody
+import kz.bloom.ui.subscription.api.entity.UserAddressDto
 import kz.bloom.ui.subscription.choose_flower.store.ChooseFlowerStore.BouquetDTO
 import kz.bloom.ui.subscription.fill_details.store.FillDetailsStore.OrderDetails
 import kz.bloom.ui.subscription.order_list.store.Order
@@ -75,6 +76,13 @@ internal class SubscriptionApiClient(private val client: HttpClient) : Subscript
         }
     }
 
+    override suspend fun loadUserAddresses(token: String): List<UserAddressDto> {
+        return client.get(GET_USER_ADDRESSES) {
+            contentType(io.ktor.http.ContentType.Application.Json)
+            headers.append("Authorization", "Bearer $token")
+        }.body<List<UserAddressDto>>()
+    }
+
     companion object {
         const val SUBS_CREATE_SUBSCRIPTION = "v1/client/subscription"
         const val ORDER_LOAD = "v1/client/order/subscription"
@@ -83,5 +91,6 @@ internal class SubscriptionApiClient(private val client: HttpClient) : Subscript
         const val FILL_ORDER = "v1/client/order"
         const val GET_ORDER_DETAILS = "v1/client/order"
         const val CREATE_ORDER_ADDRESS = "v1/address/order"
+        const val GET_USER_ADDRESSES = "v1/users/my-address"
     }
 }

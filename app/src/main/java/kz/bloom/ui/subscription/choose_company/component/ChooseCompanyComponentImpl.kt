@@ -5,6 +5,8 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.operator.map
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kz.bloom.libraries.states
 import kz.bloom.ui.subscription.api.SubscriptionApi
 import kz.bloom.ui.subscription.api.entity.BouquetDetailsResponse
@@ -14,6 +16,7 @@ import kz.bloom.ui.subscription.choose_company.component.ChooseCompanyComponent.
 import kz.bloom.ui.subscription.choose_company.store.ChooseCompanyStore.State
 import kz.bloom.ui.subscription.choose_company.store.ChooseCompanyStore.Intent
 import kz.bloom.ui.subscription.choose_company.store.chooseCompanyStore
+import kz.bloom.ui.ui_components.coroutineScope
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -45,6 +48,8 @@ class ChooseCompanyComponentImpl(
 
     override val model: Value<Model> = store.states.toModels()
 
+    val scope = coroutineScope()
+
     private fun Value<State>.toModels(): Value<Model> = map { state ->
         Model(
             companies = state.companiesRaw.toCompanies()
@@ -65,7 +70,10 @@ class ChooseCompanyComponentImpl(
         )
         store.states.subscribe { state ->
             if(state.orderFilled) {
-                onBranchPicked()
+                scope.launch {
+                    delay(timeMillis = 400)
+                    onBranchPicked()
+                }
             }
         }
     }

@@ -12,5 +12,5 @@ interface OrderListComponent {
 
     fun onNavigateToRightBack()
 
-    fun openIndividualOrder(orderId: Long)
+    fun openIndividualOrder(orderId: Long, deliveryDate: String)
 }

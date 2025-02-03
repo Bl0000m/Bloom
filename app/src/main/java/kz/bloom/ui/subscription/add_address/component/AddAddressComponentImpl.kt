@@ -4,19 +4,19 @@ import android.util.Log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
-import com.arkivanov.decompose.value.operator.map
 import com.arkivanov.decompose.value.update
 import com.arkivanov.mvikotlin.core.store.StoreFactory
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kz.bloom.libraries.states
+import kz.bloom.ui.auth.country_chooser.component.CountryModel
 import org.koin.core.component.KoinComponent
 import kz.bloom.ui.subscription.add_address.component.AddAddressComponent.Model
-import kz.bloom.ui.subscription.add_address.store.AddAddressStore
 import kz.bloom.ui.subscription.add_address.store.AddAddressStore.AddressDto
 import kz.bloom.ui.subscription.add_address.store.AddAddressStore.Intent
 import kz.bloom.ui.subscription.add_address.store.addAddressStore
-import kz.bloom.ui.subscription.add_address.store.AddAddressStore.State
 import kz.bloom.ui.subscription.api.SubscriptionApi
+import kz.bloom.ui.ui_components.coroutineScope
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
@@ -24,9 +24,11 @@ import kotlin.coroutines.CoroutineContext
 
 internal class AddAddressComponentImpl(
     componentContext: ComponentContext,
+    selectedCountry: CountryModel? = null,
     private val onNavigateBack:() -> Unit,
-    private val orderId: Long
-
+    private val orderId: Long,
+    private val onOpenCountryChooser: () -> Unit,
+    private val onNavigateToOrderDetails: () -> Unit
 ) : AddAddressComponent, KoinComponent, ComponentContext by componentContext {
 
     private val mainContext by inject<CoroutineContext>(qualifier = named(name = "Main"))
@@ -44,6 +46,14 @@ internal class AddAddressComponentImpl(
         orderId = orderId
     )
 
+    private val startingCountryModel = CountryModel(
+        code = "KZ",
+        name = "Казахстан",
+        dialCode = "+7",
+        flagEmoji = "\uD83C\uDDF0\uD83C\uDDFF",
+        phoneNumberLength = 10
+    )
+
     private val _model = MutableValue(
         initialValue = Model(
             city = "",
@@ -54,14 +64,32 @@ internal class AddAddressComponentImpl(
             intercom = "",
             floor = "",
             recipientPhoneNumber = "",
-            comment = ""
+            comment = "",
+            selectedCountry = selectedCountry ?: startingCountryModel,
+            isPrimaryButtonEnabled = false
         )
     )
 
+    val scope = coroutineScope()
     init {
         store.states.subscribe { state ->
             if (state.city != "") {
                 _model.update { it.copy(city = state.city) }
+            }
+            if (state.addressCreated) {
+                scope.launch {
+                    delay(timeMillis = 300L)
+                    onNavigateToOrderDetails()
+                }
+            }
+        }
+        _model.subscribe { model ->
+            if (model.street.isNotEmpty()
+                && model.house.isNotEmpty()
+                && model.recipientPhoneNumber.isNotEmpty()
+                && !model.isPrimaryButtonEnabled
+                ) {
+                _model.update { it.copy(isPrimaryButtonEnabled = true) }
             }
         }
     }
@@ -100,6 +128,18 @@ internal class AddAddressComponentImpl(
         _model.update { it.copy(comment = comment) }
     }
 
+    override fun clearPhone() {
+        _model.update { it.copy(recipientPhoneNumber = "") }
+    }
+
+    override fun openCountryChooser() {
+        onOpenCountryChooser()
+    }
+
+    override fun updateSelectedCountry(country: CountryModel) {
+        _model.update { it.copy(selectedCountry = country) }
+    }
+
     override fun createAddress() {
         store.accept(
             intent = Intent.AddAddress(
@@ -119,12 +159,12 @@ internal class AddAddressComponentImpl(
             apartment = this.value.apartment,
             entrance = this.value.entry,
             intercom = this.value.intercom,
-            floor = this.value.floor.toInt(),
+            floor = null,
             postalCode = null,
             latitude = null,
             longitude = null,
             orderId = orderId,
-            recipientPhone = this.value.recipientPhoneNumber,
+            recipientPhone = this.value.selectedCountry.dialCode + this.value.recipientPhoneNumber,
             comment = this.value.comment,
             city = this.value.city
         )

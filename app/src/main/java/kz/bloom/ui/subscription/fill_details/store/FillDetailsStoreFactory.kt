@@ -1,6 +1,5 @@
 package kz.bloom.ui.subscription.fill_details.store
 
-import android.util.Log
 import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
@@ -8,22 +7,20 @@ import com.arkivanov.mvikotlin.core.utils.JvmSerializable
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kz.bloom.ui.subscription.add_address.store.AddAddressStore
-import kz.bloom.ui.subscription.add_address.store.AddAddressStore.AddressDto
 import kz.bloom.ui.subscription.api.SubscriptionApi
 import kz.bloom.ui.subscription.fill_details.store.FillDetailsStore.State
 import kz.bloom.ui.subscription.fill_details.store.FillDetailsStore.Intent
 import kz.bloom.ui.subscription.fill_details.store.FillDetailsStore.OrderDetails
 import kz.bloom.ui.subscription.fill_details.store.FillDetailsStore.BouquetInfo1
 import kz.bloom.ui.subscription.fill_details.store.FillDetailsStore.BranchDivisionInfoDto
-import kz.bloom.ui.subscription.order_list.store.BouquetInfo
 import kz.bloom.ui.ui_components.preference.SharedPreferencesSetting
 import kotlin.coroutines.CoroutineContext
 
 private sealed interface Message : JvmSerializable {
     data object ErrorOccurred : Message
     data object AddressBeenFilled : Message
-    data class DetailsLoaded(val orderDetails: OrderDetails) : Message
+    data class BouquetDetailsLoaded(val orderDetails: OrderDetails) : Message
+    data class AddressDetailsLoaded(val orderDetails: OrderDetails) : Message
 }
 
 private sealed interface Action : JvmSerializable {
@@ -46,20 +43,20 @@ internal fun fillDetailsStore(
             orderDetails = OrderDetails(
                 id = 0,
                 orderCode = 0,
-                address = AddressDto(
+                address = FillDetailsStore.DetailAddressDto(
+                    id = 0,
                     city = "",
                     street = "",
                     building = "",
-                    apartment = null,
-                    entrance = null,
-                    intercom = null,
+                    apartment = "",
+                    entrance = "",
+                    intercom = "",
                     floor = null,
                     postalCode = null,
                     latitude = null,
                     longitude = null,
-                    orderId = 0,
                     recipientPhone = "",
-                    comment = null
+                    comment = ""
                 ),
                 bouquetInfo = BouquetInfo1(
                     id = 0,
@@ -79,13 +76,15 @@ internal fun fillDetailsStore(
                     email = ""
                 )
             ),
-            detailsLoaded = false
+            addressDetailsLoaded = false,
+            bouquetDetailsLoaded = false
         ),
         reducer = { message ->
             when (message) {
                 is Message.ErrorOccurred -> copy(isError = true)
                 is Message.AddressBeenFilled -> copy(addressBeenFilled = true)
-                is Message.DetailsLoaded -> copy(orderDetails = message.orderDetails, detailsLoaded = true)
+                is Message.AddressDetailsLoaded -> copy(orderDetails = message.orderDetails, addressDetailsLoaded = true)
+                is Message.BouquetDetailsLoaded -> copy(orderDetails = message.orderDetails, bouquetDetailsLoaded = true)
             }
         },
         bootstrapper = SimpleBootstrapper(),
@@ -119,13 +118,17 @@ private class ExecutorImpl(
                                 token = sharedPreferencesSetting.accessToken!!
                             )
                         }
-                        dispatch(message = Message.DetailsLoaded(orderDetails = orderDetails))
+                        if (orderDetails.address != null) {
+                            dispatch(message = Message.AddressDetailsLoaded(orderDetails = orderDetails))
+                        } else if (orderDetails.bouquetInfo!= null) {
+                            dispatch(message = Message.BouquetDetailsLoaded(orderDetails = orderDetails))
+                        }
                     } catch (e: Exception) {
                         dispatch(message = Message.ErrorOccurred)
                     }
                 }
             }
-            is Intent -> {
+            is Intent.FillAddress -> {
 
             }
         }

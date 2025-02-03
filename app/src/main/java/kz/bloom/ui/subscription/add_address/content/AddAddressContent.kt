@@ -11,18 +11,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kz.bloom.R
+import kz.bloom.ui.auth.country_chooser.component.isRussiaOrKazakhstan
 import kz.bloom.ui.subscription.add_address.component.AddAddressComponent
 import kz.bloom.ui.ui_components.LabeledTextField
+import kz.bloom.ui.ui_components.PhoneNumberMaskVisualTransformation
 import kz.bloom.ui.ui_components.PrimaryButton
 
 @Composable
@@ -73,7 +84,7 @@ fun AddAddressContent(modifier: Modifier = Modifier, component: AddAddressCompon
                 modifier = Modifier
                     .padding(top = 4.dp),
                 value = model.value.house,
-                onValueChange = { component.onHouseFill(house = it)},
+                onValueChange = { component.onHouseFill(house = it) },
                 label = "ДОМ/ЗДАНИЕ",
                 placeholder = "",
                 singleLine = true,
@@ -120,15 +131,66 @@ fun AddAddressContent(modifier: Modifier = Modifier, component: AddAddressCompon
         }
         LabeledTextField(
             modifier = Modifier.padding(top = 4.dp),
-            value = model.value.recipientPhoneNumber,
+            value = model.value.floor,
             onValueChange = {
                 component.onFloorFill(it)
             },
             label = "ЭТАЖ",
             placeholder = "",
             labelStyle = MaterialTheme.typography.bodySmall,
-
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Column {
+                Row(modifier = Modifier
+                    .padding(top = 16.dp)
+                    .clickable { component.openCountryChooser() }) {
+                    Text(
+                        text = model.value.selectedCountry.dialCode,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Icon(
+                        modifier = Modifier.padding(start = 10.dp),
+                        painter = painterResource(id = R.drawable.ic_expand_left_light),
+                        contentDescription = null
+                    )
+                }
+                HorizontalDivider(
+                    modifier = Modifier
+                        .width(50.dp)
+                        .padding(top = 15.dp),
+                    thickness = 0.5.dp,
+                    color = Color.Black
+                )
+            }
+
+            LabeledTextField(
+                label = "НОМЕР ТЕЛЕФОНА",
+                singleLine = true,
+                placeholder = null,
+                trailingContent = {
+                    if (model.value.recipientPhoneNumber.isNotEmpty()) {
+                        Icon(
+                            modifier = Modifier.clickable { component.clearPhone() },
+                            painter = painterResource(id = R.drawable.ic_close_round_fill_light),
+                            contentDescription = null
+                        )
+                    }
+                },
+                labelStyle = MaterialTheme.typography.labelSmall,
+                onValueChange = { component.onPhoneNumberFill(it) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                value = model.value.recipientPhoneNumber,
+                visualTransformation = if (model.value.selectedCountry.isRussiaOrKazakhstan) {
+                    PhoneNumberMaskVisualTransformation(length = 10)
+                } else VisualTransformation.None
+            )
+        }
+
         LabeledTextField(
             modifier = Modifier.padding(top = 4.dp),
             value = model.value.comment,
@@ -145,7 +207,8 @@ fun AddAddressContent(modifier: Modifier = Modifier, component: AddAddressCompon
             text = "ПОДТВЕРДИТЬ",
             onClick = {
                 component.createAddress()
-            }
+            },
+            isEnabled = model.value.isPrimaryButtonEnabled
         )
     }
 }
