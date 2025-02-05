@@ -182,7 +182,9 @@ fun AddAddressContent(modifier: Modifier = Modifier, component: AddAddressCompon
                     }
                 },
                 labelStyle = MaterialTheme.typography.labelSmall,
-                onValueChange = { component.onPhoneNumberFill(it) },
+                onValueChange = { input ->
+                    val filtered = input.filter { it in '1'..'9' }
+                    component.onPhoneNumberFill(filtered) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 value = model.value.recipientPhoneNumber,
                 visualTransformation = if (model.value.selectedCountry.isRussiaOrKazakhstan) {

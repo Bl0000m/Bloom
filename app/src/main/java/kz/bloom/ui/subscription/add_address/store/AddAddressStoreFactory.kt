@@ -19,6 +19,7 @@ sealed interface Message: JvmSerializable {
     data object ErrorOccurred: Message
     data object AddressCreated: Message
     data class CityNameLoaded(val cityName: String) : Message
+    data object AddressCreateStateRefreshed: Message
 }
 
 sealed interface Action: JvmSerializable {
@@ -46,6 +47,10 @@ internal fun addAddressStore(
                         is Message.ErrorOccurred -> { copy(isError = true) }
                         is Message.AddressCreated -> { copy(addressCreated = true) }
                         is Message.CityNameLoaded -> { copy(city = message.cityName) }
+                        is Message.AddressCreateStateRefreshed -> {
+                            Log.d("behold1", "refreshed")
+                            copy(addressCreated = false)
+                        }
                     }
                 },
                 bootstrapper = SimpleBootstrapper(Action.LoadUserCityName(orderId)),
@@ -84,6 +89,11 @@ private class ExecutorImpl(
                     } catch (e: Exception) {
                         dispatch(message = Message.ErrorOccurred)
                     }
+                }
+            }
+            is Intent.RefreshAddressCreatedState -> {
+                scope.launch {
+                    dispatch(message = Message.AddressCreateStateRefreshed)
                 }
             }
         }

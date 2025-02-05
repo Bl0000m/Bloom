@@ -15,6 +15,7 @@ interface AddAddressStore: Store<Intent, State, Nothing> {
 
     sealed interface Intent : JvmSerializable {
         data class AddAddress(val addressDto: AddressDto) : Intent
+        data object RefreshAddressCreatedState: Intent
     }
 
     @Serializable

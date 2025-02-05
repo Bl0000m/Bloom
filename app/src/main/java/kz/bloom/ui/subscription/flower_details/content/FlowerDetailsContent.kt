@@ -71,7 +71,7 @@ fun CustomBottomSheetDialog(
     modifier: Modifier = Modifier,
     bouquetPhotos: List<BouquetPhoto>,
     initialHeight: Dp = 150.dp,
-    expandedHeight: Dp = 400.dp,
+    expandedHeight: Dp = 600.dp,
     onCloseDetails: () -> Unit,
     onChooseClicked:(bouquetId: Long) -> Unit,
     price: String

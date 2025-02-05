@@ -79,7 +79,7 @@ internal class AddAddressComponentImpl(
             if (state.addressCreated) {
                 scope.launch {
                     delay(timeMillis = 300L)
-                    onNavigateToOrderDetails()
+                    store.accept(intent = Intent.RefreshAddressCreatedState)
                 }
             }
         }
@@ -146,6 +146,11 @@ internal class AddAddressComponentImpl(
                 _model.toAddressDto(orderId = orderId)
             )
         )
+        store.states.subscribe { state ->
+            if (state.addressCreated) {
+                onNavigateToOrderDetails()
+            }
+        }
     }
 
     override fun navigateBack() {

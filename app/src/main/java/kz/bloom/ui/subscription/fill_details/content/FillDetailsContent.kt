@@ -121,9 +121,8 @@ fun FillDetailsContent(modifier: Modifier = Modifier, component: FillDetailsComp
                 .padding(bottom = 21.dp)
                 .padding(horizontal = 21.dp),
             text = "ПРОДОЛЖИТЬ",
-            onClick = { }
+            onClick = { component.onClose() }
         )
-
     }
 }
 
