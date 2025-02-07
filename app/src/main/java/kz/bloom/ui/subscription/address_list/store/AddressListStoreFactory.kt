@@ -1,6 +1,5 @@
 package kz.bloom.ui.subscription.address_list.store
 
-import android.util.Log
 import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
@@ -75,11 +74,8 @@ private class ExecutorImpl(
                                 token = sharedPreferencesSetting.accessToken!!
                             )
                         }
-                        Log.d("behold1", loadUserAddresses.toString())
                         dispatch(message = Message.AddressesLoaded(addresses = loadUserAddresses))
-
                     } catch (e: Exception) {
-                        Log.d("beholdE", e.toString())
                         dispatch(message = Message.ErrorOccurred)
                     }
                 }
