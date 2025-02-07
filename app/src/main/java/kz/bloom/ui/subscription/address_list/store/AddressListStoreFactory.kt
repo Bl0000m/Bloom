@@ -1,11 +1,11 @@
 package kz.bloom.ui.subscription.address_list.store
 
+import android.util.Log
 import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.core.utils.JvmSerializable
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
-import io.ktor.utils.io.concurrent.shared
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kz.bloom.ui.subscription.api.SubscriptionApi
@@ -75,8 +75,11 @@ private class ExecutorImpl(
                                 token = sharedPreferencesSetting.accessToken!!
                             )
                         }
+                        Log.d("behold1", loadUserAddresses.toString())
                         dispatch(message = Message.AddressesLoaded(addresses = loadUserAddresses))
+
                     } catch (e: Exception) {
+                        Log.d("beholdE", e.toString())
                         dispatch(message = Message.ErrorOccurred)
                     }
                 }

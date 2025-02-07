@@ -7,12 +7,12 @@ data class UserAddressDto(
     val id: Long,
     val street: String,
     val building: String,
-    val apartment: String,
-    val entrance: String,
-    val intercom: String,
-    val floor: Int,
+    val apartment: String?,
+    val entrance: String?,
+    val intercom: String?,
+    val floor: Int?,
     val city: String,
-    val postalCode: String,
-    val latitude: Int,
-    val longitude: Int
+    val postalCode: String?,
+    val latitude: Double?,
+    val longitude: Double?
 )
